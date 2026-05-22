@@ -67,22 +67,23 @@ export function Header() {
 
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-card/95 shadow-sm backdrop-blur-md">
-      <div className="h-1 w-full bg-nest-sage" />
+    <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-white/95 shadow-sm backdrop-blur-md">
+      {/* Top Teal Accent Strip */}
+      <div className="h-1 bg-[#007A78] w-full" />
 
       {/* Main Header Container */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
         {/* Top Row: Track order, Logo, Icons */}
-        <div className="flex h-20 items-center justify-between gap-4 border-b border-border/70">
+        <div className="flex h-20 items-center justify-between gap-4 border-b border-stone-100">
 
           {/* Left Side: Track order */}
           <div className="flex-1 hidden md:flex items-center">
             <Link
               href="/faq"
-              className="flex items-center gap-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 transition-colors hover:text-stone-900"
             >
-              <MapPin className="h-4 w-4 text-muted-foreground" />
+              <MapPin className="h-4 w-4 text-stone-500" />
               <span>Track Your Order</span>
             </Link>
           </div>
@@ -91,14 +92,14 @@ export function Header() {
           <div className="flex justify-center flex-1 md:flex-initial">
             <Link href="/" className="flex flex-col items-center select-none text-center">
               <div className="flex items-baseline justify-center">
-                <span className="mr-1.5 transform -rotate-3 select-none font-serif text-2xl italic leading-none tracking-tight text-nest-tan">
+                <span className="font-sans font-extrabold text-2xl text-[#007A78] tracking-widest leading-none">
                   nestify
                 </span>
-                <span className="font-sans text-2xl font-extrabold leading-none tracking-widest text-primary">
+                <span className="font-serif italic text-2xl text-amber-500 tracking-tight leading-none mr-1.5 transform -rotate-3 select-none">
                   ESSENTIALS
                 </span>
               </div>
-              <span className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground/80 mt-1 font-semibold">
+              <span className="text-[10px] uppercase tracking-[0.25em] text-stone-400 mt-1 font-semibold">
                 Style Your Space…
               </span>
             </Link>
@@ -111,7 +112,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="h-9 w-9 text-stone-600 hover:text-stone-900 hover:bg-stone-50"
               aria-label="Search catalog"
             >
               <Search className="h-5 w-5" />
@@ -122,11 +123,11 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted"
+                className="h-9 w-9 text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                 aria-label="Wishlist"
               >
                 <Heart className="h-5 w-5" />
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-stone-900 px-1 text-[10px] font-medium text-white">
                   0
                 </span>
               </Button>
@@ -140,7 +141,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-primary hover:text-foreground hover:bg-muted"
+                    className="h-9 w-9 text-[#007A78] hover:text-stone-900 hover:bg-stone-50"
                     onClick={() => setShowDropdown(!showDropdown)}
                     aria-label="Account menu"
                   >
@@ -148,15 +149,15 @@ export function Header() {
                   </Button>
 
                   {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border bg-card py-1 shadow-lg ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-150">
-                      <div className="px-4 py-2 border-b border-border/70">
-                        <p className="text-xs font-semibold text-foreground truncate">{user.fullName}</p>
-                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">{user.email}</p>
+                    <div className="absolute right-0 mt-2 w-48 rounded-lg border border-stone-200 bg-white py-1 shadow-lg ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-150">
+                      <div className="px-4 py-2 border-b border-stone-100">
+                        <p className="text-xs font-semibold text-stone-900 truncate">{user.fullName}</p>
+                        <p className="text-[10px] text-stone-500 truncate mt-0.5">{user.email}</p>
                       </div>
                       <Link
                         href="/account/profile"
                         onClick={() => setShowDropdown(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-foreground/90 hover:bg-muted hover:text-foreground"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 hover:text-stone-900"
                       >
                         <User className="h-4 w-4" />
                         <span>Profile</span>
@@ -164,7 +165,7 @@ export function Header() {
                       <Link
                         href="/account/settings"
                         onClick={() => setShowDropdown(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-foreground/90 hover:bg-muted hover:text-foreground"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-stone-700 hover:bg-stone-50 hover:text-stone-900"
                       >
                         <Settings className="h-4 w-4" />
                         <span>Settings</span>
@@ -187,7 +188,7 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted"
+                    className="h-9 w-9 text-stone-600 hover:text-stone-900 hover:bg-stone-50"
                     aria-label="Sign in"
                   >
                     <User className="h-5 w-5" />
@@ -200,13 +201,13 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="relative h-9 w-9 text-stone-600 hover:text-stone-900 hover:bg-stone-50"
               onClick={openCart}
               aria-label="Open cart"
             >
               <ShoppingBag className="h-5 w-5" />
               {itemCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-medium text-white">
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-stone-900 px-1 text-[10px] font-medium text-white">
                   {itemCount}
                 </span>
               )}
@@ -222,7 +223,7 @@ export function Header() {
               href={link.href}
               className={`text-[12px] font-bold tracking-wider transition-colors whitespace-nowrap ${link.isSale
                 ? "text-red-600 hover:text-red-800"
-                : "text-foreground/90 hover:text-foreground"
+                : "text-stone-700 hover:text-stone-950"
                 }`}
             >
               {link.label}
