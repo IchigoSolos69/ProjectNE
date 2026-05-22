@@ -43,7 +43,7 @@ export function CartSheet() {
                 ) : (
                   <p className="mt-2 text-sm text-muted-foreground">
                     <a
-                      href="https://nestifyessentials.pages.dev/login"
+                      href="/login"
                       onClick={closeCart}
                       className="text-primary hover:underline font-semibold cursor-pointer text-left bg-transparent border-none p-0 inline-flex items-center"
                     >
@@ -102,7 +102,7 @@ export function CartSheet() {
                         </button>
                       ) : (
                         <a
-                          href="https://nestifyessentials.pages.dev/login"
+                          href="/login"
                           onClick={closeCart}
                           className="w-full flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors text-left"
                         >

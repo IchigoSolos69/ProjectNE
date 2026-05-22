@@ -17,9 +17,9 @@ export function Footer() {
             <Link href="/faq" className="hover:text-foreground">
               FAQ
             </Link>
-            <a href="https://nestifyessentials.pages.dev/login" className="hover:text-foreground">
+            <Link href="/login" className="hover:text-foreground">
               Sign in
-            </a>
+            </Link>
             <Link href="/account/profile" className="hover:text-foreground">
               Account
             </Link>

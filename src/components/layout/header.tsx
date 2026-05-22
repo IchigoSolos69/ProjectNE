@@ -11,12 +11,6 @@ import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { createClient } from "@/utils/supabase/client";
 
-const ANNOUNCEMENTS = [
-  "✨ FREE SHIPPING ON ORDERS OVER $150",
-  "🌿 ECO-FRIENDLY & ORGANIC MATERIALS",
-  "🛌 EXPERIENCE ULTIMATE SLEEP COMFORT",
-  "💫 SPECIAL LAUNCH OFFER: USE CODE 'RESTFUL' FOR 15% OFF"
-];
 
 export function Header() {
   const openCart = useCartStore((s) => s.openCart);
@@ -25,19 +19,11 @@ export function Header() {
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  const [categories, setCategories] = React.useState<{ name: string; slug: string }[]>([]);
-  const [announcementIndex, setAnnouncementIndex] = React.useState(0);
+  const [categories, setCategories] = React.useState<any[]>([]);
+  const [activeDropdown, setActiveDropdown] = React.useState<"categories" | "price" | null>(null);
   const [searchExpanded, setSearchExpanded] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const searchInputRef = React.useRef<HTMLInputElement>(null);
-
-  // Rotate announcements
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setAnnouncementIndex((prev) => (prev + 1) % ANNOUNCEMENTS.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
   // Close dropdown on click outside
   React.useEffect(() => {
@@ -63,8 +49,7 @@ export function Header() {
         const supabase = createClient();
         const { data } = await supabase
           .from("categories")
-          .select("name, slug")
-          .is("parent_id", null)
+          .select("*")
           .order("sort_order", { ascending: true });
         if (data && data.length > 0) {
           setCategories(data);
@@ -77,48 +62,35 @@ export function Header() {
   }, []);
 
   const navLinks = [
-    { label: "NEW ARRIVALS", href: "/shop/beddings" },
-    ...categories.map((cat) => ({
-      label: cat.name.toUpperCase(),
-      href: `/shop/${cat.slug}`,
-    })),
-    ...(categories.length === 0
-      ? [
-          { label: "BEDDING", href: "/shop/beddings" },
-          { label: "BATH", href: "/shop/bath-towels" },
-          { label: "PILLOWS", href: "/shop/pillow-covers" },
-        ]
-      : []),
-    { label: "SALE", href: "/shop/beddings", isSale: true },
+    { label: "WHAT'S NEW", href: "/shop/beddings?sort=newest" },
+    { label: "BESTSELLERS", href: "/shop/beddings?filter=bestsellers" },
+    { label: "SHOP BY CATEGORIES", href: "/shop/beddings", hasDropdown: true, dropdownType: "categories" as const },
+    { label: "SHOP BY PRICE", href: "/shop/beddings?price=under-1500", hasDropdown: true, dropdownType: "price" as const },
   ];
 
+  const FALLBACK_CATEGORIES = [
+    { id: "cat-beddings-001", name: "Beddings", slug: "beddings", parent_id: null },
+    { id: "cat-towels-001", name: "Towels", slug: "towels", parent_id: null },
+    { id: "cat-pillows-001", name: "Pillows", slug: "pillows", parent_id: null },
+    { id: "subcat-sheets-001", name: "Bed Sheets", slug: "bed-sheets", parent_id: "cat-beddings-001" },
+    { id: "subcat-duvet-001", name: "Duvet Covers", slug: "duvet-covers", parent_id: "cat-beddings-001" },
+    { id: "subcat-bath-001", name: "Bath Towels", slug: "bath-towels", parent_id: "cat-towels-001" },
+    { id: "subcat-hand-001", name: "Hand Towels", slug: "hand-towels", parent_id: "cat-towels-001" },
+  ];
+
+  const activeCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES;
+  const parentCats = activeCategories.filter((c) => c.parent_id === null);
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/80 bg-card/90 backdrop-blur-md transition-colors duration-300">
-      {/* Top Announcement Bar */}
-      <div className="bg-nest-brown-dark text-[10px] font-bold tracking-[0.2em] text-nest-cream py-2 text-center h-8 flex items-center justify-center overflow-hidden relative w-full border-b border-border/20">
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={announcementIndex}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
-            className="inline-block"
-          >
-            {ANNOUNCEMENTS[announcementIndex]}
-          </motion.span>
-        </AnimatePresence>
-      </div>
+    <header 
+      className="sticky top-0 z-40 w-full border-b border-border/80 bg-card/90 backdrop-blur-md transition-colors duration-300"
+      onMouseLeave={() => setActiveDropdown(null)}
+    >
 
       {/* Main Header Container */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top Row: balanced layout grid */}
         <div className="grid grid-cols-3 items-center h-20 border-b border-border/30">
-          
-          {/* Left Column: EST / Brand details (Desktop only) */}
-          <div className="hidden md:flex items-center justify-start text-[10px] tracking-[0.25em] text-muted-foreground uppercase font-bold select-none">
-            <span>Style Your Space</span>
-          </div>
 
           {/* Center Column: Logo */}
           <div className="col-span-3 md:col-span-1 flex justify-center">
@@ -132,7 +104,7 @@ export function Header() {
                 </span>
               </div>
               <span className="text-[9px] uppercase tracking-[0.25em] text-muted-foreground mt-1 font-semibold group-hover:text-foreground transition-colors duration-300">
-                my heart for home
+                Style Your Space...
               </span>
             </Link>
           </div>
@@ -266,7 +238,7 @@ export function Header() {
                   </AnimatePresence>
                 </>
               ) : (
-                <a href="https://nestifyessentials.pages.dev/login">
+                <Link href="/login">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -275,7 +247,7 @@ export function Header() {
                   >
                     <User className="h-5 w-5" />
                   </Button>
-                </a>
+                </Link>
               )}
             </div>
 
@@ -300,23 +272,139 @@ export function Header() {
         {/* Bottom Row: Navigation Links */}
         <nav className="flex h-12 items-center justify-center gap-6 sm:gap-8 overflow-x-auto scrollbar-none py-1">
           {navLinks.map((link, idx) => (
-            <Link
+            <div
               key={idx}
-              href={link.href}
-              className={`text-[12px] font-bold tracking-widest transition-all duration-300 whitespace-nowrap relative py-1.5 group ${
-                link.isSale
-                  ? "text-red-600 hover:text-red-800"
-                  : "text-muted-foreground/90 hover:text-foreground"
-              }`}
+              onMouseEnter={() => {
+                if (link.hasDropdown) {
+                  setActiveDropdown(link.dropdownType);
+                } else {
+                  setActiveDropdown(null);
+                }
+              }}
+              className="relative py-1.5"
             >
-              {link.label}
-              <span className={`absolute bottom-0 left-0 w-full h-[1.5px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left ${
-                link.isSale ? "bg-red-600" : "bg-primary"
-              }`} />
-            </Link>
+              {link.hasDropdown ? (
+                <button
+                  onClick={() => {
+                    setActiveDropdown(activeDropdown === link.dropdownType ? null : link.dropdownType);
+                  }}
+                  className={`text-[12px] font-bold tracking-widest transition-all duration-300 whitespace-nowrap relative py-1.5 group cursor-pointer ${
+                    activeDropdown === link.dropdownType
+                      ? "text-primary"
+                      : "text-muted-foreground/90 hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                  <span className={`absolute bottom-0 left-0 w-full h-[1.5px] transition-transform duration-300 origin-left ${
+                    activeDropdown === link.dropdownType ? "scale-x-100 bg-primary" : "scale-x-0 group-hover:scale-x-100 bg-primary"
+                  }`} />
+                </button>
+              ) : (
+                <Link
+                  href={link.href}
+                  className="text-[12px] font-bold tracking-widest transition-all duration-300 whitespace-nowrap relative py-1.5 group text-muted-foreground/90 hover:text-foreground"
+                >
+                  {link.label}
+                  <span className="absolute bottom-0 left-0 w-full h-[1.5px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left bg-primary" />
+                </Link>
+              )}
+            </div>
           ))}
         </nav>
       </div>
+
+      {/* Dropdown Panels */}
+      <AnimatePresence>
+        {activeDropdown === "categories" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-0 right-0 top-full bg-card/95 backdrop-blur-md border-b border-border shadow-lg z-30"
+            onMouseEnter={() => setActiveDropdown("categories")}
+            onMouseLeave={() => setActiveDropdown(null)}
+          >
+            <div className="mx-auto max-w-7xl px-8 py-10 grid grid-cols-3 gap-8">
+              {parentCats.map((parent) => {
+                const subCats = activeCategories.filter((c) => c.parent_id === parent.id);
+                return (
+                  <div key={parent.id} className="flex flex-col gap-3">
+                    <Link
+                      href={`/shop/${parent.slug}`}
+                      className="font-serif text-lg font-bold text-foreground hover:text-primary transition-colors border-b border-border pb-2"
+                      onClick={() => setActiveDropdown(null)}
+                    >
+                      {parent.name.toUpperCase()}
+                    </Link>
+                    <div className="flex flex-col gap-2">
+                      {subCats.map((sub) => (
+                        <Link
+                          key={sub.id}
+                          href={`/shop/${parent.slug}/${sub.slug}`}
+                          className="text-xs text-muted-foreground hover:text-foreground font-medium transition-colors hover:translate-x-1 duration-200 inline-block transform"
+                          onClick={() => setActiveDropdown(null)}
+                        >
+                          {sub.name}
+                        </Link>
+                      ))}
+                      <Link
+                        href={`/shop/${parent.slug}`}
+                        className="text-xs text-primary font-semibold hover:underline mt-1"
+                        onClick={() => setActiveDropdown(null)}
+                      >
+                        Shop All {parent.name} →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {activeDropdown === "price" && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute left-0 right-0 top-full bg-card/95 backdrop-blur-md border-b border-border shadow-lg z-30"
+            onMouseEnter={() => setActiveDropdown("price")}
+            onMouseLeave={() => setActiveDropdown(null)}
+          >
+            <div className="mx-auto max-w-2xl px-8 py-8 flex flex-col items-center gap-4 text-center">
+              <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">Select a Range</div>
+              <div className="grid grid-cols-3 gap-4 w-full">
+                <Link
+                  href="/shop/beddings?price=under-1500"
+                  className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
+                  onClick={() => setActiveDropdown(null)}
+                >
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Under</span>
+                  <span className="text-lg font-serif font-bold text-foreground mt-1">₹1,500</span>
+                </Link>
+                <Link
+                  href="/shop/beddings?price=1500-3000"
+                  className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
+                  onClick={() => setActiveDropdown(null)}
+                >
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Range</span>
+                  <span className="text-base font-serif font-bold text-foreground mt-1">₹1,500 - ₹3,000</span>
+                </Link>
+                <Link
+                  href="/shop/beddings?price=over-3000"
+                  className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
+                  onClick={() => setActiveDropdown(null)}
+                >
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Over</span>
+                  <span className="text-lg font-serif font-bold text-foreground mt-1">₹3,000</span>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

@@ -129,6 +129,23 @@ if (fs.existsSync(nextCache)) {
   console.log("[build-cf-preview] Cleared .next cache");
 }
 
+const hasSupabase =
+  Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
+  Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim() ||
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim(),
+  );
+
+if (hasSupabase) {
+  console.log(
+    "[build-cf-preview] Supabase env detected — Google/email auth ENABLED (do not set NEXT_PUBLIC_MOCK_PREVIEW=true on Cloudflare)",
+  );
+} else {
+  console.warn(
+    "[build-cf-preview] Missing Supabase env — auth DISABLED. Add NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY to Cloudflare build env.",
+  );
+}
+
 const result = spawnSync("npx", ["next", "build"], {
   cwd: root,
   stdio: "inherit",
@@ -136,7 +153,7 @@ const result = spawnSync("npx", ["next", "build"], {
   env: {
     ...process.env,
     MOCK_PREVIEW: "true",
-    NEXT_PUBLIC_MOCK_PREVIEW: "true",
+    NEXT_PUBLIC_MOCK_PREVIEW: hasSupabase ? "false" : "true",
   },
 });
 

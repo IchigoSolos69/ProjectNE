@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BRAND_NAME } from "@/lib/constants";
+import { getAuthErrorMessage } from "@/lib/auth-errors";
+import { AuthErrorBanner } from "@/components/auth/auth-error-banner";
 import type { CharacterMood } from "@/components/auth/auth-characters";
 
 const slideVariants = {
@@ -32,14 +34,16 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
   const { setView, direction } = useFamilyAuthNav();
   const { loginWithGoogle } = useAuthStore();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGoogle = async () => {
     setLoading(true);
+    setError(null);
     try {
       await loginWithGoogle();
       // OAuth redirects away; success view runs after /auth/callback
     } catch (err) {
-      console.error(err);
+      setError(getAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -56,6 +60,7 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
       className="space-y-5"
     >
+      <AuthErrorBanner message={error} onDismiss={() => setError(null)} />
       <div className="text-center">
         <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
           <Sparkles className="h-6 w-6 text-primary" />
@@ -122,6 +127,7 @@ export function AuthEmailSignInView({ onSuccess, onMoodChange }: ViewProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <motion.div
@@ -134,6 +140,7 @@ export function AuthEmailSignInView({ onSuccess, onMoodChange }: ViewProps) {
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
       className="space-y-4"
     >
+      <AuthErrorBanner message={error} onDismiss={() => setError(null)} />
       <button
         type="button"
         onClick={goBack}
@@ -197,12 +204,15 @@ export function AuthEmailSignInView({ onSuccess, onMoodChange }: ViewProps) {
         disabled={!email || !password || loading}
         onClick={async () => {
           setLoading(true);
+          setError(null);
           try {
-            await loginWithEmail(email, password);
-            setView("success");
-            onSuccess?.();
+            const result = await loginWithEmail(email, password);
+            if (result === "signed_in") {
+              setView("success");
+              onSuccess?.();
+            }
           } catch (err) {
-            console.error(err);
+            setError(getAuthErrorMessage(err));
           } finally {
             setLoading(false);
           }
@@ -222,6 +232,8 @@ export function AuthEmailSignUpView({ onSuccess, onMoodChange }: ViewProps) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
 
   return (
     <motion.div
@@ -234,6 +246,12 @@ export function AuthEmailSignUpView({ onSuccess, onMoodChange }: ViewProps) {
       transition={{ type: "spring", stiffness: 280, damping: 28 }}
       className="space-y-4"
     >
+      <AuthErrorBanner message={error} onDismiss={() => setError(null)} />
+      {info && (
+        <p className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm text-foreground">
+          {info}
+        </p>
+      )}
       <button
         type="button"
         onClick={goBack}
@@ -306,12 +324,20 @@ export function AuthEmailSignUpView({ onSuccess, onMoodChange }: ViewProps) {
         disabled={!name || !email || !password || loading}
         onClick={async () => {
           setLoading(true);
+          setError(null);
+          setInfo(null);
           try {
-            await loginWithEmail(email, password, name);
+            const result = await loginWithEmail(email, password, name);
+            if (result === "confirm_email") {
+              setInfo(
+                `We sent a confirmation link to ${email}. Open it, then sign in here.`,
+              );
+              return;
+            }
             setView("success");
             onSuccess?.();
           } catch (err) {
-            console.error(err);
+            setError(getAuthErrorMessage(err));
           } finally {
             setLoading(false);
           }
