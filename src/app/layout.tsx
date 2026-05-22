@@ -7,14 +7,13 @@ import { CartSheet } from "@/components/cart/cart-sheet";
 import { BRAND_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
-  weight: ["400", "600", "700"],
+  weight: ["400", "500", "600", "700", "800", "900"],
   style: ["normal", "italic"],
-  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -22,19 +21,7 @@ export const metadata: Metadata = {
     default: BRAND_NAME,
     template: `%s · ${BRAND_NAME}`,
   },
-  description: "Premium bedding, bath linens, and pillow covers.",
-  icons: {
-    icon: "/images/logo.png",
-    shortcut: "/images/logo.png",
-    apple: "/images/logo.png",
-  },
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-  themeColor: "#8a5f41",
+  description: "Modern comfort, woven into premium bedding and bath goods.",
 };
 
 export default function RootLayout({
@@ -47,7 +34,7 @@ export default function RootLayout({
       lang="en"
       className={cn("h-full", "antialiased", playfair.variable, "font-sans", geist.variable)}
     >
-      <body className="flex min-h-dvh flex-col">
+      <body className="flex min-h-full flex-col">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
