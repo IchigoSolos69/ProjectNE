@@ -8,22 +8,18 @@ import { BRAND_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
-import { AuthPrompt } from "@/components/account/auth-prompt";
-import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogClose,
-} from "@/components/animate-ui/components/radix/dialog";
+import { FamilyAuthDrawer } from "@/components/auth/family-auth-drawer";
+import { createClient } from "@/utils/supabase/client";
 
 export function Header() {
   const openCart = useCartStore((s) => s.openCart);
   const { itemCount } = useCartTotals();
   const { user, logout } = useAuthStore();
   const pathname = usePathname();
-  const [authDialogOpen, setAuthDialogOpen] = React.useState(false);
+  const [authDrawerOpen, setAuthDrawerOpen] = React.useState(false);
   const [showDropdown, setShowDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const [categories, setCategories] = React.useState<{ name: string; slug: string }[]>([]);
 
   // Close dropdown on click outside
   React.useEffect(() => {
@@ -36,15 +32,41 @@ export function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  React.useEffect(() => {
+    async function loadCategories() {
+      try {
+        const supabase = createClient();
+        const { data } = await supabase
+          .from("categories")
+          .select("name, slug")
+          .is("parent_id", null)
+          .order("sort_order", { ascending: true });
+        if (data && data.length > 0) {
+          setCategories(data);
+        }
+      } catch (err) {
+        console.error("Failed to load header categories:", err);
+      }
+    }
+    loadCategories();
+  }, []);
+
   const navLinks = [
     { label: "NEW ARRIVALS", href: "/shop/beddings" },
-    { label: "BESTSELLER", href: "/shop/beddings" },
-    { label: "BEDDING", href: "/shop/beddings" },
-    { label: "BATH", href: "/shop/towels" },
-    { label: "COMFORTERS & BLANKETS", href: "/shop/beddings" },
-    { label: "PILLOWS", href: "/shop/pillows" },
+    ...categories.map((cat) => ({
+      label: cat.name.toUpperCase(),
+      href: `/shop/${cat.slug}`,
+    })),
+    ...(categories.length === 0
+      ? [
+          { label: "BEDDING", href: "/shop/beddings" },
+          { label: "BATH", href: "/shop/bath-towels" },
+          { label: "PILLOWS", href: "/shop/pillow-covers" },
+        ]
+      : []),
     { label: "SALE", href: "/shop/beddings", isSale: true },
   ];
+
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-stone-200/80 bg-white/95 shadow-sm backdrop-blur-md">
@@ -164,9 +186,11 @@ export function Header() {
                   )}
                 </>
               ) : (
-                // User is Logged Out: Show Auth Dialog Trigger
-                <Dialog open={authDialogOpen} onOpenChange={setAuthDialogOpen}>
-                  <DialogTrigger asChild>
+                <FamilyAuthDrawer
+                  open={authDrawerOpen}
+                  onOpenChange={setAuthDrawerOpen}
+                  onSuccess={() => setAuthDrawerOpen(false)}
+                  trigger={
                     <Button
                       variant="ghost"
                       size="icon"
@@ -175,11 +199,8 @@ export function Header() {
                     >
                       <User className="h-5 w-5" />
                     </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px] p-0 overflow-hidden border-none bg-transparent">
-                    <AuthPrompt onSuccess={() => setAuthDialogOpen(false)} />
-                  </DialogContent>
-                </Dialog>
+                  }
+                />
               )}
             </div>
 

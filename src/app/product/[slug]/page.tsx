@@ -4,14 +4,15 @@ import { getProductBySlug } from "@/lib/catalog";
 import { formatINR } from "@/lib/utils";
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductFaqSection } from "@/components/faq/product-faq-section";
-import { getStaticProductParams } from "@/lib/mock-data";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export function generateStaticParams() {
-  return getStaticProductParams();
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps) {

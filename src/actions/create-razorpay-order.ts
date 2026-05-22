@@ -2,6 +2,7 @@
 
 import type { CheckoutPayload } from "@/types/database";
 import { createOrder } from "@/lib/db";
+import { createClient } from "@/utils/supabase/server";
 
 export interface CreateOrderResult {
   success: boolean;
@@ -26,6 +27,11 @@ export async function createRazorpayOrderAction(
     );
     const totalPaise = subtotalPaise + payload.shippingPaise;
 
+    // Get active user session to link the order
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
+
     // Generate standard order IDs
     const mockOrderId = `MOCK_ORDER_${Date.now()}_${Math.random()
       .toString(36)
@@ -35,10 +41,10 @@ export async function createRazorpayOrderAction(
     const keyId =
       process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || "rzp_test_mock_key_id";
 
-    // Save order in local file database
+    // Save order in database
     await createOrder({
       id: mockOrderId,
-      user_id: null,
+      user_id: userId,
       status: "pending",
       razorpay_order_id: mockRazorpayOrderId,
       razorpay_payment_id: null,
@@ -50,6 +56,13 @@ export async function createRazorpayOrderAction(
       customer_email: payload.customerEmail,
       customer_phone: payload.customerPhone,
       customer_pincode: payload.pincode,
+      items: payload.items.map((item) => ({
+        product_id: item.productId,
+        quantity: item.quantity,
+        unit_price_paise: item.pricePaise,
+        product_name: item.name,
+        product_slug: item.slug,
+      })) as any,
     });
 
     return {

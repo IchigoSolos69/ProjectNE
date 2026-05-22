@@ -6,14 +6,15 @@ import {
   getSubcategories,
 } from "@/lib/catalog";
 import { ProductGrid } from "@/components/products/product-grid";
-import { getStaticSubcategoryParams } from "@/lib/mock-data";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ category: string; subcategory: string }>;
 }
 
 export function generateStaticParams() {
-  return getStaticSubcategoryParams();
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps) {

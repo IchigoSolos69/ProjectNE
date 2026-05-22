@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCategoryBySlug, getProductsByCategorySlug } from "@/lib/catalog";
+import { getCategoryBySlug, getProductsByCategorySlug, getSubcategories } from "@/lib/catalog";
 import { ProductGrid } from "@/components/products/product-grid";
-import { SUBCATEGORIES } from "@/lib/constants";
-import { getStaticCategoryParams } from "@/lib/mock-data";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ category: string }>;
 }
 
 export function generateStaticParams() {
-  return getStaticCategoryParams();
+  return [];
 }
 
 export async function generateMetadata({ params }: PageProps) {
@@ -28,7 +28,8 @@ export default async function CategoryPage({ params }: PageProps) {
   }
 
   const products = await getProductsByCategorySlug(categorySlug);
-  const subs = SUBCATEGORIES[categorySlug] ?? [];
+  const subs = await getSubcategories(category.id);
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -47,7 +48,7 @@ export default async function CategoryPage({ params }: PageProps) {
               href={`/shop/${categorySlug}/${sub.slug}`}
               className="rounded-full border border-stone-300 px-4 py-1.5 text-sm text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900"
             >
-              {sub.label}
+              {sub.name}
             </Link>
           ))}
         </nav>

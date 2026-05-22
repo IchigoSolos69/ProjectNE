@@ -6,6 +6,7 @@ import {
   type ProfileFormData,
 } from "@/components/account/edit-profile-dialog";
 import { Button } from "@/components/ui/button";
+import { createClient } from "@/utils/supabase/client";
 
 export default function AccountProfilePage() {
   const { user, logout } = useAuthStore();
@@ -19,22 +20,45 @@ export default function AccountProfilePage() {
   };
 
   async function handleSave(data: ProfileFormData) {
-    // Update store state
-    useAuthStore.setState((s) => {
-      if (s.user) {
-        return {
-          user: {
-            ...s.user,
-            fullName: data.fullName,
-            phone: data.phone,
-            shippingAddress: data.shippingAddress,
-          },
-        };
+    if (!user) return;
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: data.fullName,
+          phone: data.phone,
+          shipping_address: data.shippingAddress,
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        console.error("Error updating profile in Supabase:", error);
+        alert("Failed to save profile: " + error.message);
+        return;
       }
-      return s;
-    });
-    console.info("[account] Profile saved:", data);
+
+      // Update store state
+      useAuthStore.setState((s) => {
+        if (s.user) {
+          return {
+            user: {
+              ...s.user,
+              fullName: data.fullName,
+              phone: data.phone,
+              shippingAddress: data.shippingAddress,
+            },
+          };
+        }
+        return s;
+      });
+      console.info("[account] Profile saved to Supabase:", data);
+    } catch (err) {
+      console.error("Unexpected error saving profile:", err);
+      alert("An unexpected error occurred while saving profile.");
+    }
   }
+
 
   return (
     <div className="space-y-8">

@@ -77,6 +77,7 @@ create table public.profiles (
   email text,
   full_name text,
   phone text,
+  shipping_address text,
   default_pincode text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

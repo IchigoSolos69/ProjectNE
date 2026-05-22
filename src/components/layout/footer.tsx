@@ -17,6 +17,9 @@ export function Footer() {
             <Link href="/faq" className="hover:text-stone-900">
               FAQ
             </Link>
+            <Link href="/login" className="hover:text-stone-900">
+              Sign in
+            </Link>
             <Link href="/account/profile" className="hover:text-stone-900">
               Account
             </Link>

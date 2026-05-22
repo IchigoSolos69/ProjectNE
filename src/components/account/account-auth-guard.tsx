@@ -1,9 +1,10 @@
 "use client";
 
 import { useAuthStore } from "@/stores/auth-store";
-import { AuthPrompt } from "./auth-prompt";
+import { FamilyAuthPanel } from "@/components/auth/family-auth-panel";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import Link from "next/link";
 
 export function AccountAuthGuard({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((s) => s.user);
@@ -23,8 +24,14 @@ export function AccountAuthGuard({ children }: { children: React.ReactNode }) {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center py-6">
-        <AuthPrompt />
+      <div className="mx-auto max-w-lg">
+        <FamilyAuthPanel showCharacters />
+        <p className="mt-6 text-center text-sm text-stone-500">
+          Prefer full screen?{" "}
+          <Link href="/login" className="font-medium text-[#007A78] hover:underline">
+            Open login page
+          </Link>
+        </p>
       </div>
     );
   }

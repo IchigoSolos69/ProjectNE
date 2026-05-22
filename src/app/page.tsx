@@ -1,13 +1,16 @@
 import Link from "next/link";
-import { getFeaturedProducts } from "@/lib/catalog";
+import { getFeaturedProducts, getTopCategories } from "@/lib/catalog";
 import { ProductGrid } from "@/components/products/product-grid";
 import { Button } from "@/components/ui/button";
-import { TOP_CATEGORIES, BRAND_NAME } from "@/lib/constants";
+import { BRAND_NAME } from "@/lib/constants";
 
-export const dynamic = "force-static";
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const products = await getFeaturedProducts();
+  const [products, categories] = await Promise.all([
+    getFeaturedProducts(),
+    getTopCategories(),
+  ]);
 
   return (
     <>
@@ -24,9 +27,9 @@ export default async function HomePage() {
             towels, and pillow covers for everyday luxury.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            {TOP_CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <Button key={cat.slug} variant="outline" asChild>
-                <Link href={`/shop/${cat.slug}`}>{cat.label}</Link>
+                <Link href={`/shop/${cat.slug}`}>{cat.name}</Link>
               </Button>
             ))}
           </div>

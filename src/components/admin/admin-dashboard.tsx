@@ -824,12 +824,24 @@ export function AdminDashboard({ products: initialProducts, categories, orders: 
                         <div className="border-t border-stone-100 pt-4">
                           <h4 className="font-semibold text-sm text-stone-900 mb-2">Order Items</h4>
                           <div className="bg-white rounded border border-stone-200 overflow-hidden divide-y divide-stone-100">
-                            {/* We can construct item list from price information or just simple summary since we don't have separate OrderItem table queries here */}
-                            {/* Wait, we can list items if we stored them, let's see. In our mock order, we have subtotal and shipping. Let's list a generic breakdown for the preview */}
-                            <div className="px-4 py-3 text-sm flex justify-between">
-                              <div className="text-stone-700">Premium Bedding/Towel Package</div>
-                              <div className="text-stone-950 font-medium">Quantity: 1 · {formatINR(o.subtotal_paise)}</div>
-                            </div>
+                            {o.items && o.items.length > 0 ? (
+                              o.items.map((item) => (
+                                <div key={item.id} className="px-4 py-3 text-sm flex justify-between items-center">
+                                  <div>
+                                    <div className="text-stone-700 font-medium">{item.product_name}</div>
+                                    <div className="text-xs text-stone-500 font-mono mt-0.5">{item.product_slug}</div>
+                                  </div>
+                                  <div className="text-stone-950 font-medium whitespace-nowrap ml-4">
+                                    Qty: {item.quantity} · {formatINR(item.unit_price_paise * item.quantity)}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="px-4 py-3 text-sm flex justify-between">
+                                <div className="text-stone-700 font-medium">Standard Package (Legacy Order)</div>
+                                <div className="text-stone-950 font-medium">Quantity: 1 · {formatINR(o.subtotal_paise)}</div>
+                              </div>
+                            )}
                             {o.shipping_paise > 0 && (
                               <div className="px-4 py-2 text-xs text-stone-500 flex justify-between bg-stone-50/50">
                                 <span>Shipping:</span>
