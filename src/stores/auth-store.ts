@@ -28,10 +28,12 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   loginWithGoogle: async () => {
     const supabase = createClient();
+    const origin =
+      typeof window !== "undefined" ? window.location.origin : "https://nestifyessentials.pages.dev";
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${origin}/auth/callback`,
       },
     });
     if (error) throw error;
