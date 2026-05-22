@@ -138,7 +138,7 @@ export function Header() {
           </div>
 
           {/* Right Column: Search, Wishlist, Account, Cart */}
-          <div className="col-span-3 md:col-span-1 flex items-center justify-center md:justify-end gap-1.5 sm:gap-2.5">
+          <div className="col-span-3 md:col-span-1 flex items-center justify-end gap-1.5 sm:gap-2.5">
             {/* Search Input and Toggle */}
             <div className="relative flex items-center">
               <AnimatePresence>
@@ -344,16 +344,14 @@ export function Header() {
                   onClick={() => {
                     setActiveDropdown(activeDropdown === link.dropdownType ? null : link.dropdownType);
                   }}
-                  className={`relative min-h-11 cursor-pointer whitespace-nowrap px-1 py-2 text-[11px] font-bold tracking-wider transition-all duration-300 group sm:text-[12px] sm:tracking-widest ${
-                    activeDropdown === link.dropdownType
+                  className={`relative min-h-11 cursor-pointer whitespace-nowrap px-1 py-2 text-[11px] font-bold tracking-wider transition-all duration-300 group sm:text-[12px] sm:tracking-widest ${activeDropdown === link.dropdownType
                       ? "text-primary"
                       : "text-muted-foreground/90 hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {link.label}
-                  <span className={`absolute bottom-0 left-0 w-full h-[1.5px] transition-transform duration-300 origin-left ${
-                    activeDropdown === link.dropdownType ? "scale-x-100 bg-primary" : "scale-x-0 group-hover:scale-x-100 bg-primary"
-                  }`} />
+                  <span className={`absolute bottom-0 left-0 w-full h-[1.5px] transition-transform duration-300 origin-left ${activeDropdown === link.dropdownType ? "scale-x-100 bg-primary" : "scale-x-0 group-hover:scale-x-100 bg-primary"
+                    }`} />
                 </button>
               ) : (
                 <Link
@@ -381,7 +379,7 @@ export function Header() {
             onMouseEnter={() => setActiveDropdown("categories")}
             onMouseLeave={() => setActiveDropdown(null)}
           >
-            <motion.div 
+            <motion.div
               initial="hidden"
               animate="visible"
               variants={{
@@ -449,7 +447,7 @@ export function Header() {
           >
             <div className="mx-auto max-w-2xl px-8 py-8 flex flex-col items-center gap-4 text-center">
               <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">Select a Range</div>
-              <motion.div 
+              <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={{
