@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Product } from "@/types/database";
-import { formatINR } from "@/lib/utils";
+import { formatINR } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/stores/cart-store";
 

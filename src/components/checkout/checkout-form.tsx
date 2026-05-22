@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCartStore, useCartTotals } from "@/stores/cart-store";
-import { formatINR } from "@/lib/utils";
+import { formatINR } from "@/lib/currency";
 import {
   createCheckoutOrder,
   fetchShippingRates,

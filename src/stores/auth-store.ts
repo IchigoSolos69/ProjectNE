@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { useCartStore } from "@/stores/cart-store";
 import { createClient } from "@/utils/supabase/client";
 
 export interface User {
@@ -55,15 +56,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (error) throw error;
 
       if (data.user) {
-        set({
-          user: {
-            id: data.user.id,
-            email: data.user.email || email,
-            fullName: name,
-            phone: "",
-            shippingAddress: "",
-          },
-        });
+        const user = {
+          id: data.user.id,
+          email: data.user.email || email,
+          fullName: name,
+          phone: "",
+          shippingAddress: "",
+        };
+        set({ user });
+        await useCartStore.getState().bindUser(user.id);
       }
     } else if (password) {
       // Sign In flow
@@ -81,15 +82,15 @@ export const useAuthStore = create<AuthState>((set) => ({
           .eq("id", data.user.id)
           .maybeSingle();
 
-        set({
-          user: {
-            id: data.user.id,
-            email: data.user.email || email,
-            fullName: profile?.full_name || data.user.user_metadata?.full_name || "",
-            phone: profile?.phone || "",
-            shippingAddress: profile?.shipping_address || "",
-          },
-        });
+        const user = {
+          id: data.user.id,
+          email: data.user.email || email,
+          fullName: profile?.full_name || data.user.user_metadata?.full_name || "",
+          phone: profile?.phone || "",
+          shippingAddress: profile?.shipping_address || "",
+        };
+        set({ user });
+        await useCartStore.getState().bindUser(user.id);
       }
     }
   },
@@ -98,6 +99,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     const supabase = createClient();
     await supabase.auth.signOut();
     set({ user: null });
+    await useCartStore.getState().bindUser(null);
   },
 }));
 
@@ -124,18 +126,18 @@ if (typeof window !== "undefined") {
           .eq("id", session.user.id)
           .maybeSingle();
 
-        useAuthStore.setState({
-          user: {
-            id: session.user.id,
-            email: session.user.email || "",
-            fullName: profile?.full_name || session.user.user_metadata?.full_name || "",
-            phone: profile?.phone || "",
-            shippingAddress: profile?.shipping_address || "",
-          },
-          loading: false,
-        });
+        const user = {
+          id: session.user.id,
+          email: session.user.email || "",
+          fullName: profile?.full_name || session.user.user_metadata?.full_name || "",
+          phone: profile?.phone || "",
+          shippingAddress: profile?.shipping_address || "",
+        };
+        useAuthStore.setState({ user, loading: false });
+        await useCartStore.getState().bindUser(user.id);
       } else {
         useAuthStore.setState({ user: null, loading: false });
+        await useCartStore.getState().bindUser(null);
       }
 
       // Listen for auth state changes
@@ -147,18 +149,23 @@ if (typeof window !== "undefined") {
             .eq("id", currentSession.user.id)
             .maybeSingle();
 
-          useAuthStore.setState({
-            user: {
-              id: currentSession.user.id,
-              email: currentSession.user.email || "",
-              fullName: profile?.full_name || currentSession.user.user_metadata?.full_name || "",
-              phone: profile?.phone || "",
-              shippingAddress: profile?.shipping_address || "",
-            },
-            loading: false,
-          });
+          const user = {
+            id: currentSession.user.id,
+            email: currentSession.user.email || "",
+            fullName:
+              profile?.full_name ||
+              currentSession.user.user_metadata?.full_name ||
+              "",
+            phone: profile?.phone || "",
+            shippingAddress: profile?.shipping_address || "",
+          };
+          useAuthStore.setState({ user, loading: false });
+          if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+            await useCartStore.getState().bindUser(user.id);
+          }
         } else {
           useAuthStore.setState({ user: null, loading: false });
+          await useCartStore.getState().bindUser(null);
         }
       });
     } catch (err) {

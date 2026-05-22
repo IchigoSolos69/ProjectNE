@@ -40,6 +40,7 @@ export interface Profile {
   email: string | null;
   full_name: string | null;
   phone: string | null;
+  shipping_address: string | null;
   default_pincode: string | null;
   created_at: string;
   updated_at: string;

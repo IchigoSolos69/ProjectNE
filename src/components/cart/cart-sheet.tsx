@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
-import { formatINR } from "@/lib/utils";
+import { formatINR } from "@/lib/currency";
 
 export function CartSheet() {
   const { items, isOpen, closeCart, updateQuantity, removeItem } = useCartStore();

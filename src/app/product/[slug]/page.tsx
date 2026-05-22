@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/catalog";
-import { formatINR } from "@/lib/utils";
+import { formatINR } from "@/lib/currency";
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductFaqSection } from "@/components/faq/product-faq-section";
 import { isPreviewBuild } from "@/lib/preview-build";
