@@ -326,7 +326,7 @@ export function Header() {
         </div>
 
         {/* Bottom Row: Navigation Links */}
-        <nav className="scrollbar-thin overscroll-x-contain flex h-12 items-center justify-center gap-4 overflow-x-auto py-1 sm:gap-8 [-webkit-overflow-scrolling:touch]">
+        <nav className="scrollbar-none overscroll-x-contain flex h-12 items-center justify-center gap-4 overflow-x-auto py-1 sm:gap-8 [-webkit-overflow-scrolling:touch]">
           {navLinks.map((link, idx) => (
             <div
               key={idx}
