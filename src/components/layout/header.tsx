@@ -93,13 +93,13 @@ export function Header() {
             <Link href="/" className="flex flex-col items-center select-none text-center">
               <div className="flex items-baseline justify-center">
                 <span className="font-sans font-extrabold text-2xl text-[#007A78] tracking-widest leading-none">
-                  nestify
+                  NESTIFY
                 </span>
                 <span className="font-serif italic text-2xl text-amber-500 tracking-tight leading-none mr-1.5 transform -rotate-3 select-none">
-                  ESSENTIALS
+                  essentials
                 </span>
               </div>
-              <span className="text-[10px] uppercase tracking-[0.25em] text-stone-400 mt-1 font-semibold">
+              <span className="text-[9ypx] uppercase tracking-[0.25em] text-stone-400 mt-1 font-semibold">
                 Style Your Space…
               </span>
             </Link>
