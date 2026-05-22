@@ -34,11 +34,6 @@ function FamilyAuthPanelInner({
 
   return (
     <div className={className}>
-      {showCharacters && view !== "success" && (
-        <div className="mb-6 rounded-2xl bg-gradient-to-b from-[#007A78]/8 to-amber-50/80 px-4 py-8">
-          <AuthCharacters mood={mood} />
-        </div>
-      )}
 
       <div className="relative min-h-[280px] overflow-hidden">
         <AnimatePresence mode="wait" custom={direction}>
