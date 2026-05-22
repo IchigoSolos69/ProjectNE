@@ -12,7 +12,7 @@ import {
   AuthHomeView,
   AuthSuccessView,
 } from "@/components/auth/family-auth-views";
-import { AuthCharacters, type CharacterMood } from "@/components/auth/auth-characters";
+import type { CharacterMood } from "@/components/auth/auth-characters";
 
 interface FamilyAuthPanelProps {
   onSuccess?: () => void;
@@ -35,7 +35,7 @@ function FamilyAuthPanelInner({
   return (
     <div className={className}>
 
-      <div className="relative min-h-[280px] overflow-hidden">
+      <div className="relative min-h-[220px] overflow-hidden sm:min-h-[260px]">
         <AnimatePresence mode="wait" custom={direction}>
           {view === "home" && (
             <AuthHomeView onSuccess={onSuccess} onMoodChange={setMood} />

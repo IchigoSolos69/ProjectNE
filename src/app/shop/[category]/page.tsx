@@ -78,7 +78,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <div className="max-w-2xl">
         <h1 className="font-serif text-3xl text-foreground">{category.name}</h1>
         {category.description && (

@@ -24,17 +24,27 @@ export function Header() {
   const [searchExpanded, setSearchExpanded] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
   const searchInputRef = React.useRef<HTMLInputElement>(null);
+  const headerRef = React.useRef<HTMLElement>(null);
 
-  // Close dropdown on click outside
+  // Close dropdowns on click outside
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setShowDropdown(false);
+      }
+      if (headerRef.current && !headerRef.current.contains(target)) {
+        setActiveDropdown(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  React.useEffect(() => {
+    setActiveDropdown(null);
+    setSearchExpanded(false);
+  }, [pathname]);
 
   // Focus search input when expanded
   React.useEffect(() => {
@@ -92,24 +102,32 @@ export function Header() {
   const parentCats = activeCategories.filter((c) => c.parent_id === null);
 
   return (
-    <header 
+    <header
+      ref={headerRef}
       className="sticky top-0 z-40 w-full border-b border-border/80 bg-card/90 backdrop-blur-md transition-colors duration-300"
-      onMouseLeave={() => setActiveDropdown(null)}
+      onMouseLeave={() => {
+        if (window.matchMedia("(hover: hover)").matches) {
+          setActiveDropdown(null);
+        }
+      }}
     >
 
       {/* Main Header Container */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top Row: balanced layout grid */}
-        <div className="grid grid-cols-3 items-center h-20 border-b border-border/30">
+        <div className="grid grid-cols-3 items-center h-auto py-4 md:h-20 md:py-0 border-b border-border/30 gap-4 md:gap-0">
+
+          {/* Left Column: Spacer to center the logo on desktop */}
+          <div className="hidden md:block md:col-span-1" />
 
           {/* Center Column: Logo */}
           <div className="col-span-3 md:col-span-1 flex justify-center">
             <Link href="/" className="flex flex-col items-center select-none text-center group">
               <div className="flex items-baseline justify-center">
-                <span className="font-sans font-black text-2xl text-foreground tracking-[0.25em] leading-none transition-colors duration-300 group-hover:text-primary">
+                <span className="font-sans text-xl font-black leading-none tracking-[0.12em] text-foreground transition-colors duration-300 group-hover:text-primary sm:text-2xl sm:tracking-[0.25em]">
                   NESTIFY
                 </span>
-                <span className="font-serif italic text-2xl text-primary tracking-tight leading-none mr-1.5 transform -rotate-3 select-none transition-all duration-300 group-hover:rotate-0 group-hover:text-secondary">
+                <span className="mr-1.5 transform -rotate-3 select-none font-serif text-xl italic leading-none tracking-tight text-primary transition-all duration-300 group-hover:rotate-0 group-hover:text-secondary sm:text-2xl">
                   essentials
                 </span>
               </div>
@@ -120,14 +138,14 @@ export function Header() {
           </div>
 
           {/* Right Column: Search, Wishlist, Account, Cart */}
-          <div className="col-span-3 md:col-span-1 flex items-center justify-end gap-1.5 sm:gap-2.5">
+          <div className="col-span-3 md:col-span-1 flex items-center justify-center md:justify-end gap-1.5 sm:gap-2.5">
             {/* Search Input and Toggle */}
             <div className="relative flex items-center">
               <AnimatePresence>
                 {searchExpanded && (
                   <motion.div
                     initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 180, opacity: 1 }}
+                    animate={{ width: "min(12rem, calc(100vw - 10rem))", opacity: 1 }}
                     exit={{ width: 0, opacity: 0 }}
                     transition={{ type: "spring", stiffness: 300, damping: 25 }}
                     className="relative flex items-center mr-1"
@@ -138,7 +156,7 @@ export function Header() {
                       placeholder="Search products..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full h-9 pl-3 pr-8 rounded-full border border-border bg-background/50 text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-all"
+                      className="h-11 w-full rounded-full border border-border bg-background/50 pl-3 pr-10 text-base text-foreground placeholder:text-muted-foreground/60 focus:bg-background focus:outline-none focus:ring-1 focus:ring-primary sm:h-9 sm:text-xs"
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && searchQuery.trim()) {
                           window.location.href = `/shop/beddings?q=${encodeURIComponent(searchQuery.trim())}`;
@@ -152,7 +170,7 @@ export function Header() {
                         setSearchQuery("");
                         setSearchExpanded(false);
                       }}
-                      className="absolute right-2.5 text-muted-foreground hover:text-foreground text-xs"
+                      className="touch-target absolute right-1 flex items-center justify-center text-muted-foreground hover:text-foreground"
                       aria-label="Close search"
                     >
                       ✕
@@ -167,7 +185,7 @@ export function Header() {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSearchExpanded(true)}
-                    className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                    className="rounded-full text-muted-foreground transition-all duration-300 hover:bg-muted/50 hover:text-foreground"
                     aria-label="Search catalog"
                   >
                     <Search className="h-5 w-5" />
@@ -209,7 +227,7 @@ export function Header() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 text-primary hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                      className="rounded-full text-primary transition-all duration-300 hover:bg-muted/50 hover:text-foreground"
                       onClick={() => setShowDropdown(!showDropdown)}
                       aria-label="Account menu"
                     >
@@ -224,7 +242,7 @@ export function Header() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
                         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-                        className="absolute right-0 mt-2.5 w-52 rounded-xl border border-border bg-card py-1.5 shadow-xl ring-1 ring-black/5 z-50 overflow-hidden"
+                        className="absolute right-0 z-50 mt-2.5 w-[min(13rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-border bg-card py-1.5 shadow-xl ring-1 ring-black/5"
                       >
                         <div className="px-4 py-2.5 border-b border-border/50 bg-muted/20">
                           <p className="text-xs font-bold text-foreground truncate">{user.fullName}</p>
@@ -268,7 +286,7 @@ export function Header() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                      className="rounded-full text-muted-foreground transition-all duration-300 hover:bg-muted/50 hover:text-foreground"
                       aria-label="Sign in"
                     >
                       <User className="h-5 w-5" />
@@ -283,7 +301,7 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                className="relative rounded-full text-muted-foreground transition-all duration-300 hover:bg-muted/50 hover:text-foreground"
                 onClick={openCart}
                 aria-label="Open cart"
               >
@@ -308,7 +326,7 @@ export function Header() {
         </div>
 
         {/* Bottom Row: Navigation Links */}
-        <nav className="flex h-12 items-center justify-center gap-6 sm:gap-8 overflow-x-auto scrollbar-none py-1">
+        <nav className="scrollbar-thin overscroll-x-contain flex h-12 items-center justify-center gap-4 overflow-x-auto py-1 sm:gap-8 [-webkit-overflow-scrolling:touch]">
           {navLinks.map((link, idx) => (
             <div
               key={idx}
@@ -319,14 +337,14 @@ export function Header() {
                   setActiveDropdown(null);
                 }
               }}
-              className="relative py-1.5"
+              className="relative shrink-0 py-2"
             >
               {link.hasDropdown ? (
                 <button
                   onClick={() => {
                     setActiveDropdown(activeDropdown === link.dropdownType ? null : link.dropdownType);
                   }}
-                  className={`text-[12px] font-bold tracking-widest transition-all duration-300 whitespace-nowrap relative py-1.5 group cursor-pointer ${
+                  className={`relative min-h-11 cursor-pointer whitespace-nowrap px-1 py-2 text-[11px] font-bold tracking-wider transition-all duration-300 group sm:text-[12px] sm:tracking-widest ${
                     activeDropdown === link.dropdownType
                       ? "text-primary"
                       : "text-muted-foreground/90 hover:text-foreground"
@@ -340,7 +358,7 @@ export function Header() {
               ) : (
                 <Link
                   href={link.href}
-                  className="text-[12px] font-bold tracking-widest transition-all duration-300 whitespace-nowrap relative py-1.5 group text-muted-foreground/90 hover:text-foreground"
+                  className="relative min-h-11 whitespace-nowrap px-1 py-2 text-[11px] font-bold tracking-wider text-muted-foreground/90 transition-all duration-300 group hover:text-foreground sm:text-[12px] sm:tracking-widest"
                 >
                   {link.label}
                   <span className="absolute bottom-0 left-0 w-full h-[1.5px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left bg-primary" />
@@ -373,7 +391,7 @@ export function Header() {
                   transition: { staggerChildren: 0.04 }
                 }
               }}
-              className="mx-auto max-w-7xl px-8 py-10 grid grid-cols-3 gap-8"
+              className="mx-auto grid max-h-[70vh] max-w-7xl grid-cols-1 gap-6 overflow-y-auto px-4 py-8 sm:grid-cols-2 sm:gap-8 sm:px-6 lg:grid-cols-3 lg:px-8 lg:py-10"
             >
               {parentCats.map((parent) => {
                 const subCats = activeCategories.filter((c) => c.parent_id === parent.id);
@@ -441,7 +459,7 @@ export function Header() {
                     transition: { staggerChildren: 0.05 }
                   }
                 }}
-                className="grid grid-cols-3 gap-4 w-full"
+                className="grid w-full grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4"
               >
                 <motion.div
                   variants={{

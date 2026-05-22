@@ -71,7 +71,7 @@ export function CartSheet() {
                         <Link
                           href="/account/profile"
                           onClick={closeCart}
-                          className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors"
+                          className="flex min-h-11 items-center gap-3 rounded px-3 py-3 text-sm font-medium text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
                         >
                           <Package className="h-4 w-4 text-muted-foreground" />
                           <span>Orders</span>
@@ -81,7 +81,7 @@ export function CartSheet() {
                         <Link
                           href="/account/profile"
                           onClick={closeCart}
-                          className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors"
+                          className="flex min-h-11 items-center gap-3 rounded px-3 py-3 text-sm font-medium text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
                         >
                           <Bookmark className="h-4 w-4 text-muted-foreground" />
                           <span>Your Saves</span>
@@ -91,7 +91,7 @@ export function CartSheet() {
                         <Link
                           href="/account/profile"
                           onClick={closeCart}
-                          className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors"
+                          className="flex min-h-11 items-center gap-3 rounded px-3 py-3 text-sm font-medium text-foreground/90 transition-colors hover:bg-muted hover:text-foreground"
                         >
                           <Settings className="h-4 w-4 text-muted-foreground" />
                           <span>Account</span>
@@ -134,19 +134,9 @@ export function CartSheet() {
                 className="w-full"
               >
                 <ul className="space-y-6 overflow-x-hidden pr-1">
-                  <AnimatePresence initial={false} mode="popLayout">
-                    {items.map((item) => (
-                      <motion.li
+                  {items.map((item) => (
+                      <li
                         key={item.productId}
-                        layout
-                        initial={{ opacity: 0, height: 0, y: 15 }}
-                        animate={{ opacity: 1, height: "auto", y: 0 }}
-                        exit={{ opacity: 0, height: 0, y: -15, overflow: "hidden" }}
-                        transition={{
-                          height: { duration: 0.25, ease: "easeOut" },
-                          opacity: { duration: 0.2 },
-                          layout: { type: "spring", stiffness: 500, damping: 30 }
-                        }}
                         className="flex gap-4 py-2"
                       >
                         <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-muted">
@@ -173,37 +163,39 @@ export function CartSheet() {
                             <Button
                               variant="outline"
                               size="icon"
-                              className="h-8 w-8"
+                              className="shrink-0"
                               onClick={() =>
                                 updateQuantity(item.productId, item.quantity - 1)
                               }
+                              aria-label="Decrease quantity"
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-                            <span className="w-6 text-center text-sm">{item.quantity}</span>
+                            <span className="w-8 text-center text-sm tabular-nums">{item.quantity}</span>
                             <Button
                               variant="outline"
                               size="icon"
-                              className="h-8 w-8"
+                              className="shrink-0"
                               onClick={() =>
                                 updateQuantity(item.productId, item.quantity + 1)
                               }
+                              aria-label="Increase quantity"
                             >
                               <Plus className="h-3 w-3" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="ml-auto h-8 w-8 text-muted-foreground/75 hover:text-red-600 transition-colors duration-200"
+                              className="ml-auto shrink-0 text-muted-foreground/75 hover:text-red-600"
                               onClick={() => removeItem(item.productId)}
+                              aria-label="Remove item"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
-                      </motion.li>
+                      </li>
                     ))}
-                  </AnimatePresence>
                 </ul>
               </motion.div>
             )}
@@ -211,13 +203,13 @@ export function CartSheet() {
         </div>
 
         {items.length > 0 && (
-          <div className="border-t border-border/70 p-6">
+          <div className="border-t border-border/70 p-4 pb-safe sm:p-6">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-medium">{formatINR(subtotalPaise)}</span>
             </div>
             <Separator className="my-4" />
-            <Button className="w-full" asChild>
+            <Button className="min-h-11 w-full" asChild>
               <Link href="/checkout" onClick={closeCart}>
                 Checkout
               </Link>

@@ -15,6 +15,7 @@ export function AddToCartButton({ product, image }: AddToCartButtonProps) {
   return (
     <Button
       size="lg"
+      className="min-h-11 w-full sm:w-auto"
       onClick={() =>
         addItem({
           productId: product.id,

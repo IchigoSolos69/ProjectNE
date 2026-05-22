@@ -34,8 +34,8 @@ export default async function ProductPage({ params }: PageProps) {
   const image = product.images[0] ?? "/placeholder-product.jpg";
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <div className="grid gap-12 lg:grid-cols-2">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-12 lg:px-8">
+      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
         <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
           <Image
             src={image}
@@ -51,7 +51,7 @@ export default async function ProductPage({ params }: PageProps) {
           <p className="text-sm uppercase tracking-widest text-muted-foreground">
             {product.category?.name}
           </p>
-          <h1 className="mt-2 font-serif text-3xl text-foreground">{product.name}</h1>
+          <h1 className="mt-2 font-serif text-2xl text-foreground sm:text-3xl">{product.name}</h1>
           <div className="mt-4 flex items-center gap-3">
             <span className="text-xl text-foreground">
               {formatINR(product.price_paise)}

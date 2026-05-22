@@ -88,7 +88,7 @@ export default async function SubcategoryPage({ params, searchParams }: PageProp
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <nav className="text-sm text-muted-foreground">
         <Link href={`/shop/${categorySlug}`} className="hover:text-foreground">
           {parent.name}

@@ -38,24 +38,12 @@ const itemVariants = {
 // Reusable Section Header matching user screenshot styling but using theme colors
 export function SectionHeader({ title }: { title: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -15 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="mb-10 w-full border-b border-border/40 pb-3 flex items-end"
-    >
-      <h2 className="font-serif text-xl sm:text-2xl font-bold tracking-widest text-foreground relative pb-3 select-none uppercase">
+    <div className="mb-8 flex w-full items-end border-b border-border/40 pb-3 sm:mb-10">
+      <h2 className="relative select-none pb-3 font-serif text-lg font-bold uppercase tracking-widest text-foreground sm:text-2xl">
         {title}
-        <motion.span
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ delay: 0.25, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute bottom-[-1.5px] left-0 right-0 h-[3px] bg-primary rounded-full origin-left"
-        />
+        <span className="absolute bottom-[-1.5px] left-0 right-0 h-[3px] origin-left rounded-full bg-primary" />
       </h2>
-    </motion.div>
+    </div>
   );
 }
 
@@ -112,14 +100,14 @@ export function ShopByCategories() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <SectionHeader title="SHOP BY CATEGORIES" />
       <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
-        className="grid grid-cols-2 gap-6 md:grid-cols-3 md:gap-8"
+        className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 md:gap-8"
       >
         {categoryItems.map((item, idx) => (
           <motion.div key={idx} variants={itemVariants}>
@@ -129,7 +117,8 @@ export function ShopByCategories() {
                   src={item.image}
                   alt={item.label}
                   fill
-                  priority={idx < 3}
+                  priority={idx === 0}
+                  loading={idx === 0 ? undefined : "lazy"}
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
@@ -157,7 +146,7 @@ export function ShopByPrice() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <SectionHeader title="SHOP BY PRICE" />
       <motion.div
         variants={containerVariants}
@@ -192,24 +181,20 @@ export function ShopByPrice() {
 function WishlistButton() {
   const [active, setActive] = useState(false);
   return (
-    <motion.button
-      whileHover={{ scale: 1.15 }}
-      whileTap={{ scale: 0.9 }}
+    <button
+      type="button"
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
         setActive(!active);
       }}
-      className="absolute top-3 right-3 rounded-full bg-white/80 p-1.5 shadow-sm text-muted-foreground/80 hover:text-red-500 hover:bg-white transition-all duration-200 z-10 cursor-pointer"
+      className="touch-target absolute right-2 top-2 z-10 flex cursor-pointer items-center justify-center rounded-full bg-white/90 p-2.5 text-muted-foreground/80 shadow-sm transition-colors hover:bg-white hover:text-red-500 sm:right-3 sm:top-3"
       aria-label="Add to wishlist"
     >
-      <motion.div
-        animate={active ? { scale: [1, 1.45, 0.9, 1.15, 1] } : { scale: 1 }}
-        transition={{ duration: 0.45 }}
-      >
-        <Heart className={`h-4.5 w-4.5 transition-colors ${active ? "fill-red-500 text-red-500" : ""}`} />
-      </motion.div>
-    </motion.button>
+      <Heart
+        className={`h-4 w-4 transition-colors ${active ? "fill-red-500 text-red-500" : ""}`}
+      />
+    </button>
   );
 }
 
@@ -231,14 +216,14 @@ export function WhatsNew({ products }: { products: Product[] }) {
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <SectionHeader title="WHAT'S NEW" />
       <motion.div
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
-        className="grid grid-cols-2 gap-6 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4"
       >
         {latestProducts.map((product) => {
           const image = product.images[0] ?? "/placeholder-product.jpg";
@@ -433,7 +418,7 @@ function BestsellerCard({
             onClick={handleAddToCart}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="w-full text-[11px] font-bold py-2 border border-primary text-primary hover:bg-primary/5 transition-colors duration-200 rounded-lg cursor-pointer flex items-center justify-center min-h-[38px] select-none"
+            className="flex min-h-11 w-full cursor-pointer select-none items-center justify-center rounded-lg border border-primary py-2 text-[11px] font-bold text-primary transition-colors duration-200 hover:bg-primary/5"
             disabled={addingState !== "idle"}
           >
             {addingState === "idle" && "Add To Cart"}
@@ -452,7 +437,7 @@ function BestsellerCard({
             onClick={handleBuyNow}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="w-full text-[11px] font-bold py-2 bg-primary text-primary-foreground hover:bg-primary/95 transition-colors duration-200 rounded-lg cursor-pointer flex items-center justify-center min-h-[38px]"
+            className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary py-2 text-[11px] font-bold text-primary-foreground transition-colors duration-200 hover:bg-primary/95"
           >
             Buy Now
           </motion.button>
@@ -479,7 +464,7 @@ export function Bestsellers({ products }: { products: Product[] }) {
     : products.slice(0, 4);
 
   return (
-    <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <SectionHeader title="BESTSELLERS" />
       <motion.div
         variants={containerVariants}

@@ -14,8 +14,8 @@ function LoginForm() {
   const next = searchParams.get("next") || "/account/profile";
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-muted">
-      <div className="grid min-h-[calc(100vh-5rem)] lg:grid-cols-2">
+    <div className="min-h-dvh bg-muted">
+      <div className="grid min-h-dvh lg:grid-cols-2">
         {/* Left — brand visual (desktop) */}
         <motion.div
           initial={{ opacity: 0, x: -24 }}
@@ -69,10 +69,7 @@ function LoginForm() {
           </Link>
 
           <div className="mx-auto w-full max-w-md rounded-2xl border border-border/80 bg-card p-6 shadow-xl sm:p-8">
-            <FamilyAuthPanel
-              showCharacters
-              onSuccess={() => router.push(next)}
-            />
+            <FamilyAuthPanel onSuccess={() => router.push(next)} />
           </div>
 
           <p className="mx-auto mt-6 max-w-sm text-center text-xs text-muted-foreground/80">
@@ -88,7 +85,7 @@ function LoginForm() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-[calc(100vh-5rem)] bg-muted flex items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center bg-muted">
         <div className="text-sm text-muted-foreground">Loading...</div>
       </div>
     }>
