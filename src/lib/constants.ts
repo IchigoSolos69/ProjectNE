@@ -1,4 +1,4 @@
-export const BRAND_NAME = "Atelier Home";
+export const BRAND_NAME = "Nestify Essentials";
 
 /** Must match slugs in `src/lib/mock-data.ts` for preview/mock deploys */
 export const TOP_CATEGORIES = [
