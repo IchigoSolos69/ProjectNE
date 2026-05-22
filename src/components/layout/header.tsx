@@ -77,17 +77,6 @@ export function Header() {
         {/* Top Row: Track order, Logo, Icons */}
         <div className="flex h-20 items-center justify-between gap-4 border-b border-stone-100">
 
-          {/* Left Side: Track order */}
-          <div className="flex-1 hidden md:flex items-center">
-            <Link
-              href="/faq"
-              className="flex items-center gap-1.5 text-[13px] font-medium text-stone-600 transition-colors hover:text-stone-900"
-            >
-              <MapPin className="h-4 w-4 text-stone-500" />
-              <span>Track Your Order</span>
-            </Link>
-          </div>
-
           {/* Center Logo */}
           <div className="flex justify-center flex-1 md:flex-initial">
             <Link href="/" className="flex flex-col items-center select-none text-center">
