@@ -1,31 +1,35 @@
 import Link from "next/link";
-import { getFeaturedProducts, getTopCategories } from "@/lib/catalog";
-import { ProductGrid } from "@/components/products/product-grid";
+import { getFeaturedProducts } from "@/lib/catalog";
 import { HeroBanner } from "@/components/layout/hero-banner";
-import { Button } from "@/components/ui/button";
-import { BRAND_NAME } from "@/lib/constants";
+import {
+  ShopByCategories,
+  ShopByPrice,
+  WhatsNew,
+  Bestsellers,
+} from "@/components/layout/homepage-sections";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([
-    getFeaturedProducts(),
-    getTopCategories(),
-  ]);
+  const products = await getFeaturedProducts(12);
 
   return (
     <>
       <HeroBanner />
 
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-        <div className="mb-10 flex items-end justify-between">
-          <h2 className="font-serif text-2xl text-foreground">Featured Products</h2>
-          <Link href="/shop/beddings" className="text-sm text-muted-foreground hover:text-foreground">
-            View all →
-          </Link>
-        </div>
-        <ProductGrid products={products} />
-      </section>
+      {/* 1. Shop By Categories */}
+      <ShopByCategories />
+
+      {/* 2. Shop By Price */}
+      <ShopByPrice />
+
+      {/* 3. What's New */}
+      <WhatsNew products={products} />
+
+      {/* 4. Bestsellers */}
+      <Bestsellers products={products} />
     </>
   );
 }
+
+

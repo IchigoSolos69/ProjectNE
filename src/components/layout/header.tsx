@@ -162,46 +162,60 @@ export function Header() {
               </AnimatePresence>
 
               {!searchExpanded && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchExpanded(true)}
-                  className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-                  aria-label="Search catalog"
-                >
-                  <Search className="h-5 w-5" />
-                </Button>
+                <motion.div whileHover={{ scale: 1.06, y: -1 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSearchExpanded(true)}
+                    className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                    aria-label="Search catalog"
+                  >
+                    <Search className="h-5 w-5" />
+                  </Button>
+                </motion.div>
               )}
             </div>
 
             {/* Wishlist */}
-            <Link href="/account/profile" className="relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-                aria-label="Wishlist"
-              >
-                <Heart className="h-5 w-5" />
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground shadow-sm transition-transform duration-300 hover:scale-110">
-                  0
-                </span>
-              </Button>
+            <Link href="/account/profile" className="relative font-sans">
+              <motion.div whileHover={{ scale: 1.06, y: -1 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                  aria-label="Wishlist"
+                >
+                  <Heart className="h-5 w-5" />
+                  <AnimatePresence mode="popLayout">
+                    <motion.span
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.6, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 450, damping: 14 }}
+                      className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground shadow-sm"
+                    >
+                      0
+                    </motion.span>
+                  </AnimatePresence>
+                </Button>
+              </motion.div>
             </Link>
 
             {/* Account Icon with Modal/Dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative font-sans" ref={dropdownRef}>
               {user ? (
                 <>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 text-primary hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    aria-label="Account menu"
-                  >
-                    <UserCheck className="h-5 w-5" />
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.06, y: -1 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 text-primary hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                      onClick={() => setShowDropdown(!showDropdown)}
+                      aria-label="Account menu"
+                    >
+                      <UserCheck className="h-5 w-5" />
+                    </Button>
+                  </motion.div>
 
                   <AnimatePresence>
                     {showDropdown && (
@@ -209,6 +223,7 @@ export function Header() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
+                        transition={{ type: "spring", stiffness: 260, damping: 20 }}
                         className="absolute right-0 mt-2.5 w-52 rounded-xl border border-border bg-card py-1.5 shadow-xl ring-1 ring-black/5 z-50 overflow-hidden"
                       >
                         <div className="px-4 py-2.5 border-b border-border/50 bg-muted/20">
@@ -249,33 +264,46 @@ export function Header() {
                 </>
               ) : (
                 <Link href="/login">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-                    aria-label="Sign in"
-                  >
-                    <User className="h-5 w-5" />
-                  </Button>
+                  <motion.div whileHover={{ scale: 1.06, y: -1 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                      aria-label="Sign in"
+                    >
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </motion.div>
                 </Link>
               )}
             </div>
 
             {/* Cart Icon */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-              onClick={openCart}
-              aria-label="Open cart"
-            >
-              <ShoppingBag className="h-5 w-5" />
-              {itemCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground shadow-sm transition-transform duration-300 hover:scale-110">
-                  {itemCount}
-                </span>
-              )}
-            </Button>
+            <motion.div whileHover={{ scale: 1.06, y: -1 }} whileTap={{ scale: 0.95 }} transition={{ type: "spring", stiffness: 400, damping: 15 }} className="relative font-sans">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-full transition-all duration-300"
+                onClick={openCart}
+                aria-label="Open cart"
+              >
+                <ShoppingBag className="h-5 w-5" />
+                {itemCount > 0 && (
+                  <AnimatePresence mode="popLayout">
+                    <motion.span
+                      key={itemCount}
+                      initial={{ scale: 0.6, opacity: 0 }}
+                      animate={{ scale: [0.6, 1.25, 1], opacity: 1 }}
+                      exit={{ scale: 0.6, opacity: 0 }}
+                      transition={{ type: "spring", stiffness: 450, damping: 14 }}
+                      className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[9px] font-bold text-primary-foreground shadow-sm"
+                    >
+                      {itemCount}
+                    </motion.span>
+                  </AnimatePresence>
+                )}
+              </Button>
+            </motion.div>
           </div>
         </div>
 
@@ -327,19 +355,37 @@ export function Header() {
       <AnimatePresence>
         {activeDropdown === "categories" && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute left-0 right-0 top-full bg-card/95 backdrop-blur-md border-b border-border shadow-lg z-30"
             onMouseEnter={() => setActiveDropdown("categories")}
             onMouseLeave={() => setActiveDropdown(null)}
           >
-            <div className="mx-auto max-w-7xl px-8 py-10 grid grid-cols-3 gap-8">
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.04 }
+                }
+              }}
+              className="mx-auto max-w-7xl px-8 py-10 grid grid-cols-3 gap-8"
+            >
               {parentCats.map((parent) => {
                 const subCats = activeCategories.filter((c) => c.parent_id === parent.id);
                 return (
-                  <div key={parent.id} className="flex flex-col gap-3">
+                  <motion.div
+                    key={parent.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 8 },
+                      visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }
+                    }}
+                    className="flex flex-col gap-3"
+                  >
                     <Link
                       href={`/shop/${parent.slug}`}
                       className="font-serif text-lg font-bold text-foreground hover:text-primary transition-colors border-b border-border pb-2"
@@ -366,51 +412,83 @@ export function Header() {
                         Shop All {parent.name} →
                       </Link>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           </motion.div>
         )}
 
         {activeDropdown === "price" && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="absolute left-0 right-0 top-full bg-card/95 backdrop-blur-md border-b border-border shadow-lg z-30"
             onMouseEnter={() => setActiveDropdown("price")}
             onMouseLeave={() => setActiveDropdown(null)}
           >
             <div className="mx-auto max-w-2xl px-8 py-8 flex flex-col items-center gap-4 text-center">
               <div className="text-xs font-semibold text-muted-foreground tracking-wider uppercase">Select a Range</div>
-              <div className="grid grid-cols-3 gap-4 w-full">
-                <Link
-                  href="/shop/beddings?price=under-1500"
-                  className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
-                  onClick={() => setActiveDropdown(null)}
+              <motion.div 
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.05 }
+                  }
+                }}
+                className="grid grid-cols-3 gap-4 w-full"
+              >
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 8 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }
+                  }}
                 >
-                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Under</span>
-                  <span className="text-lg font-serif font-bold text-foreground mt-1">₹1,500</span>
-                </Link>
-                <Link
-                  href="/shop/beddings?price=1500-3000"
-                  className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
-                  onClick={() => setActiveDropdown(null)}
+                  <Link
+                    href="/shop/beddings?price=under-1500"
+                    className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
+                    onClick={() => setActiveDropdown(null)}
+                  >
+                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Under</span>
+                    <span className="text-lg font-serif font-bold text-foreground mt-1">₹1,500</span>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 8 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }
+                  }}
                 >
-                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Range</span>
-                  <span className="text-base font-serif font-bold text-foreground mt-1">₹1,500 - ₹3,000</span>
-                </Link>
-                <Link
-                  href="/shop/beddings?price=over-3000"
-                  className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
-                  onClick={() => setActiveDropdown(null)}
+                  <Link
+                    href="/shop/beddings?price=1500-3000"
+                    className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
+                    onClick={() => setActiveDropdown(null)}
+                  >
+                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Range</span>
+                    <span className="text-base font-serif font-bold text-foreground mt-1">₹1,500 - ₹3,000</span>
+                  </Link>
+                </motion.div>
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, y: 8 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] } }
+                  }}
                 >
-                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Over</span>
-                  <span className="text-lg font-serif font-bold text-foreground mt-1">₹3,000</span>
-                </Link>
-              </div>
+                  <Link
+                    href="/shop/beddings?price=over-3000"
+                    className="flex flex-col items-center justify-center p-5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/50 hover:border-primary transition-all duration-300 group"
+                    onClick={() => setActiveDropdown(null)}
+                  >
+                    <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors font-semibold uppercase tracking-wider">Over</span>
+                    <span className="text-lg font-serif font-bold text-foreground mt-1">₹3,000</span>
+                  </Link>
+                </motion.div>
+              </motion.div>
             </div>
           </motion.div>
         )}

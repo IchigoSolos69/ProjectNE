@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Slide {
   image: string;
@@ -73,9 +74,8 @@ export function HeroBanner() {
           {SLIDES.map((slide, idx) => (
             <div
               key={idx}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                idx === current ? "z-10 opacity-100" : "z-0 opacity-0"
-              }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === current ? "z-10 opacity-100" : "z-0 opacity-0"
+                }`}
             >
               <Image
                 src={slide.image}
@@ -109,34 +109,51 @@ export function HeroBanner() {
           <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-nest-cream/5 blur-3xl" />
 
           <div className="flex select-none flex-col items-center">
-            <div className="mb-3 border border-primary-foreground/30 bg-white/5 px-4 py-1 text-[10px] font-medium uppercase tracking-[0.3em] text-primary-foreground/90 backdrop-blur-sm">
-              ne
+            <div className="relative mb-4 h-16 w-16 overflow-hidden rounded-xl border border-white/10 bg-[#f7f5f0] shadow-md transition-all duration-300 hover:scale-105">
+              <Image
+                src="/images/logo.png"
+                alt="Nestify Essentials Logo"
+                fill
+                className="object-contain p-1"
+                priority
+              />
             </div>
             <div className="text-[13px] font-bold uppercase tracking-[0.25em] text-primary-foreground/80">
               nestify <span className="text-nest-cream">ESSENTIALS</span>
             </div>
             <span className="mt-1 block text-[8px] font-semibold uppercase tracking-[0.2em] text-nest-cream">
-              my heart for home
+              style your space...
             </span>
           </div>
 
-          <div className="my-auto max-w-md py-6 sm:py-8">
-            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-nest-sage">
-              {SLIDES[current].subtitle}
-            </span>
-            <h2 className="mb-4 font-serif text-3xl leading-tight tracking-wide text-primary-foreground transition-all duration-500 sm:text-4xl lg:text-5xl">
-              {SLIDES[current].title}
-            </h2>
-            <p className="mx-auto mb-8 max-w-sm text-sm font-light leading-relaxed text-primary-foreground/75">
-              {SLIDES[current].description}
-            </p>
+          <div className="my-auto max-w-md py-6 sm:py-8 overflow-hidden w-full min-h-[280px] flex items-center justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={current}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="flex flex-col items-center"
+              >
+                <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-nest-sage">
+                  {SLIDES[current].subtitle}
+                </span>
+                <h2 className="mb-4 font-serif text-3xl leading-tight tracking-wide text-primary-foreground sm:text-4xl lg:text-5xl">
+                  {SLIDES[current].title}
+                </h2>
+                <p className="mx-auto mb-8 max-w-sm text-sm font-light leading-relaxed text-primary-foreground/75">
+                  {SLIDES[current].description}
+                </p>
 
-            <Link
-              href={SLIDES[current].href}
-              className="bg-nest-sage px-10 py-4 text-xs font-bold uppercase tracking-[0.25em] text-nest-brown-dark shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-nest-sage/90 hover:shadow-xl active:translate-y-0"
-            >
-              SHOP NOW
-            </Link>
+                <Link
+                  href={SLIDES[current].href}
+                  className="bg-nest-sage px-10 py-4 text-xs font-bold uppercase tracking-[0.25em] text-nest-brown-dark shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-nest-sage/90 hover:shadow-xl active:translate-y-0"
+                >
+                  SHOP NOW
+                </Link>
+              </motion.div>
+            </AnimatePresence>
           </div>
 
           <div className="mt-auto flex select-none items-center gap-2.5 pt-4">
@@ -144,11 +161,10 @@ export function HeroBanner() {
               <button
                 key={idx}
                 onClick={() => setCurrent(idx)}
-                className={`h-2.5 cursor-pointer rounded-full transition-all duration-300 ${
-                  idx === current
+                className={`h-2.5 cursor-pointer rounded-full transition-all duration-300 ${idx === current
                     ? "w-7 bg-primary-foreground"
                     : "w-2.5 bg-primary-foreground/30 hover:bg-primary-foreground/65"
-                }`}
+                  }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             ))}

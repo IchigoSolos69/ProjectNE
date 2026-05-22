@@ -48,6 +48,12 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   if (sParams.price) {
     if (sParams.price === "under-1500") {
       products = products.filter((p) => p.price_paise < 150000);
+    } else if (sParams.price === "under-3000") {
+      products = products.filter((p) => p.price_paise < 300000);
+    } else if (sParams.price === "under-5000") {
+      products = products.filter((p) => p.price_paise < 500000);
+    } else if (sParams.price === "over-5000") {
+      products = products.filter((p) => p.price_paise >= 500000);
     } else if (sParams.price === "1500-3000") {
       products = products.filter((p) => p.price_paise >= 150000 && p.price_paise <= 300000);
     } else if (sParams.price === "over-3000") {
