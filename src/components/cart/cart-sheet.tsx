@@ -42,13 +42,13 @@ export function CartSheet() {
                   </p>
                 ) : (
                   <p className="mt-2 text-sm text-stone-500">
-                    <Link
-                      href="/login"
+                    <a
+                      href="https://nestifyessentials.pages.dev/login"
                       onClick={closeCart}
                       className="text-[#007A78] hover:underline font-semibold cursor-pointer text-left bg-transparent border-none p-0 inline-flex items-center"
                     >
                       Sign in
-                    </Link>{" "}
+                    </a>{" "}
                     to see if you have any saved items
                   </p>
                 )}
@@ -101,14 +101,14 @@ export function CartSheet() {
                           <span>Sign out</span>
                         </button>
                       ) : (
-                        <Link
-                          href="/login"
+                        <a
+                          href="https://nestifyessentials.pages.dev/login"
                           onClick={closeCart}
                           className="w-full flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors text-left"
                         >
                           <User className="h-4 w-4 text-stone-500" />
                           <span>Sign in</span>
-                        </Link>
+                        </a>
                       )}
                     </li>
                   </ul>

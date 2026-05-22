@@ -184,7 +184,7 @@ export function Header() {
                   )}
                 </>
               ) : (
-                <Link href="/login">
+                <a href="https://nestifyessentials.pages.dev/login">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -193,7 +193,7 @@ export function Header() {
                   >
                     <User className="h-5 w-5" />
                   </Button>
-                </Link>
+                </a>
               )}
             </div>
 

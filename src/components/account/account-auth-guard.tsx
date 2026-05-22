@@ -16,9 +16,9 @@ export function AccountAuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (mounted && !user) {
-      router.push("/login");
+      window.location.href = "https://nestifyessentials.pages.dev/login";
     }
-  }, [mounted, user, router]);
+  }, [mounted, user]);
 
   if (!mounted || !user) {
     return (

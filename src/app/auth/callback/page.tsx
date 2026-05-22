@@ -55,7 +55,9 @@ function AuthCallbackHandler() {
         <p className="text-sm text-red-600">{error}</p>
         <button
           type="button"
-          onClick={() => router.replace("/login")}
+          onClick={() => {
+            window.location.href = "https://nestifyessentials.pages.dev/login";
+          }}
           className="mt-4 text-sm font-medium text-[#007A78] underline"
         >
           Back to login
