@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,32 +10,71 @@ import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { formatINR } from "@/lib/utils";
 import { getShippingRatesAction } from "@/actions/shipping";
 import { createRazorpayOrderAction } from "@/actions/create-razorpay-order";
-import type { ShippingAddress } from "@/types/database";
+import type { ShippingAddress, CheckoutPayload } from "@/types/database";
 
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => {
-      open: () => void;
-    };
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
   }
 }
 
-function loadRazorpayScript(): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (typeof window === "undefined") {
-      resolve(false);
-      return;
-    }
-    if (window.Razorpay) {
-      resolve(true);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
+function PaymentSuccessModal({
+  isOpen,
+  amount,
+  orderId,
+  onConfirm,
+}: {
+  isOpen: boolean;
+  amount: number;
+  orderId: string;
+  onConfirm: () => void;
+}) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 bg-black/50"
+            onClick={onConfirm}
+          />
+
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+                  <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-stone-900">Payment Successful!</h2>
+                <p className="text-sm text-stone-600">Your order has been confirmed.</p>
+
+                <div className="w-full space-y-2 rounded-lg bg-stone-50 p-4 text-center">
+                  <div className="text-sm text-stone-600">Amount Paid</div>
+                  <div className="text-2xl font-bold text-stone-900">{formatINR(amount)}</div>
+                  <div className="mt-2 text-sm text-stone-600">Order ID</div>
+                  <div className="font-mono text-sm text-stone-900">{orderId}</div>
+                </div>
+
+                <Button onClick={onConfirm} className="w-full" size="lg">
+                  Go to Order Details
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
 }
 
 export function CheckoutForm() {
@@ -46,6 +86,8 @@ export function CheckoutForm() {
   const [shippingPaise, setShippingPaise] = useState(0);
   const [serviceable, setServiceable] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successOrderId, setSuccessOrderId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const [form, setForm] = useState({
@@ -72,7 +114,7 @@ export function CheckoutForm() {
 
   const totalPaise = subtotalPaise + shippingPaise;
 
-  function handleCheckout() {
+  async function handleCheckout() {
     setError(null);
 
     if (!items.length) {
@@ -85,197 +127,172 @@ export function CheckoutForm() {
       return;
     }
 
-    const shippingAddress: ShippingAddress = {
-      name: form.name,
-      line1: form.line1,
-      line2: form.line2 || undefined,
-      city: form.city,
-      state: form.state,
+    const payload: CheckoutPayload = {
+      items,
+      shippingAddress: {
+        name: form.name,
+        line1: form.line1,
+        line2: form.line2 || undefined,
+        city: form.city,
+        state: form.state,
+        pincode: form.pincode,
+      },
+      customerEmail: form.email,
+      customerPhone: form.phone,
       pincode: form.pincode,
-      country: "India",
+      shippingPaise,
     };
 
     startTransition(async () => {
-      const result = await createRazorpayOrderAction({
-        items,
-        shippingAddress,
-        customerEmail: form.email,
-        customerPhone: form.phone,
-        pincode: form.pincode,
-        shippingPaise,
-      });
-
-      if (!result.success || !result.razorpayOrderId || !result.keyId) {
-        setError(result.error ?? "Could not start checkout");
+      const res = await createRazorpayOrderAction(payload as any);
+      if (!res.success) {
+        setError(res.error || "Order creation failed");
         return;
       }
 
-      const loaded = await loadRazorpayScript();
-      if (!loaded || !window.Razorpay) {
-        setError("Payment SDK failed to load");
-        return;
-      }
-
-      const rzp = new window.Razorpay({
-        key: result.keyId,
-        amount: result.amountPaise,
-        currency: "INR",
-        name: "Atelier Home",
-        description: "Order payment",
-        order_id: result.razorpayOrderId,
-        prefill: {
-          name: form.name,
-          email: form.email,
-          contact: form.phone,
-        },
-        theme: { color: "#1c1917" },
-        handler: () => {
-          clearCart();
-          router.push(`/order/success?order=${result.orderId}`);
-        },
-        modal: {
-          ondismiss: () => setError("Payment cancelled"),
-        },
-      });
-
-      rzp.open();
+      setSuccessOrderId(res.orderId ?? null);
+      setShowSuccessModal(true);
     });
   }
 
-  if (!items.length) {
-    return (
-      <p className="text-stone-500">Add items to your cart before checking out.</p>
-    );
+  function handleConfirmSuccess() {
+    setShowSuccessModal(false);
+    clearCart();
+    const oid = successOrderId ?? "MOCK_ORDER_123456";
+    router.push(`/order/success?order=${encodeURIComponent(oid)}`);
   }
 
   return (
-    <div className="grid gap-12 lg:grid-cols-2">
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleCheckout();
-        }}
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="name">Full name</Label>
-            <Input
-              id="name"
-              required
-              value={form.name}
-              onChange={(e) => handleChange("name", e.target.value)}
-            />
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 gap-3">
+        <div>
+          <Label>Name</Label>
+          <Input value={form.name} onChange={(e) => handleChange("name", e.target.value)} />
+        </div>
+
+        <div>
+          <Label>Email</Label>
+          <Input value={form.email} onChange={(e) => handleChange("email", e.target.value)} />
+        </div>
+
+        <div>
+          <Label>Phone</Label>
+          <Input value={form.phone} onChange={(e) => handleChange("phone", e.target.value)} />
+        </div>
+
+        <div>
+          <Label>Address Line 1</Label>
+          <Input value={form.line1} onChange={(e) => handleChange("line1", e.target.value)} />
+        </div>
+
+        <div>
+          <Label>Address Line 2</Label>
+          <Input value={form.line2} onChange={(e) => handleChange("line2", e.target.value)} />
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <Label>City</Label>
+            <Input value={form.city} onChange={(e) => handleChange("city", e.target.value)} />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={form.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              required
-              value={form.phone}
-              onChange={(e) => handleChange("phone", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="line1">Address</Label>
-            <Input
-              id="line1"
-              required
-              value={form.line1}
-              onChange={(e) => handleChange("line1", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="line2">Apartment, suite (optional)</Label>
-            <Input
-              id="line2"
-              value={form.line2}
-              onChange={(e) => handleChange("line2", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="city">City</Label>
-            <Input
-              id="city"
-              required
-              value={form.city}
-              onChange={(e) => handleChange("city", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="state">State</Label>
-            <Input
-              id="state"
-              required
-              value={form.state}
-              onChange={(e) => handleChange("state", e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="pincode">Pincode</Label>
-            <Input
-              id="pincode"
-              required
-              maxLength={6}
-              value={form.pincode}
-              onChange={(e) => handleChange("pincode", e.target.value)}
-              onBlur={handlePincodeBlur}
-            />
-            {serviceable === false && (
-              <p className="text-sm text-red-600">Not serviceable</p>
-            )}
-            {serviceable && shippingPaise > 0 && (
-              <p className="text-sm text-stone-500">
-                Shipping: {formatINR(shippingPaise)}
-              </p>
-            )}
+          <div>
+            <Label>State</Label>
+            <Input value={form.state} onChange={(e) => handleChange("state", e.target.value)} />
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        <div>
+          <Label>Pincode</Label>
+          <Input value={form.pincode} onBlur={handlePincodeBlur} onChange={(e) => handleChange("pincode", e.target.value)} />
+          {serviceable === false && <div className="text-sm text-red-600">Delivery not available to this pincode.</div>}
+        </div>
+      </div>
 
-        <Button type="submit" size="lg" disabled={isPending} className="w-full sm:w-auto">
-          {isPending ? "Processing…" : `Pay ${formatINR(totalPaise)}`}
+      <div className="pt-4">
+        <div className="mb-2 text-sm text-stone-600">Subtotal: {formatINR(subtotalPaise)}</div>
+        <div className="mb-2 text-sm text-stone-600">Shipping: {formatINR(shippingPaise)}</div>
+        <div className="mb-4 text-lg font-semibold">Total: {formatINR(totalPaise)}</div>
+
+        {error && <div className="mb-2 text-sm text-red-600">{error}</div>}
+
+        <Button onClick={() => handleCheckout()} disabled={isPending} className="w-full">
+          Pay {formatINR(totalPaise)}
         </Button>
-      </form>
+      </div>
 
-      <aside className="rounded-lg border border-stone-200 bg-stone-50 p-6">
-        <h2 className="font-medium text-stone-900">Order summary</h2>
-        <ul className="mt-4 space-y-3">
-          {items.map((item) => (
-            <li key={item.productId} className="flex justify-between text-sm">
-              <span className="text-stone-600">
-                {item.name} × {item.quantity}
-              </span>
-              <span>{formatINR(item.pricePaise * item.quantity)}</span>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-6 space-y-2 border-t border-stone-200 pt-4 text-sm">
-          <div className="flex justify-between">
-            <span className="text-stone-600">Subtotal</span>
-            <span>{formatINR(subtotalPaise)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-stone-600">Shipping</span>
-            <span>{shippingPaise ? formatINR(shippingPaise) : "—"}</span>
-          </div>
-          <div className="flex justify-between font-medium text-stone-900">
-            <span>Total</span>
-            <span>{formatINR(totalPaise)}</span>
-          </div>
-        </div>
-      </aside>
+      <PaymentSuccessModal isOpen={showSuccessModal} amount={totalPaise} orderId={successOrderId ?? "MOCK_ORDER_123456"} onConfirm={handleConfirmSuccess} />
     </div>
   );
 }
+
+                        import { useState, useTransition } from "react";
+                        import { useRouter } from "next/navigation";
+                        import { motion, AnimatePresence } from "framer-motion";
+                        import { Button } from "@/components/ui/button";
+                        import { Input } from "@/components/ui/input";
+                        import { Label } from "@/components/ui/label";
+                        import { useCartStore, useCartTotals } from "@/stores/cart-store";
+                        import { formatINR } from "@/lib/utils";
+                        import { getShippingRatesAction } from "@/actions/shipping";
+                        import { createRazorpayOrderAction } from "@/actions/create-razorpay-order";
+                        import type { ShippingAddress } from "@/types/database";
+
+                        function PaymentSuccessModal({
+                          isOpen,
+                          amount,
+                          orderId,
+                          onConfirm,
+                        }: {
+                          isOpen: boolean;
+                          amount: number;
+                          orderId: string;
+                          onConfirm: () => void;
+                        }) {
+                          return (
+                            <AnimatePresence>
+                              {isOpen && (
+                                <>
+                                  <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="fixed inset-0 z-40 bg-black/50"
+                                    onClick={onConfirm}
+                                  />
+
+                                  <motion.div
+                                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                                    animate={{ scale: 1, opacity: 1, y: 0 }}
+                                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                                  >
+                                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                                      <div className="flex flex-col items-center gap-4">
+                                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+                                          <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                          </svg>
+                                        </div>
+                                        <h2 className="text-2xl font-bold text-stone-900">Payment Successful!</h2>
+                                        <p className="text-sm text-stone-600">Your order has been confirmed.</p>
+
+                                        <div className="w-full space-y-2 rounded-lg bg-stone-50 p-4 text-center">
+                                          <div className="text-sm text-stone-600">Amount Paid</div>
+                                          <div className="text-2xl font-bold text-stone-900">{formatINR(amount)}</div>
+                                          <div className="mt-2 text-sm text-stone-600">Order ID</div>
+                                          <div className="font-mono text-sm text-stone-900">{orderId}</div>
+                                        </div>
+
+                                        <Button onClick={onConfirm} className="w-full" size="lg">
+                                          Go to Order Details
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                </>
+                              )}
+                            </AnimatePresence>
+                          );
+                        }
+                                  value={form.phone}
