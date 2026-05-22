@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/catalog";
 import { formatINR } from "@/lib/utils";
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
+import { ProductFaqSection } from "@/components/faq/product-faq-section";
 import { getStaticProductParams } from "@/lib/mock-data";
 
 interface PageProps {
@@ -69,6 +70,8 @@ export default async function ProductPage({ params }: PageProps) {
           )}
         </div>
       </div>
+
+      <ProductFaqSection />
     </div>
   );
 }

@@ -27,6 +27,18 @@ export function Header() {
               {cat.label}
             </Link>
           ))}
+          <Link
+            href="/faq"
+            className="text-sm text-stone-600 transition-colors hover:text-stone-900"
+          >
+            FAQ
+          </Link>
+          <Link
+            href="/account/profile"
+            className="text-sm text-stone-600 transition-colors hover:text-stone-900"
+          >
+            Account
+          </Link>
         </nav>
 
         <Button

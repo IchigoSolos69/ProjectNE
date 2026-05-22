@@ -1,7 +1,7 @@
-
 "use server";
 
 import type { CheckoutPayload } from "@/types/database";
+import { createOrder } from "@/lib/db";
 
 export interface CreateOrderResult {
   success: boolean;
@@ -26,7 +26,7 @@ export async function createRazorpayOrderAction(
     );
     const totalPaise = subtotalPaise + payload.shippingPaise;
 
-    // Mock order creation - generate a mock order ID
+    // Generate standard order IDs
     const mockOrderId = `MOCK_ORDER_${Date.now()}_${Math.random()
       .toString(36)
       .substring(7)
@@ -34,6 +34,23 @@ export async function createRazorpayOrderAction(
     const mockRazorpayOrderId = `pay_mock_${Math.random().toString(36).substring(7).toUpperCase()}`;
     const keyId =
       process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || "rzp_test_mock_key_id";
+
+    // Save order in local file database
+    await createOrder({
+      id: mockOrderId,
+      user_id: null,
+      status: "pending",
+      razorpay_order_id: mockRazorpayOrderId,
+      razorpay_payment_id: null,
+      delhivery_waybill: null,
+      subtotal_paise: subtotalPaise,
+      shipping_paise: payload.shippingPaise,
+      total_paise: totalPaise,
+      shipping_address: payload.shippingAddress,
+      customer_email: payload.customerEmail,
+      customer_phone: payload.customerPhone,
+      customer_pincode: payload.pincode,
+    });
 
     return {
       success: true,
