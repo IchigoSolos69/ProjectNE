@@ -31,6 +31,8 @@ create table public.categories (
 
 create index categories_parent_id_idx on public.categories (parent_id);
 create index categories_slug_idx on public.categories (slug);
+create index categories_parent_id_sort_order_idx on public.categories (parent_id, sort_order);
+create index categories_sort_order_null_parent_idx on public.categories (sort_order) where parent_id is null;
 
 -- ---------------------------------------------------------------------------
 -- Products
@@ -49,12 +51,23 @@ create table public.products (
   is_active boolean not null default true,
   metadata jsonb not null default '{}',
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  search_vector tsvector generated always as (
+    setweight(to_tsvector('english', name), 'A') ||
+    setweight(to_tsvector('english', coalesce(description, '')), 'B')
+  ) stored
 );
 
 create index products_category_id_idx on public.products (category_id);
 create index products_slug_idx on public.products (slug);
 create index products_is_active_idx on public.products (is_active) where is_active = true;
+create index products_category_id_active_idx on public.products (category_id) where is_active = true;
+create index products_category_price_asc_idx on public.products (category_id, price_paise asc) where is_active = true;
+create index products_category_price_desc_idx on public.products (category_id, price_paise desc) where is_active = true;
+create index products_category_created_at_desc_idx on public.products (category_id, created_at desc) where is_active = true;
+create index products_price_paise_idx on public.products (price_paise);
+create index products_created_at_desc_idx on public.products (created_at desc);
+create index products_search_vector_idx on public.products using gin (search_vector);
 
 -- ---------------------------------------------------------------------------
 -- User profiles (extends auth.users)
@@ -68,6 +81,10 @@ create table public.profiles (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create unique index profiles_email_unique_idx on public.profiles (email) where email is not null;
+create index profiles_phone_idx on public.profiles (phone) where phone is not null;
+create index profiles_created_at_desc_idx on public.profiles (created_at desc);
 
 -- ---------------------------------------------------------------------------
 -- Orders & line items
@@ -93,6 +110,9 @@ create table public.orders (
 create index orders_user_id_idx on public.orders (user_id);
 create index orders_status_idx on public.orders (status);
 create index orders_razorpay_order_id_idx on public.orders (razorpay_order_id);
+create index orders_user_id_created_at_desc_idx on public.orders (user_id, created_at desc);
+create index orders_created_at_desc_idx on public.orders (created_at desc);
+create index orders_delhivery_waybill_idx on public.orders (delhivery_waybill) where delhivery_waybill is not null;
 
 create table public.order_items (
   id uuid primary key default gen_random_uuid(),
@@ -105,6 +125,7 @@ create table public.order_items (
 );
 
 create index order_items_order_id_idx on public.order_items (order_id);
+create index order_items_product_id_idx on public.order_items (product_id);
 
 -- ---------------------------------------------------------------------------
 -- Triggers
@@ -139,11 +160,12 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name)
+  insert into public.profiles (id, email, full_name, phone)
   values (
     new.id,
     new.email,
-    coalesce(new.raw_user_meta_data ->> 'full_name', '')
+    coalesce(new.raw_user_meta_data ->> 'full_name', ''),
+    new.phone
   );
   return new;
 end;
@@ -206,6 +228,99 @@ create policy "Users can insert items for own orders"
       where o.id = order_id and (o.user_id = auth.uid() or o.user_id is null)
     )
   );
+
+-- ---------------------------------------------------------------------------
+-- Inventory Helper Functions
+-- ---------------------------------------------------------------------------
+-- Safe atomic single-product inventory decrement function
+create or replace function public.decrement_product_inventory(
+  p_product_id uuid,
+  p_quantity int
+)
+returns boolean
+language plpgsql
+security definer
+as $$
+begin
+  update public.products
+  set inventory = inventory - p_quantity
+  where id = p_product_id and inventory >= p_quantity;
+  
+  return found;
+end;
+$$;
+
+-- Safe atomic multi-product inventory decrement function to prevent overselling and deadlocks
+create or replace function public.decrement_products_inventory(
+  p_items jsonb
+)
+returns jsonb
+language plpgsql
+security definer
+as $$
+declare
+  r record;
+  missing_product_id uuid;
+  insufficient_items jsonb := '[]'::jsonb;
+begin
+  -- 1. Check if all products exist first
+  select (value->>'product_id')::uuid into missing_product_id
+  from jsonb_array_elements(p_items)
+  where (value->>'product_id')::uuid not in (select id from public.products);
+  
+  if missing_product_id is not null then
+    return jsonb_build_object(
+      'success', false,
+      'error', 'Product not found: ' || missing_product_id::text,
+      'code', 'PRODUCT_NOT_FOUND',
+      'product_id', missing_product_id
+    );
+  end if;
+
+  -- 2. Lock rows in alphabetical order of UUID to prevent deadlocks and check stock
+  for r in 
+    with parsed_items as (
+      select (value->>'product_id')::uuid as product_id, (value->>'quantity')::int as quantity
+      from jsonb_array_elements(p_items)
+    )
+    select p.id, p.name, p.inventory, i.quantity
+    from parsed_items i
+    join public.products p on p.id = i.product_id
+    order by p.id
+    for update
+  loop
+    if r.inventory < r.quantity then
+      insufficient_items := insufficient_items || jsonb_build_object(
+        'product_id', r.id,
+        'name', r.name,
+        'requested', r.quantity,
+        'available', r.inventory
+      );
+    end if;
+  end loop;
+
+  -- 3. If any item has insufficient inventory, abort and return detail
+  if jsonb_array_length(insufficient_items) > 0 then
+    return jsonb_build_object(
+      'success', false,
+      'error', 'Insufficient inventory for some items',
+      'code', 'INSUFFICIENT_INVENTORY',
+      'items', insufficient_items
+    );
+  end if;
+
+  -- 4. Perform the decrement since all items are verified
+  update public.products p
+  set inventory = p.inventory - (i.quantity)
+  from (
+    select (value->>'product_id')::uuid as product_id, (value->>'quantity')::int as quantity
+    from jsonb_array_elements(p_items)
+  ) i
+  where p.id = i.product_id;
+
+  return jsonb_build_object('success', true);
+end;
+$$;
 
 -- ---------------------------------------------------------------------------
 -- Seed: category tree
