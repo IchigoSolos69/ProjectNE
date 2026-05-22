@@ -38,11 +38,12 @@ export async function getProductsByCategorySlug(
   if (!parent) return [];
 
   const subs = getSubcategoriesForParent(parent.id);
-  const ids = subs.map((s) => s.id);
 
-  if (ids.length === 0) return [];
+  if (subs.length === 0) {
+    return getProductsByCategoryId(parent.id);
+  }
 
-  return ids.flatMap((id) => getProductsByCategoryId(id));
+  return subs.flatMap((sub) => getProductsByCategoryId(sub.id));
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {

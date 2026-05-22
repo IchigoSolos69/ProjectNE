@@ -144,7 +144,7 @@ export function CheckoutForm() {
     };
 
     startTransition(async () => {
-      const res = await createRazorpayOrderAction(payload as any);
+      const res = await createRazorpayOrderAction(payload);
       if (!res.success) {
         setError(res.error || "Order creation failed");
         return;
@@ -220,79 +220,12 @@ export function CheckoutForm() {
         </Button>
       </div>
 
-      <PaymentSuccessModal isOpen={showSuccessModal} amount={totalPaise} orderId={successOrderId ?? "MOCK_ORDER_123456"} onConfirm={handleConfirmSuccess} />
+      <PaymentSuccessModal
+        isOpen={showSuccessModal}
+        amount={totalPaise}
+        orderId={successOrderId ?? "MOCK_ORDER_123456"}
+        onConfirm={handleConfirmSuccess}
+      />
     </div>
   );
 }
-
-                        import { useState, useTransition } from "react";
-                        import { useRouter } from "next/navigation";
-                        import { motion, AnimatePresence } from "framer-motion";
-                        import { Button } from "@/components/ui/button";
-                        import { Input } from "@/components/ui/input";
-                        import { Label } from "@/components/ui/label";
-                        import { useCartStore, useCartTotals } from "@/stores/cart-store";
-                        import { formatINR } from "@/lib/utils";
-                        import { getShippingRatesAction } from "@/actions/shipping";
-                        import { createRazorpayOrderAction } from "@/actions/create-razorpay-order";
-                        import type { ShippingAddress } from "@/types/database";
-
-                        function PaymentSuccessModal({
-                          isOpen,
-                          amount,
-                          orderId,
-                          onConfirm,
-                        }: {
-                          isOpen: boolean;
-                          amount: number;
-                          orderId: string;
-                          onConfirm: () => void;
-                        }) {
-                          return (
-                            <AnimatePresence>
-                              {isOpen && (
-                                <>
-                                  <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="fixed inset-0 z-40 bg-black/50"
-                                    onClick={onConfirm}
-                                  />
-
-                                  <motion.div
-                                    initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                                    exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
-                                  >
-                                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-                                      <div className="flex flex-col items-center gap-4">
-                                        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-                                          <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                          </svg>
-                                        </div>
-                                        <h2 className="text-2xl font-bold text-stone-900">Payment Successful!</h2>
-                                        <p className="text-sm text-stone-600">Your order has been confirmed.</p>
-
-                                        <div className="w-full space-y-2 rounded-lg bg-stone-50 p-4 text-center">
-                                          <div className="text-sm text-stone-600">Amount Paid</div>
-                                          <div className="text-2xl font-bold text-stone-900">{formatINR(amount)}</div>
-                                          <div className="mt-2 text-sm text-stone-600">Order ID</div>
-                                          <div className="font-mono text-sm text-stone-900">{orderId}</div>
-                                        </div>
-
-                                        <Button onClick={onConfirm} className="w-full" size="lg">
-                                          Go to Order Details
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </motion.div>
-                                </>
-                              )}
-                            </AnimatePresence>
-                          );
-                        }
-                                  value={form.phone}
