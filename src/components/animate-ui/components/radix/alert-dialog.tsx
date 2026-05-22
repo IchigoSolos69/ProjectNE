@@ -54,7 +54,7 @@ const AlertDialogContent = React.forwardRef<
           initial={motionProps.initial}
           animate={motionProps.animate}
           transition={dialogSpring}
-          className="grid gap-4 border border-stone-200 bg-white p-6 shadow-lg sm:rounded-lg"
+          className="grid gap-4 border border-border bg-card p-6 shadow-lg sm:rounded-lg"
         >
           {children}
         </motion.div>
@@ -93,7 +93,7 @@ const AlertDialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-semibold text-stone-900", className)}
+    className={cn("text-lg font-semibold text-foreground", className)}
     {...props}
   />
 ));
@@ -105,7 +105,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-stone-600", className)}
+    className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ));

@@ -46,10 +46,10 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
   };
 
   return (
-    <div className="w-full max-w-md overflow-hidden rounded-2xl border border-stone-200/80 bg-white/70 p-8 shadow-xl backdrop-blur-md">
+    <div className="w-full max-w-md overflow-hidden rounded-2xl border border-border/80 bg-white/70 p-8 shadow-xl backdrop-blur-md">
       <div className="text-center">
-        <h3 className="font-serif text-2xl text-stone-900">Welcome to Nestify</h3>
-        <p className="mt-2 text-sm text-stone-600">
+        <h3 className="font-serif text-2xl text-foreground">Welcome to Nestify</h3>
+        <p className="mt-2 text-sm text-muted-foreground">
           Sign in to track orders, manage your profile, and curate your wishlist.
         </p>
       </div>
@@ -60,10 +60,10 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
           onClick={handleGoogleLogin}
           disabled={loadingType !== null}
           variant="outline"
-          className="relative flex w-full items-center justify-center gap-3 border-stone-200/80 bg-white py-6 hover:bg-stone-50 hover:text-stone-900 active:bg-stone-100 transition-colors"
+          className="relative flex w-full items-center justify-center gap-3 border-border/80 bg-card py-6 hover:bg-muted hover:text-foreground active:bg-muted transition-colors"
         >
           {loadingType === "google" ? (
-            <Loader2 className="h-5 w-5 animate-spin text-stone-500" />
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           ) : (
             <svg className="h-5 w-5" viewBox="0 0 24 24" width="24" height="24">
               <path
@@ -88,9 +88,9 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
         </Button>
 
         <div className="relative flex items-center py-3">
-          <div className="flex-grow border-t border-stone-200/80"></div>
-          <span className="mx-4 flex-shrink text-xs uppercase tracking-wider text-stone-400">or</span>
-          <div className="flex-grow border-t border-stone-200/80"></div>
+          <div className="flex-grow border-t border-border/80"></div>
+          <span className="mx-4 flex-shrink text-xs uppercase tracking-wider text-muted-foreground/80">or</span>
+          <div className="flex-grow border-t border-border/80"></div>
         </div>
 
         {/* Email Login/Signup Option */}
@@ -105,7 +105,7 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
               <Button
                 onClick={() => setShowEmailForm(true)}
                 variant="ghost"
-                className="w-full text-stone-600 hover:bg-stone-50 hover:text-stone-900"
+                className="w-full text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Create account with email
               </Button>
@@ -120,7 +120,7 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
               className="space-y-4"
             >
               <div className="space-y-1">
-                <Label htmlFor="auth-name" className="text-stone-700">Full Name</Label>
+                <Label htmlFor="auth-name" className="text-foreground/90">Full Name</Label>
                 <Input
                   id="auth-name"
                   type="text"
@@ -128,12 +128,12 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="border-stone-200/85 focus:border-stone-400"
+                  className="border-border/85 focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="auth-email" className="text-stone-700">Email Address</Label>
+                <Label htmlFor="auth-email" className="text-foreground/90">Email Address</Label>
                 <Input
                   id="auth-email"
                   type="email"
@@ -141,7 +141,7 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="border-stone-200/85 focus:border-stone-400"
+                  className="border-border/85 focus:border-primary"
                 />
               </div>
 
@@ -150,14 +150,14 @@ export function AuthPrompt({ onSuccess }: AuthPromptProps) {
                   type="button"
                   variant="ghost"
                   onClick={() => setShowEmailForm(false)}
-                  className="w-1/3 text-stone-500"
+                  className="w-1/3 text-muted-foreground"
                 >
                   Back
                 </Button>
                 <Button
                   type="submit"
                   disabled={loadingType !== null}
-                  className="w-2/3 bg-stone-900 text-white hover:bg-stone-800"
+                  className="w-2/3 bg-primary text-white hover:bg-primary/90"
                 >
                   {loadingType === "email" ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />

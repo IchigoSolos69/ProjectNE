@@ -44,15 +44,15 @@ export default async function SubcategoryPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <nav className="text-sm text-stone-500">
-        <Link href={`/shop/${categorySlug}`} className="hover:text-stone-900">
+      <nav className="text-sm text-muted-foreground">
+        <Link href={`/shop/${categorySlug}`} className="hover:text-foreground">
           {parent.name}
         </Link>
         <span className="mx-2">/</span>
-        <span className="text-stone-900">{sub.name}</span>
+        <span className="text-foreground">{sub.name}</span>
       </nav>
 
-      <h1 className="mt-4 font-serif text-3xl text-stone-900">{sub.name}</h1>
+      <h1 className="mt-4 font-serif text-3xl text-foreground">{sub.name}</h1>
 
       <div className="mt-12">
         <ProductGrid products={products} />

@@ -11,14 +11,14 @@ export default function LoginPage() {
   const router = useRouter();
 
   return (
-    <div className="min-h-[calc(100vh-5rem)] bg-stone-50">
+    <div className="min-h-[calc(100vh-5rem)] bg-muted">
       <div className="grid min-h-[calc(100vh-5rem)] lg:grid-cols-2">
         {/* Left — brand visual (desktop) */}
         <motion.div
           initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative hidden overflow-hidden bg-gradient-to-br from-[#007A78] via-[#005f5d] to-stone-900 lg:flex lg:flex-col lg:justify-between"
+          className="relative hidden overflow-hidden bg-gradient-to-br from-nest-brown via-nest-tan to-nest-brown-dark lg:flex lg:flex-col lg:justify-between"
         >
           <div className="absolute inset-0 opacity-30">
             <Image
@@ -60,19 +60,19 @@ export default function LoginPage() {
         >
           <Link
             href="/"
-            className="mb-8 text-sm text-stone-500 hover:text-stone-900 lg:hidden"
+            className="mb-8 text-sm text-muted-foreground hover:text-foreground lg:hidden"
           >
             ← Back to shop
           </Link>
 
-          <div className="mx-auto w-full max-w-md rounded-2xl border border-stone-200/80 bg-white p-6 shadow-xl sm:p-8">
+          <div className="mx-auto w-full max-w-md rounded-2xl border border-border/80 bg-card p-6 shadow-xl sm:p-8">
             <FamilyAuthPanel
               showCharacters
               onSuccess={() => router.push("/account/profile")}
             />
           </div>
 
-          <p className="mx-auto mt-6 max-w-sm text-center text-xs text-stone-400">
+          <p className="mx-auto mt-6 max-w-sm text-center text-xs text-muted-foreground/80">
             By continuing, you agree to our Terms and Privacy Policy. Supabase auth
             can be wired in when your project keys are ready.
           </p>

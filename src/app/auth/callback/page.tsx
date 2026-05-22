@@ -58,7 +58,7 @@ function AuthCallbackHandler() {
           onClick={() => {
             window.location.href = "https://nestifyessentials.pages.dev/login";
           }}
-          className="mt-4 text-sm font-medium text-[#007A78] underline"
+          className="mt-4 text-sm font-medium text-primary underline"
         >
           Back to login
         </button>
@@ -67,8 +67,8 @@ function AuthCallbackHandler() {
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 text-stone-600">
-      <Loader2 className="h-8 w-8 animate-spin text-[#007A78]" />
+    <div className="flex flex-col items-center gap-3 text-muted-foreground">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
       <p className="text-sm">Completing sign-in…</p>
     </div>
   );
@@ -79,8 +79,8 @@ export default function AuthCallbackPage() {
     <div className="flex min-h-[50vh] items-center justify-center px-4">
       <Suspense
         fallback={
-          <div className="flex flex-col items-center gap-3 text-stone-600">
-            <Loader2 className="h-8 w-8 animate-spin text-[#007A78]" />
+          <div className="flex flex-col items-center gap-3 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-sm">Loading…</p>
           </div>
         }

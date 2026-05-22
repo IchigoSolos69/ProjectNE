@@ -9,15 +9,15 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="border-b border-stone-200 bg-white">
+      <section className="border-b border-border bg-white">
         <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
-          <p className="text-sm uppercase tracking-[0.2em] text-stone-500">
+          <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
             Premium home goods
           </p>
-          <h1 className="mt-4 max-w-2xl font-serif text-4xl leading-tight text-stone-900 sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 max-w-2xl font-serif text-4xl leading-tight text-foreground sm:text-5xl lg:text-6xl">
             Rest, refined.
           </h1>
-          <p className="mt-6 max-w-lg text-stone-600">
+          <p className="mt-6 max-w-lg text-muted-foreground">
             Discover {BRAND_NAME} — thoughtfully woven bedding, spa-weight
             towels, and pillow covers for everyday luxury.
           </p>
@@ -33,8 +33,8 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mb-10 flex items-end justify-between">
-          <h2 className="font-serif text-2xl text-stone-900">Featured</h2>
-          <Link href="/shop/beddings" className="text-sm text-stone-600 hover:text-stone-900">
+          <h2 className="font-serif text-2xl text-foreground">Featured</h2>
+          <Link href="/shop/beddings" className="text-sm text-muted-foreground hover:text-foreground">
             View all →
           </Link>
         </div>

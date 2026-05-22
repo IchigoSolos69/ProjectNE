@@ -112,7 +112,7 @@ export function EditProfileDialog({
                   setForm((f) => ({ ...f, shippingAddress: e.target.value }))
                 }
                 placeholder="Flat 4B, 12 Residency Road, Bengaluru, Karnataka 560025"
-                className="flex w-full rounded-md border border-stone-300 bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-stone-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
+                className="flex w-full rounded-md border border-border bg-card px-3 py-2 text-sm ring-offset-white placeholder:text-muted-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </div>
           </div>

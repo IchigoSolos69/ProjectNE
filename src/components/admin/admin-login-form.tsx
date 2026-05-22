@@ -31,10 +31,10 @@ export function AdminLoginForm() {
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md border-stone-200/80 shadow-lg">
+      <Card className="w-full max-w-md border-border/80 shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="font-serif text-3xl text-stone-900">Admin Portal</CardTitle>
-          <CardDescription className="text-stone-500">
+          <CardTitle className="font-serif text-3xl text-foreground">Admin Portal</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Sign in to manage inventory and view customer orders.
           </CardDescription>
         </CardHeader>
@@ -46,7 +46,7 @@ export function AdminLoginForm() {
               </div>
             )}
             <div className="space-y-1.5">
-              <Label htmlFor="email" className="text-stone-700">Email Address</Label>
+              <Label htmlFor="email" className="text-foreground/90">Email Address</Label>
               <Input
                 id="email"
                 type="email"
@@ -54,12 +54,12 @@ export function AdminLoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="border-stone-300 focus-visible:ring-stone-400"
+                className="border-border focus-visible:ring-ring"
               />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-stone-700">Password</Label>
+                <Label htmlFor="password" className="text-foreground/90">Password</Label>
               </div>
               <Input
                 id="password"
@@ -67,7 +67,7 @@ export function AdminLoginForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="border-stone-300 focus-visible:ring-stone-400"
+                className="border-border focus-visible:ring-ring"
               />
             </div>
           </CardContent>
@@ -75,7 +75,7 @@ export function AdminLoginForm() {
             <Button
               type="submit"
               disabled={isPending}
-              className="w-full bg-stone-900 hover:bg-stone-800 text-white font-medium h-11"
+              className="w-full bg-primary hover:bg-primary/90 text-white font-medium h-11"
             >
               {isPending ? "Signing in..." : "Sign In"}
             </Button>

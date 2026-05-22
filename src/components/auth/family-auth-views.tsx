@@ -57,11 +57,11 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
       className="space-y-5"
     >
       <div className="text-center">
-        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#007A78]/10">
-          <Sparkles className="h-6 w-6 text-[#007A78]" />
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+          <Sparkles className="h-6 w-6 text-primary" />
         </div>
-        <h2 className="font-serif text-2xl text-stone-900">Welcome back</h2>
-        <p className="mt-1 text-sm text-stone-500">
+        <h2 className="font-serif text-2xl text-foreground">Welcome back</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
           Sign in to {BRAND_NAME} for orders, wishlists, and faster checkout.
         </p>
       </div>
@@ -71,7 +71,7 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
         variant="outline"
         disabled={loading}
         onClick={handleGoogle}
-        className="flex h-12 w-full items-center justify-center gap-3 border-stone-200 bg-white hover:bg-stone-50"
+        className="flex h-12 w-full items-center justify-center gap-3 border-border bg-card hover:bg-muted"
       >
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />
@@ -82,16 +82,16 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
       </Button>
 
       <div className="relative flex items-center py-1">
-        <div className="grow border-t border-stone-200" />
-        <span className="mx-3 text-xs uppercase tracking-wider text-stone-400">
+        <div className="grow border-t border-border" />
+        <span className="mx-3 text-xs uppercase tracking-wider text-muted-foreground/80">
           or
         </span>
-        <div className="grow border-t border-stone-200" />
+        <div className="grow border-t border-border" />
       </div>
 
       <Button
         type="button"
-        className="h-12 w-full bg-[#007A78] text-white hover:bg-[#006664]"
+        className="h-12 w-full bg-primary text-white hover:bg-primary/90"
         onClick={() => {
           onMoodChange?.("idle");
           setView("email-signin");
@@ -101,11 +101,11 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
         Continue with email
       </Button>
 
-      <p className="text-center text-sm text-stone-500">
+      <p className="text-center text-sm text-muted-foreground">
         New here?{" "}
         <button
           type="button"
-          className="font-medium text-[#007A78] underline-offset-4 hover:underline"
+          className="font-medium text-primary underline-offset-4 hover:underline"
           onClick={() => setView("email-signup")}
         >
           Create an account
@@ -137,15 +137,15 @@ export function AuthEmailSignInView({ onSuccess, onMoodChange }: ViewProps) {
       <button
         type="button"
         onClick={goBack}
-        className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
       </button>
 
       <div>
-        <h2 className="font-serif text-xl text-stone-900">Sign in with email</h2>
-        <p className="text-sm text-stone-500">We&apos;ll remember you on this device.</p>
+        <h2 className="font-serif text-xl text-foreground">Sign in with email</h2>
+        <p className="text-sm text-muted-foreground">We&apos;ll remember you on this device.</p>
       </div>
 
       <div className="space-y-3">
@@ -180,7 +180,7 @@ export function AuthEmailSignInView({ onSuccess, onMoodChange }: ViewProps) {
             />
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/80"
               onClick={() => {
                 setShowPassword((v) => !v);
                 onMoodChange?.(!showPassword ? "password-visible" : "password-hidden");
@@ -193,7 +193,7 @@ export function AuthEmailSignInView({ onSuccess, onMoodChange }: ViewProps) {
       </div>
 
       <Button
-        className="h-12 w-full bg-stone-900 hover:bg-stone-800"
+        className="h-12 w-full bg-primary hover:bg-primary/90"
         disabled={!email || !password || loading}
         onClick={async () => {
           setLoading(true);
@@ -237,15 +237,15 @@ export function AuthEmailSignUpView({ onSuccess, onMoodChange }: ViewProps) {
       <button
         type="button"
         onClick={goBack}
-        className="flex items-center gap-1 text-sm text-stone-500 hover:text-stone-800"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         Back
       </button>
 
       <div>
-        <h2 className="font-serif text-xl text-stone-900">Create your account</h2>
-        <p className="text-sm text-stone-500">Join for curated home essentials.</p>
+        <h2 className="font-serif text-xl text-foreground">Create your account</h2>
+        <p className="text-sm text-muted-foreground">Join for curated home essentials.</p>
       </div>
 
       <div className="space-y-3">
@@ -289,7 +289,7 @@ export function AuthEmailSignUpView({ onSuccess, onMoodChange }: ViewProps) {
             />
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/80"
               onClick={() => {
                 setShowPassword((v) => !v);
                 onMoodChange?.(!showPassword ? "password-visible" : "password-hidden");
@@ -302,7 +302,7 @@ export function AuthEmailSignUpView({ onSuccess, onMoodChange }: ViewProps) {
       </div>
 
       <Button
-        className="h-12 w-full bg-[#007A78] hover:bg-[#006664]"
+        className="h-12 w-full bg-primary hover:bg-primary/90"
         disabled={!name || !email || !password || loading}
         onClick={async () => {
           setLoading(true);
@@ -335,11 +335,11 @@ export function AuthSuccessView({ onDone }: { onDone?: () => void }) {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 16, delay: 0.05 }}
-        className="flex h-16 w-16 items-center justify-center rounded-full bg-[#007A78]/15"
+        className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/15"
       >
         <motion.svg
           viewBox="0 0 24 24"
-          className="h-8 w-8 text-[#007A78]"
+          className="h-8 w-8 text-primary"
           fill="none"
           stroke="currentColor"
           strokeWidth={2.5}
@@ -352,10 +352,10 @@ export function AuthSuccessView({ onDone }: { onDone?: () => void }) {
           />
         </motion.svg>
       </motion.div>
-      <h2 className="mt-4 font-serif text-xl text-stone-900">You&apos;re in</h2>
-      <p className="mt-1 text-sm text-stone-500">Welcome to the nest.</p>
+      <h2 className="mt-4 font-serif text-xl text-foreground">You&apos;re in</h2>
+      <p className="mt-1 text-sm text-muted-foreground">Welcome to the nest.</p>
       {onDone && (
-        <Button className="mt-6 bg-stone-900" onClick={onDone}>
+        <Button className="mt-6 bg-primary" onClick={onDone}>
           Continue shopping
         </Button>
       )}

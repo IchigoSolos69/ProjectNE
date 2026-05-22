@@ -32,20 +32,20 @@ export function CartSheet() {
           {items.length === 0 ? (
             <div className="py-8 flex flex-col h-full justify-between">
               <div>
-                <h3 className="font-serif text-2xl font-bold text-stone-900 leading-tight">
+                <h3 className="font-serif text-2xl font-bold text-foreground leading-tight">
                   Your Bag is empty.
                 </h3>
                 
                 {user ? (
-                  <p className="mt-2 text-sm text-stone-500">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     Welcome back, {user.fullName}! Explore our collections to add items to your bag.
                   </p>
                 ) : (
-                  <p className="mt-2 text-sm text-stone-500">
+                  <p className="mt-2 text-sm text-muted-foreground">
                     <a
                       href="https://nestifyessentials.pages.dev/login"
                       onClick={closeCart}
-                      className="text-[#007A78] hover:underline font-semibold cursor-pointer text-left bg-transparent border-none p-0 inline-flex items-center"
+                      className="text-primary hover:underline font-semibold cursor-pointer text-left bg-transparent border-none p-0 inline-flex items-center"
                     >
                       Sign in
                     </a>{" "}
@@ -54,7 +54,7 @@ export function CartSheet() {
                 )}
 
                 <div className="mt-12">
-                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-4">
+                  <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground/80 mb-4">
                     My Profile
                   </h4>
                   <ul className="space-y-1">
@@ -62,9 +62,9 @@ export function CartSheet() {
                       <Link
                         href="/account/profile"
                         onClick={closeCart}
-                        className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors"
+                        className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors"
                       >
-                        <Package className="h-4 w-4 text-stone-500" />
+                        <Package className="h-4 w-4 text-muted-foreground" />
                         <span>Orders</span>
                       </Link>
                     </li>
@@ -72,9 +72,9 @@ export function CartSheet() {
                       <Link
                         href="/account/profile"
                         onClick={closeCart}
-                        className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors"
+                        className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors"
                       >
-                        <Bookmark className="h-4 w-4 text-stone-500" />
+                        <Bookmark className="h-4 w-4 text-muted-foreground" />
                         <span>Your Saves</span>
                       </Link>
                     </li>
@@ -82,9 +82,9 @@ export function CartSheet() {
                       <Link
                         href="/account/profile"
                         onClick={closeCart}
-                        className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors"
+                        className="flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors"
                       >
-                        <Settings className="h-4 w-4 text-stone-500" />
+                        <Settings className="h-4 w-4 text-muted-foreground" />
                         <span>Account</span>
                       </Link>
                     </li>
@@ -104,9 +104,9 @@ export function CartSheet() {
                         <a
                           href="https://nestifyessentials.pages.dev/login"
                           onClick={closeCart}
-                          className="w-full flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors text-left"
+                          className="w-full flex items-center gap-3 py-3 px-1 text-sm font-medium text-foreground/90 hover:text-foreground hover:bg-muted rounded transition-colors text-left"
                         >
-                          <User className="h-4 w-4 text-stone-500" />
+                          <User className="h-4 w-4 text-muted-foreground" />
                           <span>Sign in</span>
                         </a>
                       )}
@@ -119,7 +119,7 @@ export function CartSheet() {
             <ul className="space-y-6">
               {items.map((item) => (
                 <li key={item.productId} className="flex gap-4">
-                  <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-stone-100">
+                  <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-muted">
                     <Image
                       src={item.image}
                       alt={item.name}
@@ -131,12 +131,12 @@ export function CartSheet() {
                   <div className="flex flex-1 flex-col">
                     <Link
                       href={`/product/${item.slug}`}
-                      className="text-sm font-medium text-stone-900"
+                      className="text-sm font-medium text-foreground"
                       onClick={closeCart}
                     >
                       {item.name}
                     </Link>
-                    <p className="text-sm text-stone-600">
+                    <p className="text-sm text-muted-foreground">
                       {formatINR(item.pricePaise)}
                     </p>
                     <div className="mt-2 flex items-center gap-2">
@@ -178,9 +178,9 @@ export function CartSheet() {
         </div>
 
         {items.length > 0 && (
-          <div className="border-t border-stone-100 p-6">
+          <div className="border-t border-border/70 p-6">
             <div className="flex justify-between text-sm">
-              <span className="text-stone-600">Subtotal</span>
+              <span className="text-muted-foreground">Subtotal</span>
               <span className="font-medium">{formatINR(subtotalPaise)}</span>
             </div>
             <Separator className="my-4" />

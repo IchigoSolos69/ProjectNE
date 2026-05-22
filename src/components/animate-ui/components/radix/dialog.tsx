@@ -60,11 +60,11 @@ const DialogContent = React.forwardRef<
             initial={motionProps.initial}
             animate={motionProps.animate}
             transition={dialogSpring}
-            className="relative grid gap-4 border border-stone-200 bg-white p-6 shadow-lg sm:rounded-lg"
+            className="relative grid gap-4 border border-border bg-card p-6 shadow-lg sm:rounded-lg"
           >
             {children}
             {showCloseButton && (
-              <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-stone-400">
+              <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring">
                 <X className="h-4 w-4" />
                 <span className="sr-only">Close</span>
               </DialogPrimitive.Close>
@@ -106,7 +106,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-semibold leading-none text-stone-900", className)}
+    className={cn("text-lg font-semibold leading-none text-foreground", className)}
     {...props}
   />
 ));
@@ -118,7 +118,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-stone-600", className)}
+    className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
 ));

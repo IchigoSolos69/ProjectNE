@@ -1,5 +1,7 @@
 export const BRAND_NAME = "Nestify Essentials";
 
+export { BRAND_COLORS } from "@/lib/brand-colors";
+
 /** Must match slugs in `src/lib/mock-data.ts` for preview/mock deploys */
 export const TOP_CATEGORIES = [
   { slug: "beddings", label: "Beddings" },

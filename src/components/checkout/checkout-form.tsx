@@ -50,21 +50,21 @@ function PaymentSuccessModal({
             transition={{ type: "spring", damping: 20, stiffness: 300 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="w-full max-w-md rounded-2xl bg-card p-6 shadow-2xl">
               <div className="flex flex-col items-center gap-4">
                 <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
                   <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h2 className="text-2xl font-bold text-stone-900">Payment Successful!</h2>
-                <p className="text-sm text-stone-600">Your order has been confirmed.</p>
+                <h2 className="text-2xl font-bold text-foreground">Payment Successful!</h2>
+                <p className="text-sm text-muted-foreground">Your order has been confirmed.</p>
 
-                <div className="w-full space-y-2 rounded-lg bg-stone-50 p-4 text-center">
-                  <div className="text-sm text-stone-600">Amount Paid</div>
-                  <div className="text-2xl font-bold text-stone-900">{formatINR(amount)}</div>
-                  <div className="mt-2 text-sm text-stone-600">Order ID</div>
-                  <div className="font-mono text-sm text-stone-900">{orderId}</div>
+                <div className="w-full space-y-2 rounded-lg bg-muted p-4 text-center">
+                  <div className="text-sm text-muted-foreground">Amount Paid</div>
+                  <div className="text-2xl font-bold text-foreground">{formatINR(amount)}</div>
+                  <div className="mt-2 text-sm text-muted-foreground">Order ID</div>
+                  <div className="font-mono text-sm text-foreground">{orderId}</div>
                 </div>
 
                 <Button onClick={onConfirm} className="w-full" size="lg">
@@ -211,8 +211,8 @@ export function CheckoutForm() {
       </div>
 
       <div className="pt-4">
-        <div className="mb-2 text-sm text-stone-600">Subtotal: {formatINR(subtotalPaise)}</div>
-        <div className="mb-2 text-sm text-stone-600">Shipping: {formatINR(shippingPaise)}</div>
+        <div className="mb-2 text-sm text-muted-foreground">Subtotal: {formatINR(subtotalPaise)}</div>
+        <div className="mb-2 text-sm text-muted-foreground">Shipping: {formatINR(shippingPaise)}</div>
         <div className="mb-4 text-lg font-semibold">Total: {formatINR(totalPaise)}</div>
 
         {error && <div className="mb-2 text-sm text-red-600">{error}</div>}

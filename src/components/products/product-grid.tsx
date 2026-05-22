@@ -12,7 +12,7 @@ export function ProductGrid({
 }: ProductGridProps) {
   if (products.length === 0) {
     return (
-      <p className="py-24 text-center text-stone-500">{emptyMessage}</p>
+      <p className="py-24 text-center text-muted-foreground">{emptyMessage}</p>
     );
   }
 

@@ -18,28 +18,32 @@ const SLIDES: Slide[] = [
     image: "/images/products/bedding-4.jpg",
     title: "Damask Rose Set",
     subtitle: "Linen Bedding",
-    description: "Woven from premium long-staple cotton, this set offers a delicate rose pattern with exceptional softness and durability.",
+    description:
+      "Woven from premium long-staple cotton, this set offers a delicate rose pattern with exceptional softness and durability.",
     href: "/shop/beddings",
   },
   {
     image: "/images/products/bedding-1.png",
     title: "Floral Gray Bedding",
     subtitle: "Egyptian Cotton",
-    description: "Sleek and sophisticated gray floral jacquard pattern, bringing a modern editorial look to your bedroom.",
+    description:
+      "Sleek and sophisticated gray floral jacquard pattern, bringing a modern editorial look to your bedroom.",
     href: "/shop/beddings",
   },
   {
     image: "/images/products/bedding-2.png",
     title: "Feather Blue Collection",
     subtitle: "Sateen Weave",
-    description: "Features a rich sateen weave with a light feather pattern, providing a cooling and silky sleeping surface.",
+    description:
+      "Features a rich sateen weave with a light feather pattern, providing a cooling and silky sleeping surface.",
     href: "/shop/beddings",
   },
   {
     image: "/images/products/bedding-3.png",
     title: "Feather Purple Set",
     subtitle: "Luxury Jacquard",
-    description: "Deep violet accents with a subtle feather jacquard pattern, offering a royal touch and ultimate cozy rest.",
+    description:
+      "Deep violet accents with a subtle feather jacquard pattern, offering a royal touch and ultimate cozy rest.",
     href: "/shop/beddings",
   },
 ];
@@ -63,16 +67,14 @@ export function HeroBanner() {
   };
 
   return (
-    <div className="relative w-full overflow-hidden bg-stone-50 border-b border-stone-200">
-      <div className="relative grid grid-cols-1 md:grid-cols-2 overflow-hidden bg-[#2D251F] text-white min-h-[500px] md:h-[580px]">
-        
-        {/* Left Side: Product Image Carousel */}
-        <div className="relative h-[350px] md:h-full w-full overflow-hidden group">
+    <div className="relative w-full overflow-hidden border-b border-border bg-muted">
+      <div className="relative grid min-h-[500px] grid-cols-1 overflow-hidden bg-nest-brown-dark text-primary-foreground md:h-[580px] md:grid-cols-2">
+        <div className="group relative h-[350px] w-full overflow-hidden md:h-full">
           {SLIDES.map((slide, idx) => (
             <div
               key={idx}
               className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                idx === current ? "opacity-100 z-10" : "opacity-0 z-0"
+                idx === current ? "z-10 opacity-100" : "z-0 opacity-0"
               }`}
             >
               <Image
@@ -80,85 +82,78 @@ export function HeroBanner() {
                 alt={slide.title}
                 fill
                 priority={idx === 0}
-                className="object-cover transition-transform duration-10000 ease-linear scale-100 group-hover:scale-105"
-                sizes="(max-w-768px) 100vw, 50vw"
+                className="scale-100 object-cover transition-transform duration-10000 ease-linear group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 50vw"
               />
-              {/* Subtle visual gradient on the image overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-transparent to-black/20" />
             </div>
           ))}
-          
-          {/* Arrows */}
+
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer md:opacity-0 group-hover:opacity-100"
+            className="absolute left-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-black/20 p-2 text-white transition-colors hover:bg-black/40 md:opacity-0 md:group-hover:opacity-100"
             aria-label="Previous slide"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-black/20 hover:bg-black/40 text-white transition-colors cursor-pointer md:opacity-0 group-hover:opacity-100"
+            className="absolute right-4 top-1/2 z-20 -translate-y-1/2 cursor-pointer rounded-full bg-black/20 p-2 text-white transition-colors hover:bg-black/40 md:opacity-0 md:group-hover:opacity-100"
             aria-label="Next slide"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Right Side: Editorial Info Card */}
-        <div className="relative flex flex-col justify-between items-center text-center p-8 sm:p-12 md:p-16 bg-[#2D251F] h-full z-10">
-          {/* Ambient gold glow effect behind text */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 rounded-full bg-[#E2D5C5]/5 blur-3xl pointer-events-none" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-between bg-nest-brown-dark p-8 text-center sm:p-12 md:p-16">
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-nest-cream/5 blur-3xl" />
 
-          {/* Top Branding Header */}
-          <div className="flex flex-col items-center select-none">
-            <div className="border border-white/30 px-4 py-1 text-[10px] tracking-[0.3em] text-white/90 font-medium uppercase mb-3 backdrop-blur-sm bg-white/5">
+          <div className="flex select-none flex-col items-center">
+            <div className="mb-3 border border-primary-foreground/30 bg-white/5 px-4 py-1 text-[10px] font-medium uppercase tracking-[0.3em] text-primary-foreground/90 backdrop-blur-sm">
               ne
             </div>
-            <div className="text-[13px] uppercase tracking-[0.25em] text-white/80 font-bold">
-              nestify <span className="text-[#E2D5C5]">ESSENTIALS</span>
+            <div className="text-[13px] font-bold uppercase tracking-[0.25em] text-primary-foreground/80">
+              nestify <span className="text-nest-cream">ESSENTIALS</span>
             </div>
-            <span className="text-[8px] uppercase tracking-[0.2em] text-[#E2D5C5] mt-1 font-semibold block">
+            <span className="mt-1 block text-[8px] font-semibold uppercase tracking-[0.2em] text-nest-cream">
               my heart for home
             </span>
           </div>
 
-          {/* Middle Title & Description */}
-          <div className="my-auto py-6 sm:py-8 max-w-md">
-            <span className="text-xs uppercase tracking-[0.25em] text-[#E2D5C5] font-semibold block mb-2">
+          <div className="my-auto max-w-md py-6 sm:py-8">
+            <span className="mb-2 block text-xs font-semibold uppercase tracking-[0.25em] text-nest-sage">
               {SLIDES[current].subtitle}
             </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-white tracking-wide leading-tight mb-4 transition-all duration-500">
+            <h2 className="mb-4 font-serif text-3xl leading-tight tracking-wide text-primary-foreground transition-all duration-500 sm:text-4xl lg:text-5xl">
               {SLIDES[current].title}
             </h2>
-            <p className="text-sm text-stone-300 leading-relaxed font-light mb-8 max-w-sm mx-auto">
+            <p className="mx-auto mb-8 max-w-sm text-sm font-light leading-relaxed text-primary-foreground/75">
               {SLIDES[current].description}
             </p>
-            
+
             <Link
               href={SLIDES[current].href}
-              className="bg-[#E2D5C5] hover:bg-[#D6C7B5] text-stone-900 font-bold px-10 py-4 text-xs uppercase tracking-[0.25em] transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
+              className="bg-nest-sage px-10 py-4 text-xs font-bold uppercase tracking-[0.25em] text-nest-brown-dark shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-nest-sage/90 hover:shadow-xl active:translate-y-0"
             >
               SHOP NOW
             </Link>
           </div>
 
-          {/* Bottom Dots Navigation */}
-          <div className="flex items-center gap-2.5 mt-auto pt-4 select-none">
+          <div className="mt-auto flex select-none items-center gap-2.5 pt-4">
             {SLIDES.map((_, idx) => (
               <button
                 key={idx}
                 onClick={() => setCurrent(idx)}
-                className={`h-2.5 transition-all duration-300 rounded-full cursor-pointer ${
-                  idx === current ? "w-7 bg-white" : "w-2.5 bg-white/30 hover:bg-white/65"
+                className={`h-2.5 cursor-pointer rounded-full transition-all duration-300 ${
+                  idx === current
+                    ? "w-7 bg-primary-foreground"
+                    : "w-2.5 bg-primary-foreground/30 hover:bg-primary-foreground/65"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />
             ))}
           </div>
-
         </div>
-
       </div>
     </div>
   );

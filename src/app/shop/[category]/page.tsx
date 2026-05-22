@@ -36,9 +36,9 @@ export default async function CategoryPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
       <div className="max-w-2xl">
-        <h1 className="font-serif text-3xl text-stone-900">{category.name}</h1>
+        <h1 className="font-serif text-3xl text-foreground">{category.name}</h1>
         {category.description && (
-          <p className="mt-3 text-stone-600">{category.description}</p>
+          <p className="mt-3 text-muted-foreground">{category.description}</p>
         )}
       </div>
 
@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: PageProps) {
             <Link
               key={sub.slug}
               href={`/shop/${categorySlug}/${sub.slug}`}
-              className="rounded-full border border-stone-300 px-4 py-1.5 text-sm text-stone-700 transition-colors hover:border-stone-900 hover:text-stone-900"
+              className="rounded-full border border-border px-4 py-1.5 text-sm text-foreground/90 transition-colors hover:border-primary hover:text-foreground"
             >
               {sub.name}
             </Link>

@@ -23,7 +23,7 @@ export function AccountAuthGuard({ children }: { children: React.ReactNode }) {
   if (!mounted || !user) {
     return (
       <div className="flex min-h-[350px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-stone-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground/80" />
       </div>
     );
   }

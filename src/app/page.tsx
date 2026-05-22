@@ -19,8 +19,8 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="mb-10 flex items-end justify-between">
-          <h2 className="font-serif text-2xl text-stone-900">Featured Products</h2>
-          <Link href="/shop/beddings" className="text-sm text-stone-600 hover:text-stone-900">
+          <h2 className="font-serif text-2xl text-foreground">Featured Products</h2>
+          <Link href="/shop/beddings" className="text-sm text-muted-foreground hover:text-foreground">
             View all →
           </Link>
         </div>

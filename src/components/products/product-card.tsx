@@ -23,7 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
       animate={{ opacity: 1, y: 0 }}
       className="group flex flex-col"
     >
-      <Link href={`/product/${product.slug}`} className="relative aspect-[4/5] overflow-hidden rounded-lg bg-stone-100">
+      <Link href={`/product/${product.slug}`} className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted">
         <Image
           src={image}
           alt={product.name}
@@ -34,12 +34,12 @@ export function ProductCard({ product }: ProductCardProps) {
       </Link>
       <div className="mt-4 flex flex-1 flex-col">
         <Link href={`/product/${product.slug}`}>
-          <h3 className="text-sm font-medium text-stone-900">{product.name}</h3>
+          <h3 className="text-sm font-medium text-foreground">{product.name}</h3>
         </Link>
         <div className="mt-1 flex items-center gap-2">
-          <span className="text-sm text-stone-900">{formatINR(product.price_paise)}</span>
+          <span className="text-sm text-foreground">{formatINR(product.price_paise)}</span>
           {product.compare_at_price_paise && (
-            <span className="text-sm text-stone-400 line-through">
+            <span className="text-sm text-muted-foreground/80 line-through">
               {formatINR(product.compare_at_price_paise)}
             </span>
           )}

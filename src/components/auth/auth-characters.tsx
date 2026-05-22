@@ -37,8 +37,8 @@ function Character({
       <div
         className={`h-24 w-24 rounded-[2rem] shadow-lg ${
           side === "left"
-            ? "bg-gradient-to-br from-[#007A78] to-[#005a58]"
-            : "bg-gradient-to-br from-amber-400 to-amber-600"
+            ? "bg-gradient-to-br from-nest-brown to-nest-brown-dark"
+            : "bg-gradient-to-br from-nest-tan to-nest-sage"
         }`}
       />
       {/* Eyes */}
@@ -50,10 +50,10 @@ function Character({
         {(["l", "r"] as const).map((eye) => (
           <div
             key={eye}
-            className="relative h-7 w-7 rounded-full bg-white shadow-inner"
+            className="relative h-7 w-7 rounded-full bg-card shadow-inner"
           >
             <div
-              className="absolute h-3 w-3 rounded-full bg-stone-900"
+              className="absolute h-3 w-3 rounded-full bg-primary"
               style={{
                 left: `calc(50% + ${pupilX * (eye === "l" ? 0.9 : 1.1)}px)`,
                 top: `calc(50% + ${pupilY}px)`,
@@ -70,13 +70,13 @@ function Character({
           animate={{ opacity: 1, y: 0 }}
           className="absolute -top-2 left-1/2 flex -translate-x-1/2 gap-1"
         >
-          <div className="h-8 w-10 rounded-full bg-stone-200/90 shadow" />
-          <div className="h-8 w-10 rounded-full bg-stone-200/90 shadow" />
+          <div className="h-8 w-10 rounded-full bg-nest-cream/90 shadow" />
+          <div className="h-8 w-10 rounded-full bg-nest-cream/90 shadow" />
         </motion.div>
       )}
       {/* Smile */}
       <div
-        className={`absolute bottom-7 left-1/2 h-3 w-8 -translate-x-1/2 rounded-b-full border-b-2 border-stone-900/70 ${
+        className={`absolute bottom-7 left-1/2 h-3 w-8 -translate-x-1/2 rounded-b-full border-b-2 border-nest-brown-dark/70 ${
           hideEyes ? "opacity-0" : "opacity-100"
         }`}
       />

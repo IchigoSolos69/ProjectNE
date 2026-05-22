@@ -13,8 +13,8 @@ export default function AccountLayout({
   return (
     <AccountAuthGuard>
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
-        <h1 className="font-serif text-3xl text-stone-900">Your account</h1>
-        <p className="mt-2 text-sm text-stone-600">
+        <h1 className="font-serif text-3xl text-foreground">Your account</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
           Manage your profile, shipping details, and account preferences.
         </p>
         <div className="mt-8">

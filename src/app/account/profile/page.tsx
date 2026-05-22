@@ -64,8 +64,8 @@ export default function AccountProfilePage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-lg font-medium text-stone-900">Profile</h2>
-          <p className="mt-1 text-sm text-stone-600">
+          <h2 className="text-lg font-medium text-foreground">Profile</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Default details used for checkout and Delhivery delivery.
           </p>
         </div>
@@ -76,33 +76,33 @@ export default function AccountProfilePage() {
             initialData={profile}
             onSave={handleSave}
           />
-          <Button variant="ghost" onClick={logout} className="text-stone-500 hover:text-stone-900 hover:bg-stone-50">
+          <Button variant="ghost" onClick={logout} className="text-muted-foreground hover:text-foreground hover:bg-muted">
             Sign out
           </Button>
         </div>
       </div>
 
-      <dl className="divide-y divide-stone-200 rounded-lg border border-stone-200 bg-white">
+      <dl className="divide-y divide-border rounded-lg border border-border bg-card">
         <div className="grid gap-1 px-6 py-4 sm:grid-cols-3">
-          <dt className="text-sm font-medium text-stone-500">Email address</dt>
-          <dd className="text-sm text-stone-900 sm:col-span-2">{user.email}</dd>
+          <dt className="text-sm font-medium text-muted-foreground">Email address</dt>
+          <dd className="text-sm text-foreground sm:col-span-2">{user.email}</dd>
         </div>
         <div className="grid gap-1 px-6 py-4 sm:grid-cols-3">
-          <dt className="text-sm font-medium text-stone-500">Full name</dt>
-          <dd className="text-sm text-stone-900 sm:col-span-2">
-            {profile.fullName || <span className="text-stone-400 italic">Not set</span>}
+          <dt className="text-sm font-medium text-muted-foreground">Full name</dt>
+          <dd className="text-sm text-foreground sm:col-span-2">
+            {profile.fullName || <span className="text-muted-foreground/80 italic">Not set</span>}
           </dd>
         </div>
         <div className="grid gap-1 px-6 py-4 sm:grid-cols-3">
-          <dt className="text-sm font-medium text-stone-500">Phone number</dt>
-          <dd className="text-sm text-stone-900 sm:col-span-2">
-            {profile.phone || <span className="text-stone-400 italic">Not set</span>}
+          <dt className="text-sm font-medium text-muted-foreground">Phone number</dt>
+          <dd className="text-sm text-foreground sm:col-span-2">
+            {profile.phone || <span className="text-muted-foreground/80 italic">Not set</span>}
           </dd>
         </div>
         <div className="grid gap-1 px-6 py-4 sm:grid-cols-3">
-          <dt className="text-sm font-medium text-stone-500">Shipping address</dt>
-          <dd className="whitespace-pre-line text-sm text-stone-900 sm:col-span-2">
-            {profile.shippingAddress || <span className="text-stone-400 italic">Not set</span>}
+          <dt className="text-sm font-medium text-muted-foreground">Shipping address</dt>
+          <dd className="whitespace-pre-line text-sm text-foreground sm:col-span-2">
+            {profile.shippingAddress || <span className="text-muted-foreground/80 italic">Not set</span>}
           </dd>
         </div>
       </dl>

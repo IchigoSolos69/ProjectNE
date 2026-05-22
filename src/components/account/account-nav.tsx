@@ -13,7 +13,7 @@ export function AccountNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 border-b border-stone-200">
+    <nav className="flex gap-1 border-b border-border">
       {LINKS.map((link) => (
         <Link
           key={link.href}
@@ -21,8 +21,8 @@ export function AccountNav() {
           className={cn(
             "border-b-2 px-4 py-3 text-sm font-medium transition-colors -mb-px",
             pathname === link.href
-              ? "border-stone-900 text-stone-900"
-              : "border-transparent text-stone-500 hover:text-stone-800",
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground",
           )}
         >
           {link.label}
