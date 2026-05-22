@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Trash2, Package, Bookmark, Settings, User } from "lucide-react";
 import {
@@ -16,6 +15,7 @@ import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { formatINR } from "@/lib/currency";
 import { motion, AnimatePresence } from "framer-motion";
+import { FadeInImage } from "@/components/ui/fade-in-image";
 
 export function CartSheet() {
   const { items, isOpen, closeCart, updateQuantity, removeItem } = useCartStore();
@@ -134,13 +134,19 @@ export function CartSheet() {
                 className="w-full"
               >
                 <ul className="space-y-6 overflow-x-hidden pr-1">
-                  {items.map((item) => (
-                      <li
+                  <AnimatePresence initial={false}>
+                    {items.map((item) => (
+                      <motion.li
                         key={item.productId}
+                        layout
+                        initial={{ opacity: 0, x: -15 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 30 }}
+                        transition={{ duration: 0.22, ease: "easeOut" }}
                         className="flex gap-4 py-2"
                       >
                         <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded bg-muted">
-                          <Image
+                          <FadeInImage
                             src={item.image}
                             alt={item.name}
                             fill
@@ -194,8 +200,9 @@ export function CartSheet() {
                             </Button>
                           </div>
                         </div>
-                      </li>
+                      </motion.li>
                     ))}
+                  </AnimatePresence>
                 </ul>
               </motion.div>
             )}

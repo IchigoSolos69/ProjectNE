@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingBag, ArrowRight } from "lucide-react";
+import { Heart } from "lucide-react";
 import { formatINR } from "@/lib/currency";
 import { useCartStore } from "@/stores/cart-store";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/types/database";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { FadeInImage } from "@/components/ui/fade-in-image";
+import { Button } from "@/components/ui/button";
 
 // Framer motion variants for premium staggered reveals
 const containerVariants = {
@@ -16,21 +17,21 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.08,
-      delayChildren: 0.05,
+      staggerChildren: 0.05,
+      delayChildren: 0.02,
     },
   },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 12 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
       type: "spring" as const,
-      stiffness: 100,
-      damping: 15,
+      stiffness: 120,
+      damping: 18,
     },
   },
 };
@@ -104,7 +105,7 @@ export function ShopByCategories() {
       <SectionHeader title="SHOP BY CATEGORIES" />
       <motion.div
         variants={containerVariants}
-        initial="hidden"
+        initial={useReducedMotion() ? "visible" : "hidden"}
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-2 gap-3 sm:gap-6 md:grid-cols-3 md:gap-8"
@@ -112,14 +113,14 @@ export function ShopByCategories() {
         {categoryItems.map((item, idx) => (
           <motion.div key={idx} variants={itemVariants}>
             <Link href={item.href} className="group flex flex-col items-center">
-              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-muted border border-border/30 shadow-sm transition-all duration-500 hover:shadow-md">
-                <Image
+              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-muted border border-border/30 shadow-sm hover:border-primary/45 transition-colors duration-300">
+                <FadeInImage
                   src={item.image}
                   alt={item.label}
                   fill
                   priority={idx === 0}
                   loading={idx === 0 ? undefined : "lazy"}
-                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+                  className="object-cover motion-safe:transition-transform motion-safe:duration-700 motion-safe:ease-out motion-safe:group-hover:scale-[1.04]"
                   sizes="(max-width: 768px) 50vw, 33vw"
                 />
               </div>
@@ -150,7 +151,7 @@ export function ShopByPrice() {
       <SectionHeader title="SHOP BY PRICE" />
       <motion.div
         variants={containerVariants}
-        initial="hidden"
+        initial={useReducedMotion() ? "visible" : "hidden"}
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
@@ -159,14 +160,14 @@ export function ShopByPrice() {
           <motion.div key={idx} variants={itemVariants}>
             <Link
               href={item.href}
-              className="group flex flex-col items-center justify-center py-10 px-6 rounded-xl border border-border/15 bg-nest-brown-dark text-center transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:border-primary/50 relative overflow-hidden"
+              className="group flex flex-col items-center justify-center py-10 px-6 rounded-xl border border-border/15 bg-nest-brown-dark text-center motion-safe:transition-all motion-safe:duration-300 ease-out motion-safe:hover:-translate-y-1 hover:border-primary/50 relative overflow-hidden"
             >
               {/* Double border effect matching user screenshot */}
               <div className="absolute inset-1 border border-nest-cream/15 rounded-lg pointer-events-none group-hover:border-nest-sage/40 transition-colors duration-500" />
               <span className="font-serif italic text-sm text-nest-cream/70 group-hover:text-nest-sage transition-colors duration-300">
                 {item.prefix}
               </span>
-              <span className="font-sans text-2xl font-black tracking-wider text-nest-cream mt-1 group-hover:scale-105 transition-transform duration-500">
+              <span className="font-sans text-2xl font-black tracking-wider text-nest-cream mt-1 motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-105">
                 {item.price}
               </span>
             </Link>
@@ -207,7 +208,7 @@ export function WhatsNew({ products }: { products: Product[] }) {
 
   // Helper to determine product material tag overlay
   const getMaterialTag = (product: Product) => {
-    const meta = (product.metadata as any) || {};
+    const meta = (product.metadata as Record<string, string | undefined>) || {};
     if (meta.material) return `MADE WITH ${meta.material.toUpperCase()}`;
     if (meta.type) return `MADE WITH ${meta.type.toUpperCase()}`;
     if (product.name.toLowerCase().includes("sheets")) return "MADE WITH SUPIMA COTTON";
@@ -220,7 +221,7 @@ export function WhatsNew({ products }: { products: Product[] }) {
       <SectionHeader title="WHAT'S NEW" />
       <motion.div
         variants={containerVariants}
-        initial="hidden"
+        initial={useReducedMotion() ? "visible" : "hidden"}
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4"
@@ -234,11 +235,11 @@ export function WhatsNew({ products }: { products: Product[] }) {
                   href={`/product/${product.slug}`}
                   className="relative aspect-[4/5] overflow-hidden rounded-xl bg-muted border border-border/30 shadow-sm"
                 >
-                  <Image
+                  <FadeInImage
                     src={image}
                     alt={product.name}
                     fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    className="object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:group-hover:scale-[1.03]"
                     sizes="(max-width: 768px) 50vw, 25vw"
                   />
 
@@ -278,15 +279,12 @@ export function WhatsNew({ products }: { products: Product[] }) {
 // Bestseller card with localized state for adding loading indicators and animations
 function BestsellerCard({
   product,
-  addItem,
-  openCart,
-  router,
 }: {
   product: Product;
-  addItem: any;
-  openCart: any;
-  router: any;
 }) {
+  const addItem = useCartStore((s) => s.addItem);
+  const openCart = useCartStore((s) => s.openCart);
+  const router = useRouter();
   const [addingState, setAddingState] = useState<"idle" | "adding" | "added">("idle");
   const image = product.images[0] ?? "/placeholder-product.jpg";
   const compareAt = product.compare_at_price_paise;
@@ -297,7 +295,7 @@ function BestsellerCard({
     : 0;
 
   const getProductTypeLabel = (p: Product) => {
-    const meta = (p.metadata as any) || {};
+    const meta = (p.metadata as Record<string, string | undefined>) || {};
     const nameLower = p.name.toLowerCase();
     const size = meta.size ? `${meta.size} ` : "";
     if (nameLower.includes("sheets")) return `${size}Bedsheet`;
@@ -356,21 +354,18 @@ function BestsellerCard({
   };
 
   return (
-    <motion.article
-      variants={itemVariants}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="group flex flex-col relative bg-card border border-border/30 rounded-2xl p-3 shadow-sm hover:shadow-md transition-shadow duration-300"
+    <article
+      className="group flex flex-col relative bg-card border border-border/30 hover:border-primary/45 rounded-2xl p-3 shadow-sm motion-safe:transition-all motion-safe:duration-300 motion-safe:ease-out motion-safe:hover:-translate-y-1.5"
     >
       <Link
         href={`/product/${product.slug}`}
-        className="relative aspect-[4/5] overflow-hidden rounded-xl bg-muted"
+        className="relative aspect-[4/5] overflow-hidden rounded-xl bg-muted block"
       >
-        <Image
+        <FadeInImage
           src={image}
           alt={product.name}
           fill
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+          className="object-cover motion-safe:transition-transform motion-safe:duration-700 motion-safe:ease-out motion-safe:group-hover:scale-[1.03]"
           sizes="(max-width: 768px) 50vw, 25vw"
         />
 
@@ -414,11 +409,10 @@ function BestsellerCard({
 
         {/* Buttons row matching user screenshot */}
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <motion.button
+          <Button
             onClick={handleAddToCart}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex min-h-11 w-full cursor-pointer select-none items-center justify-center rounded-lg border border-primary py-2 text-[11px] font-bold text-primary transition-colors duration-200 hover:bg-primary/5"
+            variant="outline"
+            className="min-h-11 w-full text-[11px] font-bold border-primary text-primary hover:bg-primary/5 hover:text-primary"
             disabled={addingState !== "idle"}
           >
             {addingState === "idle" && "Add To Cart"}
@@ -432,18 +426,16 @@ function BestsellerCard({
               </span>
             )}
             {addingState === "added" && "Added ✓"}
-          </motion.button>
-          <motion.button
+          </Button>
+          <Button
             onClick={handleBuyNow}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg bg-primary py-2 text-[11px] font-bold text-primary-foreground transition-colors duration-200 hover:bg-primary/95"
+            className="min-h-11 w-full text-[11px] font-bold"
           >
             Buy Now
-          </motion.button>
+          </Button>
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
 
@@ -451,10 +443,6 @@ function BestsellerCard({
 // 4. BESTSELLERS
 // ----------------------------------------------------
 export function Bestsellers({ products }: { products: Product[] }) {
-  const addItem = useCartStore((s) => s.addItem);
-  const openCart = useCartStore((s) => s.openCart);
-  const router = useRouter();
-
   // Bestsellers: 4 products with compare_at discounts or standard featured
   const bestsellerProducts = products.filter((p) => p.compare_at_price_paise).slice(0, 4);
 
@@ -468,19 +456,15 @@ export function Bestsellers({ products }: { products: Product[] }) {
       <SectionHeader title="BESTSELLERS" />
       <motion.div
         variants={containerVariants}
-        initial="hidden"
+        initial={useReducedMotion() ? "visible" : "hidden"}
         whileInView="visible"
         viewport={{ once: true, margin: "-80px" }}
         className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4"
       >
         {displayProducts.map((product) => (
-          <BestsellerCard
-            key={product.id}
-            product={product}
-            addItem={addItem}
-            openCart={openCart}
-            router={router}
-          />
+          <motion.div key={product.id} variants={itemVariants}>
+            <BestsellerCard product={product} />
+          </motion.div>
         ))}
       </motion.div>
     </section>

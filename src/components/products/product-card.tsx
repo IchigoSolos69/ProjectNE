@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { FadeInImage } from "@/components/ui/fade-in-image";
 import type { Product } from "@/types/database";
 import { formatINR } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
@@ -20,15 +20,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     <article className="group flex flex-col">
       <Link
         href={`/product/${product.slug}`}
-        className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted"
+        className="relative aspect-[4/5] overflow-hidden rounded-lg bg-muted block"
       >
-        <Image
+        <FadeInImage
           src={image}
           alt={product.name}
           fill
           priority={priority}
           loading={priority ? undefined : "lazy"}
-          className="object-cover transition-transform duration-500 md:group-hover:scale-105"
+          className="object-cover motion-safe:transition-transform motion-safe:duration-500 motion-safe:md:group-hover:scale-105"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         />
       </Link>
