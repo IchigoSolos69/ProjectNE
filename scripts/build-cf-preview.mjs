@@ -1,5 +1,6 @@
 /**
  * Static export build for Cloudflare Pages (mock / visual preview).
+ * Temporarily moves server-only code outside src/ so Next does not compile it.
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -7,21 +8,18 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
+const backupRoot = path.join(root, ".cf-preview-backup");
 
-const foldersToHide = [
-  { from: path.join(root, "src", "app", "api"), backup: path.join(root, "src", "app", "_api_cf_preview_backup") },
-  { from: path.join(root, "src", "actions"), backup: path.join(root, "src", "_actions_cf_preview_backup") },
-  { from: path.join(root, "src", "app", "admin"), backup: path.join(root, "src", "app", "_admin_cf_preview_backup") },
+const moves = [
+  { from: path.join(root, "src", "app", "api"), to: path.join(backupRoot, "app", "api") },
+  { from: path.join(root, "src", "app", "admin"), to: path.join(backupRoot, "app", "admin") },
+  { from: path.join(root, "src", "actions"), to: path.join(backupRoot, "actions") },
+  { from: path.join(root, "src", "components", "admin"), to: path.join(backupRoot, "components", "admin") },
+  { from: path.join(root, "src", "middleware.ts"), to: path.join(backupRoot, "middleware.ts") },
 ];
 
 const checkoutActions = path.join(root, "src", "components", "checkout", "checkout-actions.ts");
-const checkoutActionsServerBackup = path.join(
-  root,
-  "src",
-  "components",
-  "checkout",
-  "_checkout-actions.server.ts.bak",
-);
+const checkoutActionsServerBackup = path.join(backupRoot, "checkout-actions.server.ts");
 const checkoutActionsPreview = path.join(
   root,
   "src",
@@ -30,47 +28,59 @@ const checkoutActionsPreview = path.join(
   "checkout-actions.preview.ts",
 );
 
-const moved = [];
-let swappedCheckoutActions = false;
+const restored = [];
 
-function hideFolder(from, backup) {
+function hidePath(from, to) {
   if (!fs.existsSync(from)) return;
-  if (fs.existsSync(backup)) fs.rmSync(backup, { recursive: true, force: true });
-  fs.cpSync(from, backup, { recursive: true });
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  if (fs.existsSync(to)) fs.rmSync(to, { recursive: true, force: true });
+  fs.cpSync(from, to, { recursive: true });
   fs.rmSync(from, { recursive: true, force: true });
-  moved.push({ from, backup });
-  console.log(`[build-cf-preview] Moved ${path.relative(root, from)} aside`);
+  restored.push({ from, to });
+  console.log(`[build-cf-preview] Moved ${path.relative(root, from)} → .cf-preview-backup`);
 }
 
-function restoreFolders() {
-  for (const { from, backup } of moved.reverse()) {
-    if (!fs.existsSync(backup)) continue;
+function restoreAll() {
+  for (const { from, to } of restored.reverse()) {
+    if (!fs.existsSync(to)) continue;
+    fs.mkdirSync(path.dirname(from), { recursive: true });
     if (fs.existsSync(from)) fs.rmSync(from, { recursive: true, force: true });
-    fs.cpSync(backup, from, { recursive: true });
-    fs.rmSync(backup, { recursive: true, force: true });
+    fs.cpSync(to, from, { recursive: true });
     console.log(`[build-cf-preview] Restored ${path.relative(root, from)}`);
+  }
+  if (fs.existsSync(backupRoot)) {
+    fs.rmSync(backupRoot, { recursive: true, force: true });
   }
 }
 
+let swappedCheckoutActions = false;
+
 function usePreviewCheckoutActions() {
   if (!fs.existsSync(checkoutActionsPreview)) return;
+  fs.mkdirSync(backupRoot, { recursive: true });
   fs.cpSync(checkoutActions, checkoutActionsServerBackup);
   fs.cpSync(checkoutActionsPreview, checkoutActions);
   swappedCheckoutActions = true;
-  console.log("[build-cf-preview] Using checkout-actions.preview.ts for build");
 }
 
 function restoreCheckoutActions() {
   if (!swappedCheckoutActions || !fs.existsSync(checkoutActionsServerBackup)) return;
   fs.cpSync(checkoutActionsServerBackup, checkoutActions);
-  fs.rmSync(checkoutActionsServerBackup, { force: true });
-  console.log("[build-cf-preview] Restored checkout-actions.ts");
+  swappedCheckoutActions = false;
 }
 
-for (const { from, backup } of foldersToHide) {
-  hideFolder(from, backup);
+if (fs.existsSync(backupRoot)) fs.rmSync(backupRoot, { recursive: true, force: true });
+
+for (const { from, to } of moves) {
+  hidePath(from, to);
 }
 usePreviewCheckoutActions();
+
+const nextCache = path.join(root, ".next");
+if (fs.existsSync(nextCache)) {
+  fs.rmSync(nextCache, { recursive: true, force: true });
+  console.log("[build-cf-preview] Cleared .next cache");
+}
 
 const result = spawnSync("npx", ["next", "build"], {
   cwd: root,
@@ -84,5 +94,5 @@ const result = spawnSync("npx", ["next", "build"], {
 });
 
 restoreCheckoutActions();
-restoreFolders();
+restoreAll();
 process.exit(result.status ?? 1);

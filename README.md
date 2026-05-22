@@ -15,6 +15,8 @@ Next.js App Router storefront with Supabase, Razorpay checkout, and Delhivery lo
 
 Copy `.env.example` to `.env.local` and fill in credentials.
 
+**Important:** `NEXT_PUBLIC_SUPABASE_URL` must be your project URL (e.g. `https://xxxx.supabase.co`), **not** the REST path (`/rest/v1`).
+
 ### 2. Supabase schema
 
 Run the migration in the Supabase SQL editor or via CLI:
@@ -43,21 +45,35 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Deploy mock UI to Cloudflare Pages
+## Deploy to Cloudflare Pages (recommended for mock / preview)
 
-Do **not** use `npx @cloudflare/next-on-pages@1` — it is deprecated and does not support Next.js 16 reliably. Your Vercel build may succeed, then the adapter step fails or the site breaks at runtime.
+Your build log shows `npx @cloudflare/next-on-pages@1`. That adapter is **deprecated**, bundles a **Worker** (CSP blocks `eval`, middleware runs on every request), and often causes **“This page couldn’t load”** when Supabase env vars are missing or wrong.
 
-For **visual / mock preview**, use a **static export**:
+### Use static export instead
+
+In **Cloudflare Pages → Settings → Builds & deployments**:
 
 | Setting | Value |
 |--------|--------|
 | **Build command** | `npm run build:preview` |
 | **Build output directory** | `out` |
-| **Environment variable** | `NEXT_PUBLIC_MOCK_PREVIEW` = `true` (optional; the script sets it) |
+| **Environment variables** | `NEXT_PUBLIC_MOCK_PREVIEW` = `true` (optional) |
 
-`build:preview` exports static HTML/JS, uses mock catalog data, and runs checkout entirely in the browser.
+Remove or replace `npx @cloudflare/next-on-pages@1` as the build command.
 
-When you need real Supabase/Razorpay later, migrate to [@opennextjs/cloudflare](https://opennext.js.org/cloudflare) (Workers) instead of next-on-pages.
+`build:preview`:
+
+- Exports static HTML/JS to `out/`
+- Uses mock catalog + client-side checkout
+- **No** middleware, **no** Worker, **no** `eval` / CSP issues
+
+### If you keep `next-on-pages` temporarily
+
+1. Set Cloudflare env vars: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (correct URL, no `/rest/v1`).
+2. Or set `NEXT_PUBLIC_MOCK_PREVIEW=true` so middleware passes through without Supabase.
+3. Middleware now supports `ANON_KEY` or `PUBLISHABLE_KEY` and skips when env is missing.
+
+For production with Supabase + Razorpay, use [@opennextjs/cloudflare](https://opennext.js.org/cloudflare) instead of next-on-pages.
 
 ## Project structure
 
