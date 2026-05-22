@@ -3,9 +3,14 @@ import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/catalog";
 import { formatINR } from "@/lib/utils";
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
+import { getStaticProductParams } from "@/lib/mock-data";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+export function generateStaticParams() {
+  return getStaticProductParams();
 }
 
 export async function generateMetadata({ params }: PageProps) {

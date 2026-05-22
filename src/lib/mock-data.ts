@@ -356,3 +356,19 @@ export function getProductBySlug(slug: string): Product | null {
 export function getFeaturedProducts(limit = 8): Product[] {
   return MOCK_PRODUCTS.filter((p) => p.is_active).slice(0, limit);
 }
+
+/** Paths for `output: "export"` (Cloudflare Pages static deploy) */
+export function getStaticCategoryParams() {
+  return MOCK_CATEGORIES.map((c) => ({ category: c.slug }));
+}
+
+export function getStaticSubcategoryParams() {
+  return MOCK_SUBCATEGORIES.map((sub) => {
+    const parent = MOCK_CATEGORIES.find((p) => p.id === sub.parent_id);
+    return { category: parent!.slug, subcategory: sub.slug };
+  });
+}
+
+export function getStaticProductParams() {
+  return MOCK_PRODUCTS.map((p) => ({ slug: p.slug }));
+}

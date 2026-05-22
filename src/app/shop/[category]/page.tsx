@@ -3,9 +3,14 @@ import { notFound } from "next/navigation";
 import { getCategoryBySlug, getProductsByCategorySlug } from "@/lib/catalog";
 import { ProductGrid } from "@/components/products/product-grid";
 import { SUBCATEGORIES } from "@/lib/constants";
+import { getStaticCategoryParams } from "@/lib/mock-data";
 
 interface PageProps {
   params: Promise<{ category: string }>;
+}
+
+export function generateStaticParams() {
+  return getStaticCategoryParams();
 }
 
 export async function generateMetadata({ params }: PageProps) {

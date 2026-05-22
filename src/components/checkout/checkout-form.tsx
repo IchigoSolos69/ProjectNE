@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { formatINR } from "@/lib/utils";
-import { getShippingRatesAction } from "@/actions/shipping";
-import { createRazorpayOrderAction } from "@/actions/create-razorpay-order";
-import type { ShippingAddress, CheckoutPayload } from "@/types/database";
+import {
+  createCheckoutOrder,
+  fetchShippingRates,
+} from "@/components/checkout/checkout-actions";
+import type { CheckoutPayload } from "@/types/database";
 
 declare global {
   interface Window {
@@ -103,7 +105,7 @@ export function CheckoutForm() {
 
   async function handlePincodeBlur() {
     if (form.pincode.length !== 6) return;
-    const rates = await getShippingRatesAction(form.pincode);
+    const rates = await fetchShippingRates(form.pincode);
     setServiceable(rates.serviceable);
     setShippingPaise(rates.shippingPaise);
   }
@@ -144,7 +146,7 @@ export function CheckoutForm() {
     };
 
     startTransition(async () => {
-      const res = await createRazorpayOrderAction(payload);
+      const res = await createCheckoutOrder(payload);
       if (!res.success) {
         setError(res.error || "Order creation failed");
         return;

@@ -43,6 +43,22 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+## Deploy mock UI to Cloudflare Pages
+
+Do **not** use `npx @cloudflare/next-on-pages@1` — it is deprecated and does not support Next.js 16 reliably. Your Vercel build may succeed, then the adapter step fails or the site breaks at runtime.
+
+For **visual / mock preview**, use a **static export**:
+
+| Setting | Value |
+|--------|--------|
+| **Build command** | `npm run build:preview` |
+| **Build output directory** | `out` |
+| **Environment variable** | `NEXT_PUBLIC_MOCK_PREVIEW` = `true` (optional; the script sets it) |
+
+`build:preview` exports static HTML/JS, uses mock catalog data, and runs checkout entirely in the browser.
+
+When you need real Supabase/Razorpay later, migrate to [@opennextjs/cloudflare](https://opennext.js.org/cloudflare) (Workers) instead of next-on-pages.
+
 ## Project structure
 
 ```

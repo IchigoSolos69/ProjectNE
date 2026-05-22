@@ -16,6 +16,8 @@
 # next.js
 /.next/
 /out/
+src/app/_api_cf_preview_backup/
+src/_actions_cf_preview_backup/
 
 # production
 /build
