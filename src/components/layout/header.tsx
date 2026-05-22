@@ -8,7 +8,6 @@ import { BRAND_NAME } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
-import { FamilyAuthDrawer } from "@/components/auth/family-auth-drawer";
 import { createClient } from "@/utils/supabase/client";
 
 export function Header() {
@@ -16,7 +15,6 @@ export function Header() {
   const { itemCount } = useCartTotals();
   const { user, logout } = useAuthStore();
   const pathname = usePathname();
-  const [authDrawerOpen, setAuthDrawerOpen] = React.useState(false);
   const [showDropdown, setShowDropdown] = React.useState(false);
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [categories, setCategories] = React.useState<{ name: string; slug: string }[]>([]);
@@ -186,21 +184,16 @@ export function Header() {
                   )}
                 </>
               ) : (
-                <FamilyAuthDrawer
-                  open={authDrawerOpen}
-                  onOpenChange={setAuthDrawerOpen}
-                  onSuccess={() => setAuthDrawerOpen(false)}
-                  trigger={
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 text-stone-600 hover:text-stone-900 hover:bg-stone-50"
-                      aria-label="Sign in"
-                    >
-                      <User className="h-5 w-5" />
-                    </Button>
-                  }
-                />
+                <Link href="/login">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-stone-600 hover:text-stone-900 hover:bg-stone-50"
+                    aria-label="Sign in"
+                  >
+                    <User className="h-5 w-5" />
+                  </Button>
+                </Link>
               )}
             </div>
 

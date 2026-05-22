@@ -14,14 +14,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCartStore, useCartTotals } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
-import { FamilyAuthDrawer } from "@/components/auth/family-auth-drawer";
 import { formatINR } from "@/lib/utils";
 
 export function CartSheet() {
   const { items, isOpen, closeCart, updateQuantity, removeItem } = useCartStore();
   const { subtotalPaise, itemCount } = useCartTotals();
   const { user, logout } = useAuthStore();
-  const [authDrawerOpen, setAuthDrawerOpen] = React.useState(false);
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -44,12 +42,13 @@ export function CartSheet() {
                   </p>
                 ) : (
                   <p className="mt-2 text-sm text-stone-500">
-                    <button
-                      onClick={() => setAuthDrawerOpen(true)}
+                    <Link
+                      href="/login"
+                      onClick={closeCart}
                       className="text-[#007A78] hover:underline font-semibold cursor-pointer text-left bg-transparent border-none p-0 inline-flex items-center"
                     >
                       Sign in
-                    </button>{" "}
+                    </Link>{" "}
                     to see if you have any saved items
                   </p>
                 )}
@@ -102,26 +101,19 @@ export function CartSheet() {
                           <span>Sign out</span>
                         </button>
                       ) : (
-                        <button
-                          onClick={() => setAuthDrawerOpen(true)}
-                          className="w-full flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors text-left cursor-pointer"
+                        <Link
+                          href="/login"
+                          onClick={closeCart}
+                          className="w-full flex items-center gap-3 py-3 px-1 text-sm font-medium text-stone-700 hover:text-stone-950 hover:bg-stone-50 rounded transition-colors text-left"
                         >
                           <User className="h-4 w-4 text-stone-500" />
                           <span>Sign in</span>
-                        </button>
+                        </Link>
                       )}
                     </li>
                   </ul>
                 </div>
               </div>
-
-              {!user && (
-                <FamilyAuthDrawer
-                  open={authDrawerOpen}
-                  onOpenChange={setAuthDrawerOpen}
-                  onSuccess={() => setAuthDrawerOpen(false)}
-                />
-              )}
             </div>
           ) : (
             <ul className="space-y-6">
