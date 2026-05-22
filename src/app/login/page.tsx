@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { Suspense } from "react";
 import { FamilyAuthPanel } from "@/components/auth/family-auth-panel";
 import { BRAND_NAME } from "@/lib/constants";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/account/profile";
 
   return (
     <div className="min-h-[calc(100vh-5rem)] bg-muted">
@@ -68,7 +71,7 @@ export default function LoginPage() {
           <div className="mx-auto w-full max-w-md rounded-2xl border border-border/80 bg-card p-6 shadow-xl sm:p-8">
             <FamilyAuthPanel
               showCharacters
-              onSuccess={() => router.push("/account/profile")}
+              onSuccess={() => router.push(next)}
             />
           </div>
 
@@ -79,5 +82,17 @@ export default function LoginPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-[calc(100vh-5rem)] bg-muted flex items-center justify-center">
+        <div className="text-sm text-muted-foreground">Loading...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

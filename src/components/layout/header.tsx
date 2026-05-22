@@ -69,13 +69,23 @@ export function Header() {
   ];
 
   const FALLBACK_CATEGORIES = [
+    // Parent categories
     { id: "cat-beddings-001", name: "Beddings", slug: "beddings", parent_id: null },
-    { id: "cat-towels-001", name: "Towels", slug: "towels", parent_id: null },
-    { id: "cat-pillows-001", name: "Pillows", slug: "pillows", parent_id: null },
-    { id: "subcat-sheets-001", name: "Bed Sheets", slug: "bed-sheets", parent_id: "cat-beddings-001" },
-    { id: "subcat-duvet-001", name: "Duvet Covers", slug: "duvet-covers", parent_id: "cat-beddings-001" },
-    { id: "subcat-bath-001", name: "Bath Towels", slug: "bath-towels", parent_id: "cat-towels-001" },
-    { id: "subcat-hand-001", name: "Hand Towels", slug: "hand-towels", parent_id: "cat-towels-001" },
+    { id: "cat-towels-001", name: "Bath Towels", slug: "bath-towels", parent_id: null },
+    { id: "cat-pillows-001", name: "Pillow Covers", slug: "pillow-covers", parent_id: null },
+    // Beddings subcategories
+    { id: "subcat-sheets-001", name: "Sheets", slug: "sheets", parent_id: "cat-beddings-001" },
+    { id: "subcat-duvet-001", name: "Duvets", slug: "duvets", parent_id: "cat-beddings-001" },
+    { id: "subcat-comforters-001", name: "Comforters", slug: "comforters", parent_id: "cat-beddings-001" },
+    // Bath Towels subcategories
+    { id: "subcat-hand-001", name: "Hand", slug: "hand", parent_id: "cat-towels-001" },
+    { id: "subcat-face-001", name: "Face", slug: "face", parent_id: "cat-towels-001" },
+    { id: "subcat-bath-001", name: "Bath", slug: "bath", parent_id: "cat-towels-001" },
+    { id: "subcat-mats-001", name: "Mats", slug: "mats", parent_id: "cat-towels-001" },
+    // Pillow Covers subcategories
+    { id: "subcat-standard-001", name: "Standard", slug: "standard", parent_id: "cat-pillows-001" },
+    { id: "subcat-king-001", name: "King", slug: "king", parent_id: "cat-pillows-001" },
+    { id: "subcat-euro-001", name: "Euro", slug: "euro", parent_id: "cat-pillows-001" },
   ];
 
   const activeCategories = categories.length > 0 ? categories : FALLBACK_CATEGORIES;

@@ -3,7 +3,7 @@ import { createClient } from "@/utils/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
   try {
-    return createClient(request);
+    return await createClient(request);
   } catch {
     return NextResponse.next({ request: { headers: request.headers } });
   }

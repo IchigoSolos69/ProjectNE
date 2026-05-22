@@ -2,11 +2,10 @@ export const BRAND_NAME = "Nestify Essentials";
 
 export { BRAND_COLORS } from "@/lib/brand-colors";
 
-/** Must match slugs in `src/lib/mock-data.ts` for preview/mock deploys */
 export const TOP_CATEGORIES = [
   { slug: "beddings", label: "Beddings" },
-  { slug: "towels", label: "Towels" },
-  { slug: "pillows", label: "Pillows" },
+  { slug: "bath-towels", label: "Bath Towels" },
+  { slug: "pillow-covers", label: "Pillow Covers" },
 ] as const;
 
 export const SUBCATEGORIES: Record<
@@ -14,12 +13,19 @@ export const SUBCATEGORIES: Record<
   { slug: string; label: string }[]
 > = {
   beddings: [
-    { slug: "bed-sheets", label: "Bed Sheets" },
-    { slug: "duvet-covers", label: "Duvet Covers" },
+    { slug: "sheets", label: "Sheets" },
+    { slug: "duvets", label: "Duvets" },
+    { slug: "comforters", label: "Comforters" },
   ],
-  towels: [
-    { slug: "bath-towels", label: "Bath Towels" },
-    { slug: "hand-towels", label: "Hand Towels" },
+  "bath-towels": [
+    { slug: "hand", label: "Hand" },
+    { slug: "face", label: "Face" },
+    { slug: "bath", label: "Bath" },
+    { slug: "mats", label: "Mats" },
   ],
-  pillows: [],
+  "pillow-covers": [
+    { slug: "standard", label: "Standard" },
+    { slug: "king", label: "King" },
+    { slug: "euro", label: "Euro" },
+  ],
 };

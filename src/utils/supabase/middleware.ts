@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSupabasePublicEnv } from "@/utils/supabase/env";
+import type { Database } from "../../../types/supabase";
 
-export const createClient = (request: NextRequest) => {
+export const createClient = async (request: NextRequest) => {
   const { url, key } = getSupabasePublicEnv();
 
   // Preview / static deploy: skip auth cookie refresh when Supabase is not configured
@@ -18,7 +19,7 @@ export const createClient = (request: NextRequest) => {
     request: { headers: request.headers },
   });
 
-  const supabase = createServerClient(url, key, {
+  const supabase = createServerClient<Database>(url, key, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -35,8 +36,16 @@ export const createClient = (request: NextRequest) => {
     },
   });
 
-  // Refresh session if expired (no-op when not logged in)
-  void supabase.auth.getUser();
+  // Refresh session if expired and check user auth status
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  if (!user && (pathname.startsWith("/account") || pathname.startsWith("/checkout"))) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = "/login";
+    loginUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(loginUrl);
+  }
 
   return supabaseResponse;
 };

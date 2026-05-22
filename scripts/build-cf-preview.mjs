@@ -15,7 +15,7 @@ const moves = [
   { from: path.join(root, "src", "app", "admin"), to: path.join(backupRoot, "app", "admin") },
   { from: path.join(root, "src", "actions"), to: path.join(backupRoot, "actions") },
   { from: path.join(root, "src", "components", "admin"), to: path.join(backupRoot, "components", "admin") },
-  { from: path.join(root, "src", "middleware.ts"), to: path.join(backupRoot, "middleware.ts") },
+  { from: path.join(root, "src", "proxy.ts"), to: path.join(backupRoot, "proxy.ts") },
 ];
 
 const checkoutActions = path.join(root, "src", "components", "checkout", "checkout-actions.ts");
