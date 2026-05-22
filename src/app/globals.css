@@ -11,8 +11,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-serif: var(--font-cormorant);
+  --font-sans: 'Selestin', var(--font-playfair), serif;
+  --font-serif: 'Selestin', var(--font-playfair), serif;
 }
 
 body {

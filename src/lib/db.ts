@@ -1,8 +1,19 @@
 import type { Category, Product, Order } from "@/types/database";
 import { createAdminClient } from "@/lib/supabase/admin";
+import {
+  getAllCategories,
+  getProductBySlug as getMockProductBySlug,
+  getProductsByCategoryId as getMockProductsByCategoryId,
+  MOCK_PRODUCTS,
+} from "@/lib/mock-data";
+import { isPreviewBuild } from "@/lib/preview-build";
 
 // Product APIs
 export async function getProducts(): Promise<Product[]> {
+  if (isPreviewBuild) {
+    return MOCK_PRODUCTS.filter((p) => p.is_active);
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("products")
@@ -16,6 +27,10 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
+  if (isPreviewBuild) {
+    return getMockProductBySlug(slug);
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("products")
@@ -30,6 +45,10 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 }
 
 export async function getProductsByCategoryId(categoryId: string): Promise<Product[]> {
+  if (isPreviewBuild) {
+    return getMockProductsByCategoryId(categoryId);
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("products")
@@ -43,6 +62,10 @@ export async function getProductsByCategoryId(categoryId: string): Promise<Produ
 }
 
 export async function getCategories(): Promise<Category[]> {
+  if (isPreviewBuild) {
+    return getAllCategories();
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("categories")

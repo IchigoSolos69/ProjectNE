@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCategoryBySlug, getProductsByCategorySlug, getSubcategories } from "@/lib/catalog";
 import { ProductGrid } from "@/components/products/product-grid";
+import { isPreviewBuild } from "@/lib/preview-build";
+import { getStaticCategoryParams } from "@/lib/mock-data";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +12,7 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  return [];
+  return isPreviewBuild ? getStaticCategoryParams() : [];
 }
 
 export async function generateMetadata({ params }: PageProps) {

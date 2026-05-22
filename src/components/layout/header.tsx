@@ -59,10 +59,10 @@ export function Header() {
     })),
     ...(categories.length === 0
       ? [
-          { label: "BEDDING", href: "/shop/beddings" },
-          { label: "BATH", href: "/shop/bath-towels" },
-          { label: "PILLOWS", href: "/shop/pillow-covers" },
-        ]
+        { label: "BEDDING", href: "/shop/beddings" },
+        { label: "BATH", href: "/shop/bath-towels" },
+        { label: "PILLOWS", href: "/shop/pillow-covers" },
+      ]
       : []),
     { label: "SALE", href: "/shop/beddings", isSale: true },
   ];
@@ -75,10 +75,10 @@ export function Header() {
 
       {/* Main Header Container */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        
+
         {/* Top Row: Track order, Logo, Icons */}
         <div className="flex h-20 items-center justify-between gap-4 border-b border-stone-100">
-          
+
           {/* Left Side: Track order */}
           <div className="flex-1 hidden md:flex items-center">
             <Link
@@ -102,14 +102,14 @@ export function Header() {
                 </span>
               </div>
               <span className="text-[9px] uppercase tracking-[0.25em] text-stone-400 mt-1 font-semibold">
-                my heart for home
+                Style Your Space…
               </span>
             </Link>
           </div>
 
           {/* Right Side: Search, Wishlist, Account, Cart */}
           <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
-            
+
             {/* Search */}
             <Button
               variant="ghost"
@@ -149,7 +149,7 @@ export function Header() {
                   >
                     <UserCheck className="h-5 w-5" />
                   </Button>
-                  
+
                   {showDropdown && (
                     <div className="absolute right-0 mt-2 w-48 rounded-lg border border-stone-200 bg-white py-1 shadow-lg ring-1 ring-black/5 animate-in fade-in slide-in-from-top-2 duration-150">
                       <div className="px-4 py-2 border-b border-stone-100">
@@ -228,11 +228,10 @@ export function Header() {
             <Link
               key={idx}
               href={link.href}
-              className={`text-[12px] font-bold tracking-wider transition-colors whitespace-nowrap ${
-                link.isSale
-                  ? "text-red-600 hover:text-red-800"
-                  : "text-stone-700 hover:text-stone-950"
-              }`}
+              className={`text-[12px] font-bold tracking-wider transition-colors whitespace-nowrap ${link.isSale
+                ? "text-red-600 hover:text-red-800"
+                : "text-stone-700 hover:text-stone-950"
+                }`}
             >
               {link.label}
             </Link>

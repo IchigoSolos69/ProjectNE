@@ -102,6 +102,15 @@ export const useAuthStore = create<AuthState>((set) => ({
 // Initialize active session and subscribe to auth state changes in browser environments
 if (typeof window !== "undefined") {
   const syncSession = async () => {
+    const isMockPreview = process.env.NEXT_PUBLIC_MOCK_PREVIEW === "true";
+    const { getSupabasePublicEnv } = await import("@/utils/supabase/env");
+    const { url, key } = getSupabasePublicEnv();
+
+    if (isMockPreview || !url || !key) {
+      useAuthStore.setState({ loading: false });
+      return;
+    }
+
     try {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();

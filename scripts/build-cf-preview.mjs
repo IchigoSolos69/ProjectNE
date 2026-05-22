@@ -29,6 +29,43 @@ const checkoutActionsPreview = path.join(
 );
 
 const restored = [];
+const dynamicPatchFiles = [
+  "src/app/page.tsx",
+  "src/app/shop/[category]/page.tsx",
+  "src/app/shop/[category]/[subcategory]/page.tsx",
+  "src/app/product/[slug]/page.tsx",
+];
+const dynamicPatches = [];
+
+function patchCatalogPagesForStaticExport() {
+  for (const rel of dynamicPatchFiles) {
+    const file = path.join(root, rel);
+    if (!fs.existsSync(file)) continue;
+    const original = fs.readFileSync(file, "utf8");
+    if (!original.includes('export const dynamic = "force-dynamic"')) continue;
+    const backup = path.join(backupRoot, "dynamic-patches", rel);
+    fs.mkdirSync(path.dirname(backup), { recursive: true });
+    fs.writeFileSync(backup, original);
+    fs.writeFileSync(
+      file,
+      original.replace(
+        'export const dynamic = "force-dynamic"',
+        'export const dynamic = "force-static"',
+      ),
+    );
+    dynamicPatches.push({ file, backup });
+    console.log(`[build-cf-preview] Patched ${rel} → force-static`);
+  }
+}
+
+function restoreDynamicPatches() {
+  for (const { file, backup } of dynamicPatches.reverse()) {
+    if (!fs.existsSync(backup)) continue;
+    fs.copyFileSync(backup, file);
+    console.log(`[build-cf-preview] Restored ${path.relative(root, file)} dynamic export`);
+  }
+  dynamicPatches.length = 0;
+}
 
 function hidePath(from, to) {
   if (!fs.existsSync(from)) return;
@@ -44,8 +81,17 @@ function restoreAll() {
   for (const { from, to } of restored.reverse()) {
     if (!fs.existsSync(to)) continue;
     fs.mkdirSync(path.dirname(from), { recursive: true });
-    if (fs.existsSync(from)) fs.rmSync(from, { recursive: true, force: true });
-    fs.cpSync(to, from, { recursive: true });
+    if (fs.existsSync(from)) {
+      const stat = fs.statSync(from);
+      if (stat.isDirectory()) fs.rmSync(from, { recursive: true, force: true });
+      else fs.rmSync(from, { force: true });
+    }
+    const backupStat = fs.statSync(to);
+    if (backupStat.isDirectory()) {
+      fs.cpSync(to, from, { recursive: true });
+    } else {
+      fs.copyFileSync(to, from);
+    }
     console.log(`[build-cf-preview] Restored ${path.relative(root, from)}`);
   }
   if (fs.existsSync(backupRoot)) {
@@ -75,6 +121,7 @@ for (const { from, to } of moves) {
   hidePath(from, to);
 }
 usePreviewCheckoutActions();
+patchCatalogPagesForStaticExport();
 
 const nextCache = path.join(root, ".next");
 if (fs.existsSync(nextCache)) {
@@ -94,5 +141,6 @@ const result = spawnSync("npx", ["next", "build"], {
 });
 
 restoreCheckoutActions();
+restoreDynamicPatches();
 restoreAll();
 process.exit(result.status ?? 1);

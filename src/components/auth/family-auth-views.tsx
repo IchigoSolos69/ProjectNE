@@ -37,8 +37,9 @@ export function AuthHomeView({ onSuccess, onMoodChange }: ViewProps) {
     setLoading(true);
     try {
       await loginWithGoogle();
-      setView("success");
-      onSuccess?.();
+      // OAuth redirects away; success view runs after /auth/callback
+    } catch (err) {
+      console.error(err);
     } finally {
       setLoading(false);
     }
