@@ -3,13 +3,13 @@ import { verifyWebhookSignature } from "@/lib/razorpay";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fulfillPaidOrder } from "@/lib/orders";
 
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function POST(request: NextRequest) {
   const rawBody = await request.text();
   const signature = request.headers.get("x-razorpay-signature");
 
-  if (!verifyWebhookSignature(rawBody, signature)) {
+  if (!(await verifyWebhookSignature(rawBody, signature))) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

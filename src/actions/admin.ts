@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import {
   getProducts,
   getOrders,
@@ -59,6 +60,9 @@ export async function updateProductInventory(
       inventory,
       price_paise: pricePaise,
     });
+    revalidatePath("/");
+    revalidatePath("/shop/[category]", "layout");
+    revalidatePath("/product/[slug]", "layout");
     return { success: true, product };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Failed to update product" };
@@ -100,7 +104,9 @@ export async function addNewProduct(productData: {
       is_active: true,
       metadata: {},
     });
-
+    revalidatePath("/");
+    revalidatePath("/shop/[category]", "layout");
+    revalidatePath("/product/[slug]", "layout");
     return { success: true, product: newProduct };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Failed to add product" };
@@ -119,6 +125,7 @@ export async function updateOrderStatus(
 
   try {
     const order = await dbUpdateOrderStatus(orderId, status);
+    revalidatePath("/admin");
     return { success: true, order };
   } catch (err) {
     return { success: false, error: err instanceof Error ? err.message : "Failed to update order status" };

@@ -11,6 +11,7 @@ const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const foldersToHide = [
   { from: path.join(root, "src", "app", "api"), backup: path.join(root, "src", "app", "_api_cf_preview_backup") },
   { from: path.join(root, "src", "actions"), backup: path.join(root, "src", "_actions_cf_preview_backup") },
+  { from: path.join(root, "src", "app", "admin"), backup: path.join(root, "src", "app", "_admin_cf_preview_backup") },
 ];
 
 const checkoutActions = path.join(root, "src", "components", "checkout", "checkout-actions.ts");
