@@ -17,12 +17,6 @@ const nextConfig: NextConfig = {
           unoptimized: true,
           remotePatterns: imageRemotePatterns,
         },
-        turbopack: {
-          resolveAlias: {
-            "@/components/checkout/checkout-actions":
-              "./src/components/checkout/checkout-actions.preview.ts",
-          },
-        },
       }
     : {
         images: {

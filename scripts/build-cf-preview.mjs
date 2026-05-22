@@ -1,6 +1,5 @@
 /**
  * Static export build for Cloudflare Pages (mock / visual preview).
- * Temporarily moves server-only folders aside (incompatible with output: "export").
  */
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -14,7 +13,24 @@ const foldersToHide = [
   { from: path.join(root, "src", "actions"), backup: path.join(root, "src", "_actions_cf_preview_backup") },
 ];
 
+const checkoutActions = path.join(root, "src", "components", "checkout", "checkout-actions.ts");
+const checkoutActionsServerBackup = path.join(
+  root,
+  "src",
+  "components",
+  "checkout",
+  "_checkout-actions.server.ts.bak",
+);
+const checkoutActionsPreview = path.join(
+  root,
+  "src",
+  "components",
+  "checkout",
+  "checkout-actions.preview.ts",
+);
+
 const moved = [];
+let swappedCheckoutActions = false;
 
 function hideFolder(from, backup) {
   if (!fs.existsSync(from)) return;
@@ -35,9 +51,25 @@ function restoreFolders() {
   }
 }
 
+function usePreviewCheckoutActions() {
+  if (!fs.existsSync(checkoutActionsPreview)) return;
+  fs.cpSync(checkoutActions, checkoutActionsServerBackup);
+  fs.cpSync(checkoutActionsPreview, checkoutActions);
+  swappedCheckoutActions = true;
+  console.log("[build-cf-preview] Using checkout-actions.preview.ts for build");
+}
+
+function restoreCheckoutActions() {
+  if (!swappedCheckoutActions || !fs.existsSync(checkoutActionsServerBackup)) return;
+  fs.cpSync(checkoutActionsServerBackup, checkoutActions);
+  fs.rmSync(checkoutActionsServerBackup, { force: true });
+  console.log("[build-cf-preview] Restored checkout-actions.ts");
+}
+
 for (const { from, backup } of foldersToHide) {
   hideFolder(from, backup);
 }
+usePreviewCheckoutActions();
 
 const result = spawnSync("npx", ["next", "build"], {
   cwd: root,
@@ -50,5 +82,6 @@ const result = spawnSync("npx", ["next", "build"], {
   },
 });
 
+restoreCheckoutActions();
 restoreFolders();
 process.exit(result.status ?? 1);
