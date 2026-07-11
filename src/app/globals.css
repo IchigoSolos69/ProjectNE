@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+:root {
+  --background: #F9F8F6;
+  --foreground: #1E201E;
+  
+  --primary: #2C3E35; /* Deep Sage / Forest */
+  --primary-light: #4A5F54;
+  --secondary: #8FA89B; /* Soft Sage */
+  --accent: #D2A28C; /* Warm Terracotta / Clay */
+  --sand: #F3EFE9; /* Warm Linen Sand */
+  --charcoal: #2A2C2B;
+  
+  --border: #E5E1DA;
+  --ring: #2C3E35;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-light: var(--primary-light);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --color-sand: var(--sand);
+  --color-charcoal: var(--charcoal);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+  
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fade-in 0.2s ease-out forwards;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: #D5CFC6;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #AFA89C;
+}
+
+/* Smooth selection colors */
+::selection {
+  background-color: #E2ECE9;
+  color: #1E201E;
+}
+
+/* Premium utility classes */
+.glassmorphism {
+  background: rgba(249, 248, 246, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.text-stroke {
+  -webkit-text-stroke: 1px currentColor;
+  color: transparent;
+}
+
