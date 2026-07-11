@@ -20,16 +20,16 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Somnia | Premium Organic Bedding & Sleep Sanctuary",
+  title: "RareComforts | Premium Organic Bedding & Sleep Sanctuary",
   description:
-    "Discover the ultimate sleep experience with Somnia. Sustainably crafted Egyptian cotton sheets, linen sets, and down pillows designed for pure morning comfort.",
+    "Discover the ultimate sleep experience with RareComforts. Sustainably crafted Egyptian cotton sheets, linen sets, and down pillows designed for pure morning comfort.",
   keywords: ["premium bedding", "organic sheets", "egyptian cotton bedding", "linen duvet cover", "down pillows", "luxury sleep"],
-  authors: [{ name: "Somnia Bedding" }],
+  authors: [{ name: "RareComforts Bedding" }],
   openGraph: {
-    title: "Somnia | Premium Organic Bedding",
+    title: "RareComforts | Premium Organic Bedding",
     description: "Sustainably crafted bedding designed for restorative sleep and quiet morning luxury.",
-    url: "https://somniabedding.com",
-    siteName: "Somnia",
+    url: "https://rarecomforts.com",
+    siteName: "RareComforts",
     locale: "en_US",
     type: "website",
   },

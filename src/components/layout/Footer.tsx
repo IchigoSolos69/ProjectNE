@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
           <div className="space-y-8 xl:col-span-1">
             <Link href="/" className="inline-block group">
               <span className="font-serif text-2xl font-semibold tracking-wide text-white group-hover:text-brand-sky transition-colors duration-300">
-                SOMNIA
+                RareComforts
               </span>
             </Link>
             <p className="text-sm text-brand-sky/85 max-w-xs leading-relaxed">
@@ -159,7 +159,7 @@ export const Footer: React.FC = () => {
         {/* Bottom bar */}
         <div className="mt-16 border-t border-brand-sky/20 pt-8 flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
           <p className="text-xs text-brand-sky/50">
-            &copy; {new Date().getFullYear()} Somnia Inc. All rights reserved. Made with love for premium sleep.
+            &copy; {new Date().getFullYear()} RareComforts Inc. All rights reserved. Made with love for premium sleep.
           </p>
           <div className="flex items-center space-x-6">
             <span className="text-brand-sky/50 hover:text-white transition-colors duration-300 cursor-pointer" aria-label="Instagram">

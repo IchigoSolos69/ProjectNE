@@ -26,7 +26,7 @@ export const Navbar: React.FC = () => {
           <div className="flex-1 md:flex-initial">
             <Link href="/" className="inline-block group">
               <span className="font-serif text-2xl font-semibold tracking-wide text-brand-midnight transition-colors duration-300 group-hover:text-brand-royal">
-                SOMNIA
+                RareComforts
               </span>
               <span className="block h-[1px] w-0 bg-brand-royal transition-all duration-300 group-hover:w-full"></span>
             </Link>

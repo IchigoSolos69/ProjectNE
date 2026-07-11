@@ -71,7 +71,7 @@ export const BlanketTransition: React.FC<BlanketTransitionProps> = ({ triggerId 
   return (
     <div
       ref={blanketRef}
-      className="absolute top-0 left-0 w-full h-full rounded-t-[4rem] md:rounded-t-[10vw] z-20 shadow-[0_-35px_80px_rgba(28,77,141,0.45),_inset_0_20px_40px_rgba(255,255,255,0.75)] border-t border-[#4988C4]/25 transition-colors duration-300 pointer-events-auto overflow-hidden"
+      className="absolute top-0 left-0 w-full h-full rounded-t-[4rem] md:rounded-t-[10vw] z-20 shadow-[0_-35px_80px_rgba(28,77,141,0.45),_inset_0_20px_40px_rgba(255,255,255,0.75)] border-t border-[#4988C4]/25 transition-colors duration-300 pointer-events-auto overflow-hidden relative flex items-center justify-center"
       style={{
         background: "radial-gradient(circle at 50% 30%, #F1F9FC 0%, #BDE8F5 70%, #A2D5E3 100%)"
       }}
@@ -93,11 +93,11 @@ export const BlanketTransition: React.FC<BlanketTransitionProps> = ({ triggerId 
         <rect width="100%" height="100%" fill="url(#damask-weave)" />
       </svg>
 
-      {/* Pinned text container, lifted slightly above the absolute center (35% top) */}
-      <div ref={textRef} className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl px-6 text-center">
+      {/* Pinned text container, lifted slightly above the absolute center (35% top) with high z-index */}
+      <div ref={textRef} className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-4 z-40 text-center max-w-4xl">
         <ScrollFloat
           animationDuration={1.3}
-          scrollStart="top center"
+          scrollStart="top 85%"
           scrollEnd="center center"
           containerClassName="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase"
           textClassName="text-[#0F2854] font-serif tracking-tight text-center justify-center flex-wrap"
