@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #F9F8F6;
-  --foreground: #1E201E;
+  --background: #F6FAFC; /* Soft linen white with cold blue undertone */
+  --foreground: #0A142F; /* Dark navy */
   
-  --primary: #2C3E35; /* Deep Sage / Forest */
-  --primary-light: #4A5F54;
-  --secondary: #8FA89B; /* Soft Sage */
-  --accent: #D2A28C; /* Warm Terracotta / Clay */
-  --sand: #F3EFE9; /* Warm Linen Sand */
-  --charcoal: #2A2C2B;
+  --primary: #0F2854; /* Deep Navy */
+  --primary-light: #1C4D8D; /* Ocean Blue */
+  --secondary: #4988C4; /* Sky Blue */
+  --accent: #1C4D8D; /* Accent Blue */
+  --sand: #EAF4F8; /* Soft ice-blue backdrop */
+  --charcoal: #0F2854;
   
-  --border: #E5E1DA;
-  --ring: #2C3E35;
+  --border: #D2E5ED;
+  --ring: #1C4D8D;
 }
 
 @theme inline {
@@ -67,22 +67,22 @@ body {
   background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
-  background: #D5CFC6;
+  background: #C4D5DD;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #AFA89C;
+  background: #9BB8C5;
 }
 
 /* Smooth selection colors */
 ::selection {
-  background-color: #E2ECE9;
-  color: #1E201E;
+  background-color: #BDE8F5;
+  color: #0F2854;
 }
 
 /* Premium utility classes */
 .glassmorphism {
-  background: rgba(249, 248, 246, 0.75);
+  background: rgba(246, 250, 252, 0.75);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
