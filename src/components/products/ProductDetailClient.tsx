@@ -49,7 +49,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       <div className="mb-8">
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-foreground/60 hover:text-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-midnight/60 hover:text-brand-royal transition-all duration-300"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to bedding collection
@@ -59,8 +59,8 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         {/* Left Column: Image Gallery Showcase */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Main Image */}
-          <div className="relative aspect-square w-full bg-sand rounded-2xl overflow-hidden border border-border/40 shadow-sm">
+          {/* Main Image with brand-sky placeholder background */}
+          <div className="relative aspect-square w-full bg-brand-sky/30 rounded-2xl overflow-hidden border border-brand-sky/40 shadow-sm">
             <Image
               src={activeImage}
               alt={product.name}
@@ -78,10 +78,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 <button
                   key={idx}
                   onClick={() => setActiveImage(img)}
-                  className={`relative h-20 w-20 bg-sand rounded-lg overflow-hidden border transition-all ${
+                  className={`relative h-20 w-20 bg-brand-sky/30 rounded-lg overflow-hidden border transition-all duration-300 ${
                     activeImage === img
-                      ? "border-primary ring-2 ring-primary/20"
-                      : "border-border hover:border-primary-light"
+                      ? "border-brand-royal ring-2 ring-brand-royal/20"
+                      : "border-brand-sky hover:border-brand-royal"
                   }`}
                 >
                   <Image
@@ -102,18 +102,18 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
         <div className="lg:col-span-5 space-y-8">
           <div>
             {/* Category */}
-            <span className="text-xs font-semibold uppercase tracking-widest text-accent">
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
               {product.category}
             </span>
             {/* Title */}
-            <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-primary mt-2">
+            <h1 className="font-serif text-3xl md:text-4xl font-bold tracking-tight text-brand-midnight mt-2">
               {product.name}
             </h1>
             
             {/* Ratings & Price */}
-            <div className="flex items-center justify-between mt-4 pb-6 border-b border-border/40">
+            <div className="flex items-center justify-between mt-4 pb-6 border-b border-brand-sky/40">
               <div className="flex items-center gap-1.5">
-                <div className="flex text-accent">
+                <div className="flex text-brand-ocean">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
@@ -123,36 +123,36 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-foreground/60">
+                <span className="text-xs font-bold text-brand-midnight/60">
                   {product.rating} ({product.reviewsCount} reviews)
                 </span>
               </div>
-              <span className="text-xl font-bold text-primary">${product.price}</span>
+              <span className="text-xl font-bold text-brand-royal">${product.price}</span>
             </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-foreground/75 leading-relaxed">
+          <p className="text-sm text-brand-midnight/75 leading-relaxed">
             {product.description}
           </p>
 
           {/* Size Selector */}
           <div className="space-y-3">
             <div className="flex justify-between items-baseline">
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+              <span className="text-xs font-bold uppercase tracking-wider text-brand-midnight">
                 Select Bed Size
               </span>
-              <span className="text-xs text-foreground/50">Standard dimensions apply</span>
+              <span className="text-xs text-brand-midnight/50">Standard dimensions apply</span>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {product.sizes.map((size) => (
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`py-3 rounded-md text-xs font-semibold uppercase tracking-wider border transition-all duration-200 ${
+                  className={`py-3 rounded-md text-xs font-semibold uppercase tracking-wider border transition-all duration-300 ${
                     selectedSize === size
-                      ? "border-primary bg-primary text-white shadow-sm"
-                      : "border-border hover:border-primary-light text-primary bg-transparent"
+                      ? "border-brand-royal bg-brand-royal text-white shadow-sm"
+                      : "border-brand-sky hover:border-brand-royal text-brand-midnight bg-transparent"
                   }`}
                 >
                   {size}
@@ -164,20 +164,20 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           {/* Quantity and Cart Actions */}
           <div className="flex gap-4 items-stretch">
             {/* Quantity */}
-            <div className="flex items-center border border-border rounded-md bg-sand/20">
+            <div className="flex items-center border border-brand-sky/40 rounded-md bg-brand-sky/20">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-3 text-foreground/60 hover:text-primary transition-colors"
+                className="px-3 text-brand-midnight/60 hover:text-brand-royal transition-colors duration-300"
                 aria-label="Decrease product count"
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="text-sm font-semibold w-8 text-center text-primary">
+              <span className="text-sm font-semibold w-8 text-center text-brand-midnight">
                 {quantity}
               </span>
               <button
                 onClick={() => setQuantity((q) => q + 1)}
-                className="px-3 text-foreground/60 hover:text-primary transition-colors"
+                className="px-3 text-brand-midnight/60 hover:text-brand-royal transition-colors duration-300"
                 aria-label="Increase product count"
               >
                 <Plus className="h-4 w-4" />
@@ -187,7 +187,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             {/* Add to Cart */}
             <button
               onClick={() => addToCart(product, selectedSize, quantity)}
-              className="flex-1 py-4 bg-primary hover:bg-primary-light text-white text-xs font-semibold uppercase tracking-widest rounded-md shadow-sm transition-colors duration-200"
+              className="flex-1 py-4 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-widest rounded-md shadow-sm transition-all duration-300"
             >
               Add to Shopping Cart
             </button>
@@ -195,10 +195,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             {/* Wishlist Button */}
             <button
               onClick={() => setWishlist(!wishlist)}
-              className={`px-4 border rounded-md transition-colors flex items-center justify-center ${
+              className={`px-4 border rounded-md transition-all duration-300 flex items-center justify-center ${
                 wishlist
-                  ? "border-accent text-accent bg-accent/5"
-                  : "border-border hover:border-primary-light text-foreground/60 hover:text-primary"
+                  ? "border-brand-royal text-brand-royal bg-brand-royal/5"
+                  : "border-brand-sky hover:border-brand-royal text-brand-midnight/60 hover:text-brand-royal"
               }`}
               aria-label="Toggle wishlist"
             >
@@ -206,23 +206,23 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             </button>
           </div>
 
-          {/* Product Highlights Checkmarks */}
-          <div className="bg-sand/25 p-4 rounded-xl border border-border/30 space-y-3">
+          {/* Product Highlights Checkmarks - brand-sky container */}
+          <div className="bg-brand-sky/15 p-4 rounded-xl border border-brand-sky/40 space-y-3">
             {product.features.map((feature, idx) => (
-              <div key={idx} className="flex items-start gap-2.5 text-xs text-foreground/85">
-                <CheckCircle2 className="h-4 w-4 text-secondary flex-shrink-0 mt-0.5" />
+              <div key={idx} className="flex items-start gap-2.5 text-xs text-brand-midnight/85">
+                <CheckCircle2 className="h-4 w-4 text-brand-royal flex-shrink-0 mt-0.5" />
                 <span>{feature}</span>
               </div>
             ))}
           </div>
 
           {/* Premium Accordions */}
-          <div className="border-t border-border/40 divide-y divide-border/40">
+          <div className="border-t border-brand-sky/30 divide-y divide-brand-sky/30">
             {/* Accordion 1: Details */}
             <div className="py-4">
               <button
                 onClick={() => toggleAccordion("materials")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-primary"
+                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-brand-midnight"
               >
                 <span>Details & Materials</span>
                 <ChevronDown
@@ -232,7 +232,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 />
               </button>
               {accordionOpen.materials && (
-                <div className="mt-3 text-xs text-foreground/75 leading-relaxed pl-1">
+                <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1">
                   {product.details}
                 </div>
               )}
@@ -242,7 +242,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             <div className="py-4">
               <button
                 onClick={() => toggleAccordion("care")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-primary"
+                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-brand-midnight"
               >
                 <span>Care Instructions</span>
                 <ChevronDown
@@ -252,7 +252,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 />
               </button>
               {accordionOpen.care && (
-                <div className="mt-3 text-xs text-foreground/75 leading-relaxed pl-1 space-y-2">
+                <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2">
                   <p>Machine wash cold on gentle cycle with similar colors. We recommend using a mild, liquid biodegradable detergent.</p>
                   <p>Tumble dry low or line dry to preserve fabric longevity. Avoid chlorine bleaches, fabric softeners, and harsh dryer sheets.</p>
                 </div>
@@ -263,7 +263,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             <div className="py-4">
               <button
                 onClick={() => toggleAccordion("shipping")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-primary"
+                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-brand-midnight"
               >
                 <span>Shipping & Returns</span>
                 <ChevronDown
@@ -273,7 +273,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 />
               </button>
               {accordionOpen.shipping && (
-                <div className="mt-3 text-xs text-foreground/75 leading-relaxed pl-1 space-y-2">
+                <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2">
                   <p><strong>Free carbon-neutral shipping</strong> on all continental orders. Shipments arrive within 3–7 business days.</p>
                   <p><strong>100-Night Sleep Guarantee:</strong> If you aren't completely content with your sleep experience, request a full refund within 100 days. We provide free prepaid return labels.</p>
                 </div>
@@ -284,17 +284,17 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
       </div>
 
       {/* Related Products Grid */}
-      <div className="mt-24 pt-16 border-t border-border/40">
-        <h2 className="font-serif text-2xl font-bold tracking-tight text-primary text-center mb-12">
+      <div className="mt-24 pt-16 border-t border-brand-sky/30">
+        <h2 className="font-serif text-2xl font-bold tracking-tight text-brand-midnight text-center mb-12">
           Complete your bedroom sanctuary
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
           {relatedProducts.map((p) => (
             <div
               key={p.id}
-              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-border/40 shadow-sm transition-all duration-300 hover:shadow-md"
+              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-300 hover:shadow-md"
             >
-              <Link href={`/products/${p.id}`} className="relative block aspect-square bg-sand overflow-hidden border-b border-border/30">
+              <Link href={`/products/${p.id}`} className="relative block aspect-square bg-brand-sky/30 border-b border-brand-sky/20 overflow-hidden">
                 <Image
                   src={p.image}
                   alt={p.name}
@@ -305,15 +305,15 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 />
               </Link>
               <div className="p-5 flex-grow flex flex-col">
-                <h3 className="font-serif text-sm font-bold text-primary group-hover:text-primary-light transition-colors mb-1 truncate">
+                <h3 className="font-serif text-sm font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-300 mb-1 truncate">
                   <Link href={`/products/${p.id}`}>{p.name}</Link>
                 </h3>
-                <p className="text-xs text-foreground/50 mb-3">{p.category}</p>
+                <p className="text-xs text-brand-midnight/55 mb-3">{p.category}</p>
                 <div className="flex items-center justify-between mt-auto">
-                  <span className="text-xs font-semibold text-primary-light">${p.price}</span>
+                  <span className="text-xs font-semibold text-brand-royal">${p.price}</span>
                   <button
                     onClick={() => addToCart(p, "Queen")}
-                    className="text-[10px] font-bold uppercase tracking-wider text-primary border-b border-primary/20 hover:border-primary transition-colors pb-0.5"
+                    className="text-[10px] font-bold uppercase tracking-wider text-brand-royal border-b border-brand-royal/20 hover:text-brand-ocean hover:border-brand-ocean transition-all duration-300 pb-0.5"
                   >
                     Quick Add
                   </button>

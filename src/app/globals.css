@@ -27,6 +27,12 @@
   --color-border: var(--border);
   --color-ring: var(--ring);
   
+  /* Strict brand colors configuration */
+  --color-brand-midnight: #0F2854;
+  --color-brand-royal: #1C4D8D;
+  --color-brand-ocean: #4988C4;
+  --color-brand-sky: #BDE8F5;
+  
   --font-serif: "Playfair Display", Georgia, serif;
   --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
   

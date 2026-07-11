@@ -25,10 +25,10 @@ export const Navbar: React.FC = () => {
           {/* Logo */}
           <div className="flex-1 md:flex-initial">
             <Link href="/" className="inline-block group">
-              <span className="font-serif text-2xl font-semibold tracking-wide text-primary transition-colors group-hover:text-primary-light">
+              <span className="font-serif text-2xl font-semibold tracking-wide text-brand-midnight transition-colors duration-300 group-hover:text-brand-royal">
                 SOMNIA
               </span>
-              <span className="block h-[1px] w-0 bg-accent transition-all duration-300 group-hover:w-full"></span>
+              <span className="block h-[1px] w-0 bg-brand-royal transition-all duration-300 group-hover:w-full"></span>
             </Link>
           </div>
 
@@ -40,12 +40,12 @@ export const Navbar: React.FC = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative font-sans text-sm font-medium tracking-wide transition-colors hover:text-primary py-2 ${
-                    isActive ? "text-primary font-semibold" : "text-foreground/70"
+                  className={`relative font-sans text-sm font-medium tracking-wide transition-colors duration-300 hover:text-brand-royal py-2 ${
+                    isActive ? "text-brand-royal font-semibold" : "text-brand-midnight/70"
                   } group`}
                 >
                   {link.label}
-                  <span className={`absolute bottom-0 left-0 h-[2px] bg-primary-light transition-all duration-300 ${
+                  <span className={`absolute bottom-0 left-0 h-[2px] bg-brand-royal transition-all duration-300 ${
                     isActive ? "w-full" : "w-0 group-hover:w-full"
                   }`}></span>
                 </Link>
@@ -58,12 +58,12 @@ export const Navbar: React.FC = () => {
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 text-foreground/80 hover:text-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-full hover:bg-sand/60"
+              className="relative p-2.5 text-brand-midnight/80 hover:text-brand-royal transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-royal focus:ring-offset-2 rounded-full hover:bg-brand-sky/30"
               aria-label="Open Shopping Cart"
             >
               <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
               {cartCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[10px] font-bold text-white animate-fade-in shadow-sm">
+                <span className="absolute -top-0.5 -right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand-royal text-[10px] font-bold text-white animate-fade-in shadow-sm">
                   {cartCount}
                 </span>
               )}
@@ -72,7 +72,7 @@ export const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-foreground/80 hover:text-primary transition-colors duration-200 md:hidden focus:outline-none"
+              className="p-2 text-brand-midnight/80 hover:text-brand-royal transition-colors duration-200 md:hidden focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? (
@@ -94,7 +94,7 @@ export const Navbar: React.FC = () => {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-base font-medium text-foreground/80 hover:text-primary transition-colors hover:bg-sand/30 px-3 rounded-lg"
+                className="block py-3 text-base font-medium text-brand-midnight/80 hover:text-brand-royal transition-all duration-200 hover:bg-brand-sky/20 px-3 rounded-lg"
               >
                 {link.label}
               </Link>
