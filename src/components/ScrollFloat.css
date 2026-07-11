@@ -2,14 +2,18 @@
   overflow: hidden;
   display: block;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.15;
+  padding: 0 0.25rem;
 }
 
 .scroll-float-text {
   display: inline-flex;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: baseline;
+  row-gap: 0.15em;
   width: 100%;
+  max-width: 100%;
 }
 
 .scroll-float-text .char {

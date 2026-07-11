@@ -1,15 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import './ScrollFloat.css';
+import { useEffect, useMemo, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import "./ScrollFloat.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
 interface ScrollFloatProps {
   children: string;
-  scrollContainerRef?: React.RefObject<HTMLElement | null>;
+  triggerId?: string;
   containerClassName?: string;
   textClassName?: string;
   animationDuration?: number;
@@ -21,21 +21,21 @@ interface ScrollFloatProps {
 
 const ScrollFloat = ({
   children,
-  scrollContainerRef,
-  containerClassName = '',
-  textClassName = '',
+  triggerId,
+  containerClassName = "",
+  textClassName = "",
   animationDuration = 1,
-  ease = 'back.inOut(2)',
-  scrollStart = 'center bottom+=50%',
-  scrollEnd = 'bottom bottom-=40%',
-  stagger = 0.03
+  ease = "power3.out",
+  scrollStart = "top+=50% top",
+  scrollEnd = "top+=80% top",
+  stagger = 0.025,
 }: ScrollFloatProps) => {
   const containerRef = useRef<HTMLHeadingElement>(null);
 
   const splitText = useMemo(() => {
-    return children.split('').map((char, index) => (
+    return children.split("").map((char, index) => (
       <span className="char" key={index}>
-        {char === ' ' ? '\u00A0' : char}
+        {char === " " ? "\u00A0" : char}
       </span>
     ));
   }, [children]);
@@ -44,37 +44,43 @@ const ScrollFloat = ({
     const el = containerRef.current;
     if (!el) return;
 
-    const scroller = scrollContainerRef && scrollContainerRef.current ? scrollContainerRef.current : window;
-    const charElements = el.querySelectorAll('.char');
+    const trigger = triggerId ? document.getElementById(triggerId) : el;
+    if (!trigger) return;
 
-    gsap.fromTo(
+    const charElements = el.querySelectorAll(".char");
+
+    const tween = gsap.fromTo(
       charElements,
       {
-        willChange: 'opacity, transform',
+        willChange: "opacity, transform",
         opacity: 0,
-        yPercent: 120,
-        scaleY: 2.3,
-        scaleX: 0.7,
-        transformOrigin: '50% 0%'
+        yPercent: 110,
+        scaleY: 1.8,
+        scaleX: 0.85,
+        transformOrigin: "50% 100%",
       },
       {
         duration: animationDuration,
-        ease: ease,
+        ease,
         opacity: 1,
         yPercent: 0,
         scaleY: 1,
         scaleX: 1,
-        stagger: stagger,
+        stagger,
         scrollTrigger: {
-          trigger: el,
-          scroller,
+          trigger,
           start: scrollStart,
           end: scrollEnd,
-          scrub: true
-        }
+          scrub: 0.6,
+        },
       }
     );
-  }, [scrollContainerRef, animationDuration, ease, scrollStart, scrollEnd, stagger]);
+
+    return () => {
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
+  }, [triggerId, animationDuration, ease, scrollStart, scrollEnd, stagger]);
 
   return (
     <h2 ref={containerRef} className={`scroll-float ${containerClassName}`}>

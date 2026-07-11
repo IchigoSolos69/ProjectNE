@@ -11,14 +11,34 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     const lenisInstance = lenisRef.current?.lenis;
     if (!lenisInstance) return;
 
-    const handleScroll = () => {
-      ScrollTrigger.refresh();
-    };
+    const onScroll = () => ScrollTrigger.update();
+    lenisInstance.on("scroll", onScroll);
 
-    lenisInstance.on("scroll", handleScroll);
+    ScrollTrigger.scrollerProxy(document.documentElement, {
+      scrollTop(value) {
+        if (arguments.length && value !== undefined) {
+          lenisInstance.scrollTo(value, { immediate: true });
+        }
+        return lenisInstance.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+    });
+
+    const onRefresh = () => lenisInstance.resize();
+    ScrollTrigger.addEventListener("refresh", onRefresh);
+    ScrollTrigger.refresh();
 
     return () => {
-      lenisInstance.off("scroll", handleScroll);
+      lenisInstance.off("scroll", onScroll);
+      ScrollTrigger.removeEventListener("refresh", onRefresh);
+      ScrollTrigger.scrollerProxy(document.documentElement, {});
     };
   }, []);
 
@@ -27,11 +47,11 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       ref={lenisRef}
       root
       options={{
-        lerp: 0.05,
+        lerp: 0.08,
         duration: 1.2,
       }}
     >
-      {children as any}
+      {children}
     </ReactLenis>
   );
 }

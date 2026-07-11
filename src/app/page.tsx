@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Leaf, ShieldCheck, Moon, Truck, Star } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
 import BlanketTransition from "@/components/BlanketTransition";
@@ -14,50 +14,6 @@ export default function Home() {
 
   // Get 4 featured products for the homepage grid
   const featuredProducts = products.slice(0, 4);
-
-  const categories = [
-    {
-      name: "Bedsheets",
-      description: "Crisp percale, buttery sateen, and relaxed linen sets.",
-      image: "/images/linen-sheets.jpg",
-      href: "/products?category=Bedsheets",
-    },
-    {
-      name: "Comforters & Quilts",
-      description: "Cloud-like down alternative and textured gauze blankets.",
-      image: "/images/cotton-quilt.jpg",
-      href: "/products?category=Comforters",
-    },
-    {
-      name: "Premium Pillows",
-      description: "Ergonomic foam, natural latex, and plush down fills.",
-      image: "/images/down-pillow.jpg",
-      href: "/products?category=Pillows",
-    },
-  ];
-
-  const usps = [
-    {
-      icon: Leaf,
-      title: "100% Organic Cotton",
-      desc: "GOTS certified long-staple cotton and European flax linen.",
-    },
-    {
-      icon: ShieldCheck,
-      title: "Oeko-Tex Certified",
-      desc: "Woven free from harmful chemicals, toxins, and synthetic dyes.",
-    },
-    {
-      icon: Moon,
-      title: "100-Night Sleep Trial",
-      desc: "Sleep on them, wash them. If you don't love them, return for free.",
-    },
-    {
-      icon: Truck,
-      title: "Free Shipping & Returns",
-      desc: "Complimentary carbon-neutral shipping on all domestic orders.",
-    },
-  ];
 
   return (
     <div className="flex flex-col w-full">
@@ -72,70 +28,7 @@ export default function Home() {
         <BlanketTransition triggerId="hero-transition-container" />
       </div>
 
-      {/* 2. USP Banner */}
-      <section className="border-y border-brand-sky/30 bg-background py-10 lg:py-16 transition-colors duration-300">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
-            {usps.map((usp, idx) => (
-              <div key={idx} className="flex flex-col items-center text-center space-y-3 p-2">
-                <div className="p-3 bg-brand-sky/45 rounded-full text-brand-midnight">
-                  <usp.icon className="h-5 w-5 stroke-[1.5]" />
-                </div>
-                <h3 className="font-serif text-sm font-semibold text-brand-midnight">{usp.title}</h3>
-                <p className="text-xs text-brand-midnight/60 leading-relaxed max-w-[240px]">
-                  {usp.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Category Spotlights */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center space-y-4 mb-16">
-          <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
-            Curated Categories
-          </span>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-brand-midnight">
-            Build your dream sleep system
-          </h2>
-          <div className="h-[2px] w-12 bg-brand-royal/40 mx-auto"></div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {categories.map((cat, idx) => (
-            <Link key={idx} href={cat.href} className="group relative flex flex-col h-[400px] rounded-xl overflow-hidden shadow-md border border-brand-sky/30">
-              {/* Image */}
-              <div className="absolute inset-0 bg-neutral-900">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  unoptimized
-                />
-              </div>
-              {/* Dark Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-              {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 p-6 text-white space-y-2">
-                <h3 className="font-serif text-xl font-bold tracking-wide">{cat.name}</h3>
-                <p className="text-xs text-white/80 leading-relaxed max-w-xs">
-                  {cat.description}
-                </p>
-                <div className="flex items-center text-xs font-semibold uppercase tracking-widest text-brand-sky group-hover:text-white pt-2 transition-colors duration-300">
-                  <span>Explore products</span>
-                  <ArrowRight className="ml-1 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* 4. Featured Products Grid */}
+      {/* Featured Products Grid */}
       <section className="bg-brand-sky/15 py-20 border-t border-brand-sky/30 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-baseline justify-between mb-12 gap-4">
