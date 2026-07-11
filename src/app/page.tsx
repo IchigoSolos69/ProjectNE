@@ -1,30 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, Moon, Truck, Star } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
 import BlanketTransition from "@/components/BlanketTransition";
-import Carousel from "@/components/Carousel";
+import EditorialSlider from "@/components/EditorialSlider";
 
 export default function Home() {
   const { addToCart } = useCart();
-  const carouselContainerRef = useRef<HTMLDivElement>(null);
-  const [carouselWidth, setCarouselWidth] = useState(300);
-
-  useEffect(() => {
-    if (!carouselContainerRef.current) return;
-    const updateWidth = () => {
-      const width = carouselContainerRef.current?.getBoundingClientRect().width || 300;
-      setCarouselWidth(Math.max(280, width - 48)); // Width minus custom padding
-    };
-
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
-  }, []);
   
   // Get 4 featured products for the homepage grid
   const featuredProducts = products.slice(0, 4);
@@ -135,17 +121,8 @@ export default function Home() {
         <BlanketTransition triggerId="hero-transition-container" />
       </div>
 
-      {/* Carousel Showcase Section */}
-      <section className="py-16 md:py-24 bg-brand-sky/15 border-b border-brand-sky/20 transition-colors duration-300">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-center text-brand-midnight uppercase tracking-tight mb-10">
-            Top Picks by RareComforts
-          </h2>
-          <div ref={carouselContainerRef} className="mx-auto max-w-3xl w-full">
-            <Carousel baseWidth={carouselWidth} loop={true} autoplay={true} />
-          </div>
-        </div>
-      </section>
+      {/* Editorial Slider Section */}
+      <EditorialSlider />
 
       {/* 2. USP Banner */}
       <section className="border-y border-brand-sky/30 bg-background py-10 lg:py-16 transition-colors duration-300">
