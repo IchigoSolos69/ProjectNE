@@ -93,11 +93,11 @@ export const BlanketTransition: React.FC<BlanketTransitionProps> = ({ triggerId 
         <rect width="100%" height="100%" fill="url(#damask-weave)" />
       </svg>
 
-      {/* Pinned text container, lifted slightly above the absolute center (35% top) with high z-index */}
-      <div ref={textRef} className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full px-4 z-40 text-center max-w-4xl">
+      {/* Pinned text container, lifted to the top-end (plush edge) with high z-index */}
+      <div ref={textRef} className="absolute top-[10%] left-1/2 -translate-x-1/2 w-full px-4 text-center z-40 max-w-4xl">
         <ScrollFloat
           animationDuration={1.3}
-          scrollStart="top 85%"
+          scrollStart="top bottom"
           scrollEnd="center center"
           containerClassName="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase"
           textClassName="text-[#0F2854] font-serif tracking-tight text-center justify-center flex-wrap"

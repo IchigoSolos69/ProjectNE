@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 
 export const Navbar: React.FC = () => {
@@ -54,7 +54,16 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Actions (Cart / Menu) */}
-          <div className="flex flex-1 items-center justify-end space-x-4 md:flex-initial">
+          <div className="flex flex-1 items-center justify-end space-x-2 md:flex-initial">
+            {/* Account Icon */}
+            <Link
+              href="/auth"
+              className="p-2.5 text-brand-midnight/80 hover:text-brand-royal transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-royal focus:ring-offset-2 rounded-full hover:bg-brand-sky/30"
+              aria-label="Account Login"
+            >
+              <User className="h-5 w-5 stroke-[1.5]" />
+            </Link>
+
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
