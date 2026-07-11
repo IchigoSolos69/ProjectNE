@@ -61,12 +61,16 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full">
-      {/* Editorial Hero Slider — full-width showcase */}
-      <EditorialSlider />
-
-
-      {/* Sliding Overlapping Blanket Section */}
-      <BlanketTransition triggerId="hero-transition-container" />
+      {/* Hero & Blanket Transition Section */}
+      <div
+        id="hero-transition-container"
+        className="relative w-full h-[calc(100vh-4.5rem)] min-h-[650px] lg:min-h-[800px] overflow-hidden bg-brand-sky/35"
+      >
+        <section id="hero-section" className="absolute inset-0 w-full h-full z-10">
+          <EditorialSlider />
+        </section>
+        <BlanketTransition triggerId="hero-transition-container" />
+      </div>
 
       {/* 2. USP Banner */}
       <section className="border-y border-brand-sky/30 bg-background py-10 lg:py-16 transition-colors duration-300">

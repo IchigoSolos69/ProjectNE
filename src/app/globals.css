@@ -93,8 +93,3 @@ body {
   -webkit-backdrop-filter: blur(12px);
 }
 
-.text-stroke {
-  -webkit-text-stroke: 1px currentColor;
-  color: transparent;
-}
-

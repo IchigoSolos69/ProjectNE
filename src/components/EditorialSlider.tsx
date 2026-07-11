@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
-import { Crown } from "lucide-react";
+import { Crown, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EditorialSlide {
   id: string;
@@ -94,15 +94,17 @@ const imageVariants = {
 export default function EditorialSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const goToSlide = useCallback((index: number) => {
-    setActiveIndex(index);
-  }, []);
+  const goToSlide = (index: number) => {
+    setActiveIndex((index + SLIDES.length) % SLIDES.length);
+  };
+
+  const goNext = () => goToSlide(activeIndex + 1);
+  const goPrev = () => goToSlide(activeIndex - 1);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % SLIDES.length);
     }, AUTOPLAY_MS);
-
     return () => clearInterval(timer);
   }, [activeIndex]);
 
@@ -110,12 +112,12 @@ export default function EditorialSlider() {
 
   return (
     <section
-      className="relative w-full h-[70vh] min-h-[600px] flex flex-col md:flex-row overflow-hidden"
+      className="relative w-full h-full flex flex-col md:flex-row overflow-hidden"
       aria-roledescription="carousel"
       aria-label="Featured products"
     >
       {/* Left — full-bleed product image */}
-      <div className="relative w-full md:w-1/2 h-[45vh] md:h-full bg-neutral-900">
+      <div className="relative w-full md:w-1/2 flex-1 md:h-full bg-neutral-900">
         <AnimatePresence mode="wait">
           <motion.div
             key={slide.id}
@@ -136,10 +138,20 @@ export default function EditorialSlider() {
             />
           </motion.div>
         </AnimatePresence>
+
+        {/* Prev arrow — image panel */}
+        <button
+          type="button"
+          onClick={goPrev}
+          aria-label="Previous slide"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-brand-midnight/50 hover:bg-brand-midnight/75 text-brand-sky backdrop-blur-sm transition-colors duration-300"
+        >
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+        </button>
       </div>
 
       {/* Right — editorial content panel */}
-      <div className="relative w-full md:w-1/2 bg-brand-midnight flex items-center justify-center flex-1 md:flex-none">
+      <div className="relative w-full md:w-1/2 h-full bg-brand-midnight flex items-center justify-center">
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-8 sm:px-12 lg:px-16 py-12 max-w-xl w-full">
           <AnimatePresence mode="wait">
             <motion.div
@@ -149,7 +161,6 @@ export default function EditorialSlider() {
               animate="visible"
               exit="exit"
             >
-              {/* Brand header */}
               <motion.div custom={0} variants={textVariants} className="flex flex-col items-center gap-2">
                 <Crown className="h-4 w-4 text-brand-sky stroke-[1.5]" aria-hidden="true" />
                 <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.35em] text-brand-sky">
@@ -157,7 +168,6 @@ export default function EditorialSlider() {
                 </span>
               </motion.div>
 
-              {/* Category overline */}
               <motion.span
                 custom={1}
                 variants={textVariants}
@@ -166,7 +176,6 @@ export default function EditorialSlider() {
                 {slide.category}
               </motion.span>
 
-              {/* Main title */}
               <motion.h2
                 custom={2}
                 variants={textVariants}
@@ -175,7 +184,6 @@ export default function EditorialSlider() {
                 {slide.title}
               </motion.h2>
 
-              {/* Description */}
               <motion.p
                 custom={3}
                 variants={textVariants}
@@ -184,7 +192,6 @@ export default function EditorialSlider() {
                 {slide.description}
               </motion.p>
 
-              {/* CTA */}
               <motion.div custom={4} variants={textVariants}>
                 <Link
                   href={slide.href}
@@ -196,6 +203,16 @@ export default function EditorialSlider() {
             </motion.div>
           </AnimatePresence>
         </div>
+
+        {/* Next arrow — content panel */}
+        <button
+          type="button"
+          onClick={goNext}
+          aria-label="Next slide"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-brand-ocean/80 hover:bg-brand-ocean text-white transition-colors duration-300"
+        >
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
+        </button>
 
         {/* Pagination dashes */}
         <div
