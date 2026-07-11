@@ -1,0 +1,79 @@
+/* Carousel container and layout */
+.carousel-container {
+  border: none;
+  background-color: transparent;
+  padding: 1rem 0;
+}
+
+.carousel-viewport {
+  padding: 1.5rem 0;
+}
+
+/* Individual card items */
+.carousel-item {
+  background-color: #ffffff;
+  border: 1px solid #4988C4; /* Soft Ocean Blue */
+  box-shadow: 0 15px 45px rgba(15, 40, 84, 0.07), 0 5px 15px rgba(15, 40, 84, 0.03); /* Deep Midnight Blue low-opacity shadow */
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.carousel-item-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.carousel-item-inactive {
+  opacity: 0.6;
+  transform: scale(0.96);
+  filter: blur(0.5px);
+}
+
+/* Icons styling */
+.carousel-icon-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background-color: rgba(189, 232, 245, 0.25); /* Soft Sky #BDE8F5 with low opacity */
+}
+
+.carousel-icon {
+  color: #0F2854; /* Deep Midnight Blue */
+}
+
+/* Item Titles & Descriptions */
+.carousel-item-title {
+  color: #0F2854; /* Deep Midnight Blue */
+}
+
+.carousel-item-description {
+  color: #1C4D8D; /* Royal Slate Blue */
+}
+
+/* Indicators */
+.carousel-indicator {
+  border: none;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.carousel-indicator.active {
+  background-color: #0F2854; /* Deep Midnight Blue */
+  width: 1.5rem; /* Pill shape for active indicator */
+}
+
+.carousel-indicator.inactive {
+  background-color: rgba(73, 136, 196, 0.35); /* Faded Soft Ocean Blue */
+}
+
+/* Hover effects for navigation buttons */
+.carousel-nav-btn {
+  box-shadow: 0 4px 12px rgba(15, 40, 84, 0.05);
+  transition: all 0.3s ease;
+}
+
+.carousel-nav-btn:hover {
+  transform: scale(1.05);
+  border-color: #4988C4;
+  box-shadow: 0 6px 18px rgba(15, 40, 84, 0.08);
+}
