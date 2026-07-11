@@ -11,7 +11,7 @@ import EditorialSlider from "@/components/EditorialSlider";
 
 export default function Home() {
   const { addToCart } = useCart();
-
+  
   // Get 4 featured products for the homepage grid
   const featuredProducts = products.slice(0, 4);
 
@@ -140,6 +140,50 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* 3. Category Spotlights */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
+        <div className="text-center space-y-4 mb-16">
+          <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
+            Curated Categories
+          </span>
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-brand-midnight">
+            Build your dream sleep system
+          </h2>
+          <div className="h-[2px] w-12 bg-brand-royal/40 mx-auto"></div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {categories.map((cat, idx) => (
+            <Link key={idx} href={cat.href} className="group relative flex flex-col h-[400px] rounded-xl overflow-hidden shadow-md border border-brand-sky/30">
+              {/* Image */}
+              <div className="absolute inset-0 bg-neutral-900">
+                <Image
+                  src={cat.image}
+                  alt={cat.name}
+                  fill
+                  className="object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                  unoptimized
+                />
+              </div>
+              {/* Dark Overlay Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+              {/* Content */}
+              <div className="absolute inset-x-0 bottom-0 p-6 text-white space-y-2">
+                <h3 className="font-serif text-xl font-bold tracking-wide">{cat.name}</h3>
+                <p className="text-xs text-white/80 leading-relaxed max-w-xs">
+                  {cat.description}
+                </p>
+                <div className="flex items-center text-xs font-semibold uppercase tracking-widest text-brand-sky group-hover:text-white pt-2 transition-colors duration-300">
+                  <span>Explore products</span>
+                  <ArrowRight className="ml-1 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
