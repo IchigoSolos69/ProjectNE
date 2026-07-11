@@ -1,8 +1,0 @@
-# Minimal Supabase local config — run `supabase init` for full setup
-project_id = "atelier-home"
-
-[api]
-enabled = true
-
-[db]
-major_version = 15
