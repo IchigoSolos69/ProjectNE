@@ -7,7 +7,7 @@ import { ArrowRight, Leaf, ShieldCheck, Moon, Truck, Star } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
 import BlanketTransition from "@/components/BlanketTransition";
-import EditorialSlider from "@/components/EditorialSlider";
+import EditorialSlider from "@/components/Carousel";
 
 export default function Home() {
   const { addToCart } = useCart();
