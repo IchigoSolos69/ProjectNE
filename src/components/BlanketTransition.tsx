@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import ScrollFloat from "./ScrollFloat";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -73,9 +74,15 @@ export const BlanketTransition: React.FC<BlanketTransitionProps> = ({ triggerId 
       className="absolute top-0 left-0 w-full h-full bg-[#BDE8F5] rounded-t-[4rem] md:rounded-t-[10vw] flex items-center justify-center z-20 shadow-[0_-30px_60px_rgba(73,136,196,0.3)] border-t border-[#4988C4]/20 transition-colors duration-300 pointer-events-auto"
     >
       <div ref={textRef} className="text-center px-6 max-w-4xl">
-        <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-[#0F2854] leading-tight select-none">
-          Uncover Your Best Sleep
-        </h2>
+        <ScrollFloat
+          animationDuration={1.5}
+          scrollStart="top center"
+          scrollEnd="center center"
+          containerClassName="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight uppercase"
+          textClassName="text-[#0F2854] font-serif tracking-tight justify-center flex-wrap"
+        >
+          Crafted for Deep Sleep and Unmatched Luxury
+        </ScrollFloat>
       </div>
     </div>
   );

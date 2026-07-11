@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, Moon, Truck, Star } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
-import ScrollFloat from "@/components/ScrollFloat";
 import BlanketTransition from "@/components/BlanketTransition";
 
 export default function Home() {
@@ -120,22 +119,6 @@ export default function Home() {
         {/* Sliding Overlapping Blanket Section */}
         <BlanketTransition triggerId="hero-transition-container" />
       </div>
-
-      {/* Dynamic Typography Section */}
-      <section className="py-12 md:py-20 bg-brand-sky/20 border-b border-brand-sky/30 flex justify-center items-center overflow-hidden transition-colors duration-300">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <ScrollFloat
-            animationDuration={1}
-            stagger={0.03}
-            scrollStart="top bottom-=10%"
-            scrollEnd="bottom center+=20%"
-            containerClassName="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-midnight uppercase"
-            textClassName="justify-center"
-          >
-            Restful Sleep Begins Here
-          </ScrollFloat>
-        </div>
-      </section>
 
       {/* 2. USP Banner */}
       <section className="border-y border-brand-sky/30 bg-background py-10 lg:py-16 transition-colors duration-300">
