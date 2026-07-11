@@ -5,6 +5,7 @@ import { CartProvider } from "@/context/cart-context";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
+import SmoothScroll from "@/components/layout/SmoothScroll";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -45,12 +46,14 @@ export default function RootLayout({
       className={`${playfair.variable} ${plusJakarta.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased font-sans">
-        <CartProvider>
-          <Navbar />
-          <CartDrawer />
-          <main className="flex-grow flex flex-col">{children}</main>
-          <Footer />
-        </CartProvider>
+        <SmoothScroll>
+          <CartProvider>
+            <Navbar />
+            <CartDrawer />
+            <main className="flex-grow flex flex-col">{children}</main>
+            <Footer />
+          </CartProvider>
+        </SmoothScroll>
       </body>
     </html>
   );
