@@ -16,6 +16,11 @@ interface SlideData {
   href: string;
 }
 
+interface EditorialSliderProps {
+  /** When true the slider fills the full hero viewport height */
+  hero?: boolean;
+}
+
 const SLIDES: SlideData[] = [
   {
     id: 1,
@@ -55,7 +60,7 @@ const SLIDES: SlideData[] = [
   },
 ];
 
-export const EditorialSlider: React.FC = () => {
+export const EditorialSlider: React.FC<EditorialSliderProps> = ({ hero = false }) => {
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(0); // -1 for prev, 1 for next
 
@@ -101,7 +106,13 @@ export const EditorialSlider: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full h-[650px] md:h-[70vh] min-h-[550px] overflow-hidden flex flex-col md:flex-row bg-[#0F2854]">
+    <div
+      className={`relative w-full overflow-hidden flex flex-col md:flex-row bg-[#0F2854] ${
+        hero
+          ? "h-[calc(100vh-4.5rem)] min-h-[600px]"
+          : "h-[650px] md:h-[70vh] min-h-[550px]"
+      }`}
+    >
       {/* Left Panel: Image Column */}
       <div className="relative w-full md:w-1/2 h-[300px] md:h-full overflow-hidden z-0 bg-brand-midnight">
         <AnimatePresence initial={false} custom={direction}>
@@ -178,9 +189,15 @@ export const EditorialSlider: React.FC = () => {
               </div>
 
               {/* Main Title */}
-              <h3 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight">
+              <h1
+                className={`font-serif font-bold tracking-tight text-white leading-tight ${
+                  hero
+                    ? "text-4xl sm:text-5xl lg:text-6xl"
+                    : "text-3xl sm:text-4xl lg:text-5xl"
+                }`}
+              >
                 {activeSlide.title}
-              </h3>
+              </h1>
 
               {/* Description */}
               <p className="text-xs sm:text-sm text-[#BDE8F5]/85 leading-relaxed font-sans font-light max-w-md">
