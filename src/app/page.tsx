@@ -6,12 +6,11 @@ import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, Moon, Truck, Star } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
-import BlanketTransition from "@/components/BlanketTransition";
 import EditorialSlider from "@/components/EditorialSlider";
 
 export default function Home() {
   const { addToCart } = useCart();
-  
+
   // Get 4 featured products for the homepage grid
   const featuredProducts = products.slice(0, 4);
 
@@ -61,68 +60,8 @@ export default function Home() {
 
   return (
     <div className="flex flex-col w-full">
-      {/* 1. Hero & Blanket Transition Section */}
-      <div id="hero-transition-container" className="relative w-full h-[calc(100vh-4.5rem)] min-h-[650px] lg:min-h-[800px] overflow-hidden bg-brand-sky/35">
-        {/* Pinned Hero Canvas */}
-        <section id="hero-section" className="absolute inset-0 w-full h-full flex items-center z-10">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              {/* Hero Copy */}
-              <div className="lg:col-span-6 space-y-6 lg:pr-8 text-center lg:text-left z-10">
-                <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
-                  Quiet Luxury for Your Bedroom
-                </span>
-                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-brand-midnight leading-tight">
-                  Sleep in pure, organic comfort
-                </h1>
-                <p className="text-base sm:text-lg text-brand-midnight/75 leading-relaxed max-w-2xl mx-auto lg:mx-0">
-                  Woven from the finest natural fibers, our bedding collection is designed to breathe, drape, and soften with every wash.
-                </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-                  <Link
-                    href="/products"
-                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-widest rounded-md shadow-sm transition-all duration-300"
-                  >
-                    Shop the Collection
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                  <Link
-                    href="/products?category=Bedsheets"
-                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3.5 border border-brand-ocean text-brand-ocean hover:bg-brand-sky/20 text-xs font-semibold uppercase tracking-widest rounded-md transition-all duration-300"
-                  >
-                    Explore Sheets
-                  </Link>
-                </div>
-              </div>
-
-              {/* Hero Image Block */}
-              <div className="lg:col-span-6 relative h-[300px] sm:h-[400px] lg:h-[500px] rounded-2xl overflow-hidden shadow-xl border border-brand-sky/30">
-                <Image
-                  src="/images/percale-sheets.jpg"
-                  alt="Premium organic cotton sheets layered beautifully"
-                  fill
-                  priority
-                  className="object-cover transition-transform duration-700 hover:scale-105"
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  unoptimized
-                />
-                {/* Floating label with accessible contrast */}
-                <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-md border border-brand-sky/40 p-4 rounded-xl max-w-xs hidden sm:block">
-                  <p className="text-xs text-brand-midnight/50 uppercase tracking-widest">Featured Set</p>
-                  <p className="text-sm font-serif font-bold text-brand-midnight">Classic Percale Core Set</p>
-                  <p className="text-xs text-brand-royal mt-0.5">Crisp, cool, 100% long-staple cotton.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Sliding Overlapping Blanket Section */}
-        <BlanketTransition triggerId="hero-transition-container" />
-      </div>
-
-      {/* Editorial Slider Section */}
-      <EditorialSlider />
+      {/* Hero: Editorial Slider */}
+      <EditorialSlider hero />
 
       {/* 2. USP Banner */}
       <section className="border-y border-brand-sky/30 bg-background py-10 lg:py-16 transition-colors duration-300">
@@ -140,50 +79,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* 3. Category Spotlights */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center space-y-4 mb-16">
-          <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
-            Curated Categories
-          </span>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-brand-midnight">
-            Build your dream sleep system
-          </h2>
-          <div className="h-[2px] w-12 bg-brand-royal/40 mx-auto"></div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {categories.map((cat, idx) => (
-            <Link key={idx} href={cat.href} className="group relative flex flex-col h-[400px] rounded-xl overflow-hidden shadow-md border border-brand-sky/30">
-              {/* Image */}
-              <div className="absolute inset-0 bg-neutral-900">
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  unoptimized
-                />
-              </div>
-              {/* Dark Overlay Gradient */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
-              {/* Content */}
-              <div className="absolute inset-x-0 bottom-0 p-6 text-white space-y-2">
-                <h3 className="font-serif text-xl font-bold tracking-wide">{cat.name}</h3>
-                <p className="text-xs text-white/80 leading-relaxed max-w-xs">
-                  {cat.description}
-                </p>
-                <div className="flex items-center text-xs font-semibold uppercase tracking-widest text-brand-sky group-hover:text-white pt-2 transition-colors duration-300">
-                  <span>Explore products</span>
-                  <ArrowRight className="ml-1 h-3 w-3 transition-transform duration-300 group-hover:translate-x-1" />
-                </div>
-              </div>
-            </Link>
-          ))}
         </div>
       </section>
 
