@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowRight, Leaf, ShieldCheck, Moon, Truck, Star } from "lucide-react";
 import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
+import ScrollFloat from "@/components/ScrollFloat";
 
 export default function Home() {
   const { addToCart } = useCart();
@@ -110,6 +111,22 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Dynamic Typography Section */}
+      <section className="py-12 md:py-20 bg-sand/20 border-b border-border/30 flex justify-center items-center overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 text-center">
+          <ScrollFloat
+            animationDuration={1}
+            stagger={0.03}
+            scrollStart="top bottom-=10%"
+            scrollEnd="bottom center+=20%"
+            containerClassName="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-primary uppercase"
+            textClassName="justify-center"
+          >
+            Restful Sleep Begins Here
+          </ScrollFloat>
         </div>
       </section>
 
