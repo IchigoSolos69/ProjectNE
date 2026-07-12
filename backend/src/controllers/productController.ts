@@ -44,7 +44,18 @@ export const addProduct = async (req: Request, res: Response) => {
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
     const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        sku: true,
+        inventoryCount: true,
+        category: true,
+        imageUrl: true,
+        isActive: true,
+      },
       orderBy: { name: "asc" },
+      take: 100, // Optimize database fetch response sizes
     });
     return res.status(200).json(products);
   } catch (error) {

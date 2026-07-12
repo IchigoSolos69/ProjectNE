@@ -268,9 +268,19 @@ export default function AdminInventoryPage() {
             <h2 className="font-serif text-xl font-bold text-[#0F2854] mb-6">Current Stock Records</h2>
 
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 text-sm text-brand-midnight/60 font-sans">
-                <div className="w-8 h-8 border-2 border-brand-royal border-t-transparent rounded-full animate-spin mb-3" />
-                Loading inventory...
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="flex items-center space-x-4 animate-pulse py-3 border-b border-brand-sky/20">
+                    <div className="h-12 w-12 bg-gray-200 rounded-md" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 w-1/3 bg-gray-200 rounded" />
+                      <div className="h-3 w-1/4 bg-gray-200 rounded" />
+                    </div>
+                    <div className="h-4 w-12 bg-gray-200 rounded" />
+                    <div className="h-4 w-12 bg-gray-200 rounded" />
+                    <div className="h-8 w-8 bg-gray-200 rounded-full" />
+                  </div>
+                ))}
               </div>
             ) : error ? (
               <div className="p-4 bg-red-50 text-red-700 text-xs font-sans rounded-md border border-red-200">

@@ -33,7 +33,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
           ease: "power2.out",
           scrollTrigger: {
             trigger: triggerElement,
-            start: "top bottom",
+            start: "top 72px",
             end: "bottom top",
             scrub: 1.5, // High scrub adds momentum to smooth jerky touch screens
           },
