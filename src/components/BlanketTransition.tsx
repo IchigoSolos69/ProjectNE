@@ -23,7 +23,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: triggerElement,
-        start: "top top",
+        start: "top 72px",
         end: "+=100%",
         scrub: true,
         pin: true,
@@ -69,11 +69,11 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
         <rect width="100%" height="100%" fill="url(#damask-weave)" />
       </svg>
 
-      <div className="relative z-40 w-full px-6 sm:px-10 lg:px-16 max-w-5xl mx-auto text-center">
+      <div className="relative z-40 w-full px-6 sm:px-10 lg:px-16 max-w-5xl mx-auto text-center -translate-y-16 md:-translate-y-24">
         <ScrollFloat
           triggerId={triggerId}
-          scrollStart="top+=42% top"
-          scrollEnd="top+=72% top"
+          scrollStart="top+=42% 72px"
+          scrollEnd="top+=72% 72px"
           animationDuration={1}
           stagger={0.022}
           containerClassName="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight uppercase leading-[1.15]"
