@@ -6,6 +6,7 @@ import Link from "next/link";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { usePathname } from "next/navigation";
+import { API_URL } from "@/lib/api";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -49,6 +50,37 @@ export const CartDrawer: React.FC = () => {
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (drawerRef.current && !drawerRef.current.contains(e.target as Node)) {
       setIsCartOpen(false);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const response = await fetch(`${API_URL}/payments/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: "00000000-0000-0000-0000-000000000000", // Placeholder UUID for testing, auth context will be linked later
+          items: cart.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+          shippingAddress: "Default Luxury Suite Address, New Delhi, India",
+        }),
+      });
+
+      const orderData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(orderData.error || "Failed to create order");
+      }
+
+      console.log("Order created successfully:", orderData);
+      alert(`Order created successfully! ID: ${orderData.razorpayOrderId}`);
+    } catch (error) {
+      console.error("Checkout Error:", error);
+      alert(`Checkout Error: ${(error as Error).message}`);
     }
   };
 
@@ -194,7 +226,7 @@ export const CartDrawer: React.FC = () => {
             </p>
             <div className="space-y-2">
               <button
-                onClick={() => alert("Proceeding to checkout... (External backend integration goes here)")}
+                onClick={handleCheckout}
                 className="w-full py-3 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 Proceed to Checkout
