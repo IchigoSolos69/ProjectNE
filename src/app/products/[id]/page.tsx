@@ -20,6 +20,32 @@ interface DatabaseProduct {
   isActive: boolean;
 }
 
+// Generate static params for all products at build time
+export async function generateStaticParams() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
+      // Prevent caching during build to get fresh data
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch products for static generation: ${response.status}`);
+      return [];
+    }
+
+    const products: DatabaseProduct[] = await response.json();
+
+    return products.map((product) => ({
+      id: product.id,
+    }));
+  } catch (error) {
+    // If the backend is asleep or unreachable during build time, return empty array
+    // This allows the build to pass and pages will be generated on-demand
+    console.warn('Failed to fetch products during build, static generation skipped:', error);
+    return [];
+  }
+}
+
 export default function ProductDetailPage() {
   const params = useParams();
   const id = params.id as string;
