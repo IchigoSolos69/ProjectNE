@@ -44,7 +44,10 @@ export default function ProductClient({ sku }: { sku: string }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/sku/${sku}`, {
+        const targetUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/sku/${sku}`;
+        console.log("FETCHING FROM:", targetUrl);
+
+        const response = await fetch(targetUrl, {
           signal: controller.signal,
         });
 
@@ -55,6 +58,7 @@ export default function ProductClient({ sku }: { sku: string }) {
         }
 
         if (!response.ok) {
+          console.error("Backend returned error:", response.status);
           throw new Error(`Failed to fetch product with status ${response.status}`);
         }
 

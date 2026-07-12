@@ -22,6 +22,7 @@ export async function generateStaticParams() {
   }
 }
 
-export default function ProductDetailPage({ params }: { params: { sku: string } }) {
-  return <ProductClient sku={params.sku} />;
+export default async function ProductDetailPage({ params }: { params: Promise<{ sku: string }> }) {
+  const resolvedParams = await params;
+  return <ProductClient sku={resolvedParams.sku} />;
 }
