@@ -20,6 +20,9 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
     if (!blanket || !triggerElement) return;
 
+    // Unhide once JS is ready to animate, avoiding FOUC
+    gsap.set(blanket, { autoAlpha: 1 });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: triggerElement,
@@ -62,7 +65,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
   return (
     <div
       ref={blanketRef}
-      className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center"
+      className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible"
       style={{
         background: "radial-gradient(circle at 50% 30%, #F1F9FC 0%, #BDE8F5 70%, #A2D5E3 100%)",
       }}

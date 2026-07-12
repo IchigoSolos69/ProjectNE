@@ -95,22 +95,24 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Mobile Nav Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-border/40 bg-background/98 animate-fade-in">
-          <div className="space-y-1 px-4 py-4 sm:px-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-base font-medium text-brand-midnight/80 hover:text-brand-royal active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-brand-sky/20 px-3 rounded-lg font-sans"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
+      <div
+        className={`md:hidden border-b border-border/40 bg-background/98 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          mobileMenuOpen ? "max-h-[300px] opacity-100 py-4" : "max-h-0 opacity-0 py-0 pointer-events-none"
+        }`}
+      >
+        <div className="space-y-1 px-4 sm:px-6">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className="block py-3 text-base font-medium text-brand-midnight/80 hover:text-brand-royal active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-brand-sky/20 px-3 rounded-lg font-sans"
+            >
+              {link.label}
+            </Link>
+          ))}
         </div>
-      )}
+      </div>
     </header>
   );
 };
