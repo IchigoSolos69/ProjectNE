@@ -59,7 +59,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     window.addEventListener("load", handleRefresh);
     window.addEventListener("resize", handleRefresh);
     // Force refresh after images likely loaded
-    const timeout = setTimeout(handleRefresh, 500); 
+    const timeout = setTimeout(handleRefresh, 500);
     return () => {
       window.removeEventListener("load", handleRefresh);
       window.removeEventListener("resize", handleRefresh);
@@ -102,14 +102,14 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       <div className="relative z-40 w-full px-6 sm:px-10 lg:px-16 max-w-5xl mx-auto text-center -translate-y-16 md:-translate-y-24">
         <ScrollFloat
           triggerId={triggerId}
-          scrollStart="top+=42% 72px"
-          scrollEnd="top+=72% 72px"
-          animationDuration={1}
+          scrollStart="top+=50% 72px"
+          scrollEnd="top+=102% 72px"
+          animationDuration={0.35}
           stagger={0.022}
-          containerClassName="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight uppercase leading-[1.15]"
+          containerClassName="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[4.1rem] font-bold tracking-tight uppercase leading-[1.15]"
           textClassName="text-brand-midnight font-serif tracking-tight text-center justify-center"
         >
-          Crafted for Deep Sleep and Unmatched Luxury
+          The Ultimate Statement of Style and Comfort
         </ScrollFloat>
       </div>
     </div>
