@@ -86,8 +86,18 @@ export const Footer: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/products?category=Pillows" className="text-sm text-brand-sky/75 hover:text-white active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
-                    Pillows
+                  <Link href="/products?category=Cushion Covers" className="text-sm text-brand-sky/75 hover:text-white active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                    Cushion Covers
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=Towels" className="text-sm text-brand-sky/75 hover:text-white active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                    Towels
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/products?category=Door Mats" className="text-sm text-brand-sky/75 hover:text-white active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+                    Door Mats
                   </Link>
                 </li>
                 <li>

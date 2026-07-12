@@ -3,7 +3,7 @@ export interface Product {
   name: string;
   price: number;
   description: string;
-  category: 'Bedsheets' | 'Comforters' | 'Pillows';
+  category: 'Bedsheets' | 'Comforters' | 'Cushion Covers' | 'Towels' | 'Door Mats';
   image: string;
   images: string[];
   sizes: ('Twin' | 'Queen' | 'King')[];
@@ -128,74 +128,5 @@ export const products: Product[] = [
       "Machine washable for easy maintenance"
     ],
     details: "Engineered to offer the perfect fluff-to-weight ratio, this duvet insert is designed for comfortable year-round use. It regulates heat so you stay warm without overheating."
-  },
-  {
-    id: "premium-down-pillow",
-    name: "Premium Down Pillow",
-    price: 8999,
-    description: "Stuffed with ethically sourced European white down, this pillow offers a plush, cloud-like headrest. Tailored in soft, medium, and firm densities to suit any sleep position.",
-    category: "Pillows",
-    image: "/images/down-pillow.jpg",
-    images: [
-      "/images/down-pillow.jpg",
-      "/images/down-pillow-detail.jpg"
-    ],
-    sizes: ["Twin", "Queen", "King"],
-    rating: 4.6,
-    reviewsCount: 1403,
-    features: [
-      "Filled with RDS-certified European white down",
-      "Double-stitched piping with 100% cotton satin shell",
-      "Available in supportive densities (Plush or Firm)",
-      "Hypoallergenic and washed 15 times to ensure purity",
-      "Made in the USA from imported materials"
-    ],
-    details: "Sleep on a bed of air. Our Premium Down Pillows are carefully crafted using large down clusters that maintain their loft much longer than standard synthetic pillows, offering adaptive support for neck and shoulders."
-  },
-  {
-    id: "dual-zone-memory-foam-pillow",
-    name: "Dual-Zone Memory Foam Pillow",
-    price: 6999,
-    description: "Experience pressure-relieving support combined with cooling technology. Features a dual-sided design with cooling gel on one side and adaptive memory foam on the other.",
-    category: "Pillows",
-    image: "/images/memory-foam-pillow.jpg",
-    images: [
-      "/images/memory-foam-pillow.jpg",
-      "/images/memory-foam-pillow-detail.jpg"
-    ],
-    sizes: ["Twin", "Queen", "King"],
-    rating: 4.7,
-    reviewsCount: 654,
-    features: [
-      "Premium CertiPUR-US® memory foam core",
-      "Advanced phase-change cooling gel layer",
-      "Removable, washable Tencel cover for ultimate breathability",
-      "Contoured support for optimal spinal alignment",
-      "Low odor, hypoallergenic composition"
-    ],
-    details: "Engineered for active sleepers who shift positions, this pillow offers dense support that conforms to the curvature of your head and neck. The cooling gel side absorbs excess heat, maintaining a refreshing sleep surface."
-  },
-  {
-    id: "organic-latex-pillow",
-    name: "Organic Latex Pillow",
-    price: 7999,
-    description: "Responsive, bouncy, and highly breathable. Made from 100% natural, organic Dunlop latex, this pillow provides orthopedic neck alignment and retains its shape for years.",
-    category: "Pillows",
-    image: "/images/latex-pillow.jpg",
-    images: [
-      "/images/latex-pillow.jpg",
-      "/images/latex-pillow-detail.jpg"
-    ],
-    sizes: ["Twin", "Queen", "King"],
-    rating: 4.8,
-    reviewsCount: 412,
-    features: [
-      "100% GOLS-certified organic natural latex",
-      "Penciled ventilation holes for continuous cooling airflow",
-      "Inherent dust mite and mildew resistance",
-      "Medium firmness with instant responsive bounce",
-      "Includes organic cotton quilted cover"
-    ],
-    details: "Naturally harvested from rubber trees, our organic latex pillow offers a resilient bounce that holds its loft day after day. Perfect for side and back sleepers seeking a chemical-free, highly responsive cushion."
   }
 ];
