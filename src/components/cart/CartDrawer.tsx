@@ -68,7 +68,7 @@ export const CartDrawer: React.FC = () => {
           </div>
           <button
             onClick={() => setIsCartOpen(false)}
-            className="p-1 rounded-full text-brand-midnight/50 hover:text-brand-royal hover:bg-brand-sky/35 transition-all duration-300"
+            className="p-1 rounded-full text-brand-midnight/50 hover:text-brand-royal hover:bg-brand-sky/35 active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             aria-label="Close cart"
           >
             <X className="h-5 w-5 stroke-[1.5]" />
@@ -88,7 +88,7 @@ export const CartDrawer: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="mt-2 inline-flex items-center justify-center px-6 py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wider rounded-md transition-all duration-300"
+                className="mt-2 inline-flex items-center justify-center px-6 py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
               >
                 Continue Shopping
               </button>
@@ -123,8 +123,8 @@ export const CartDrawer: React.FC = () => {
                         {item.product.name}
                       </Link>
                     </h3>
-                    <p className="text-sm font-semibold text-brand-royal">
-                      ${item.product.price * item.quantity}
+                    <p className="text-sm font-semibold text-brand-royal font-sans">
+                      {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(item.product.price * item.quantity)}
                     </p>
                   </div>
 
@@ -134,10 +134,10 @@ export const CartDrawer: React.FC = () => {
 
                   <div className="flex items-center justify-between mt-3">
                     {/* Quantity Adjustment Selector */}
-                    <div className="flex items-center border border-brand-sky/50 rounded-md bg-brand-sky/20">
+                    <div className="flex items-center border border-brand-sky/50 rounded-md bg-brand-sky/20 font-sans">
                       <button
                         onClick={() => updateQuantity(item.product.id, item.size, item.quantity - 1)}
-                        className="p-1 px-2 text-brand-midnight/60 hover:text-brand-royal hover:bg-brand-sky/50 transition-all duration-300"
+                        className="p-1 px-2 text-brand-midnight/60 hover:text-brand-royal hover:bg-brand-sky/50 active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                         aria-label="Decrease quantity"
                       >
                         <Minus className="h-3 w-3" />
@@ -147,7 +147,7 @@ export const CartDrawer: React.FC = () => {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.product.id, item.size, item.quantity + 1)}
-                        className="p-1 px-2 text-brand-midnight/60 hover:text-brand-royal hover:bg-brand-sky/50 transition-all duration-300"
+                        className="p-1 px-2 text-brand-midnight/60 hover:text-brand-royal hover:bg-brand-sky/50 active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                         aria-label="Increase quantity"
                       >
                         <Plus className="h-3 w-3" />
@@ -157,7 +157,7 @@ export const CartDrawer: React.FC = () => {
                     {/* Delete Item */}
                     <button
                       onClick={() => removeFromCart(item.product.id, item.size)}
-                      className="p-1.5 text-brand-midnight/40 hover:text-brand-royal hover:bg-brand-sky/35 transition-all duration-300 rounded-full"
+                      className="p-1.5 text-brand-midnight/40 hover:text-brand-royal hover:bg-brand-sky/35 active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] rounded-full"
                       aria-label="Remove item from cart"
                     >
                       <Trash2 className="h-4 w-4 stroke-[1.5]" />
@@ -171,10 +171,10 @@ export const CartDrawer: React.FC = () => {
 
         {/* Drawer Footer */}
         {cart.length > 0 && (
-          <div className="p-6 border-t border-brand-sky/30 bg-brand-sky/20 space-y-4">
+          <div className="p-6 border-t border-brand-sky/30 bg-brand-sky/20 space-y-4 font-sans">
             <div className="flex items-center justify-between text-base font-semibold text-brand-midnight">
               <span>Subtotal</span>
-              <span>${cartSubtotal}</span>
+              <span>{Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(cartSubtotal)}</span>
             </div>
             <p className="text-xs text-brand-midnight/60">
               Shipping and taxes are calculated at checkout.
@@ -182,13 +182,13 @@ export const CartDrawer: React.FC = () => {
             <div className="space-y-2">
               <button
                 onClick={() => alert("Proceeding to checkout... (External backend integration goes here)")}
-                className="w-full py-3 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-widest rounded-md shadow-sm transition-all duration-300"
+                className="w-full py-3 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 Proceed to Checkout
               </button>
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="w-full py-2 bg-transparent text-brand-royal hover:text-brand-midnight text-xs font-semibold uppercase tracking-wider transition-all duration-300"
+                className="w-full py-2 bg-transparent text-brand-royal hover:text-brand-midnight text-xs font-semibold uppercase tracking-wide active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 Continue Shopping
               </button>

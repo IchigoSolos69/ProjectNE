@@ -33,11 +33,12 @@
   --color-brand-ocean: #4988C4;
   --color-brand-sky: #BDE8F5;
   
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", "Inter", sans-serif;
+  --font-serif: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-sans: var(--font-outfit), "Outfit", sans-serif;
   
   --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fade-in 0.2s ease-out forwards;
+  --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slide-in-right {
@@ -61,7 +62,7 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -92,4 +93,33 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
+
+.premium-transition {
+  transition: all 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-link {
+  position: relative;
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.premium-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #4988C4;
+  transform-origin: bottom center;
+  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.premium-link:hover::after {
+  transform: scaleX(1);
+}
+
 

@@ -19,16 +19,16 @@ export const Navbar: React.FC = () => {
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-border/40 glassmorphism transition-all duration-300">
+    <header className="sticky top-0 z-40 w-full border-b border-border/40 glassmorphism transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-18 items-center justify-between">
           {/* Logo */}
           <div className="flex-1 md:flex-initial">
-            <Link href="/" className="inline-block group">
-              <span className="font-serif text-2xl font-semibold tracking-wide text-brand-midnight transition-colors duration-300 group-hover:text-brand-royal">
+            <Link href="/" className="inline-block group active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+              <span className="font-serif text-2xl font-semibold tracking-wide text-brand-midnight transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:text-brand-royal">
                 RareComforts
               </span>
-              <span className="block h-[1px] w-0 bg-brand-royal transition-all duration-300 group-hover:w-full"></span>
+              <span className="block h-[1px] w-0 bg-brand-royal transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-full"></span>
             </Link>
           </div>
 
@@ -40,12 +40,12 @@ export const Navbar: React.FC = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative font-sans text-sm font-medium tracking-wide transition-colors duration-300 hover:text-brand-royal py-2 ${
-                    isActive ? "text-brand-royal font-semibold" : "text-brand-midnight/70"
+                  className={`relative font-sans text-xs font-semibold uppercase tracking-wide hover:text-brand-royal py-2 active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                    isActive ? "text-brand-royal font-bold" : "text-brand-midnight/70"
                   } group`}
                 >
                   {link.label}
-                  <span className={`absolute bottom-0 left-0 h-[2px] bg-brand-royal transition-all duration-300 ${
+                  <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[1px] bg-brand-ocean transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center ${
                     isActive ? "w-full" : "w-0 group-hover:w-full"
                   }`}></span>
                 </Link>
@@ -58,7 +58,7 @@ export const Navbar: React.FC = () => {
             {/* Account Icon */}
             <Link
               href="/auth"
-              className="p-2.5 text-brand-midnight/80 hover:text-brand-royal transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-royal focus:ring-offset-2 rounded-full hover:bg-brand-sky/30"
+              className="p-2.5 text-brand-midnight/80 hover:text-brand-royal active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none rounded-full hover:bg-brand-sky/30"
               aria-label="Account Login"
             >
               <User className="h-5 w-5 stroke-[1.5]" />
@@ -67,7 +67,7 @@ export const Navbar: React.FC = () => {
             {/* Cart Button */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 text-brand-midnight/80 hover:text-brand-royal transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-brand-royal focus:ring-offset-2 rounded-full hover:bg-brand-sky/30"
+              className="relative p-2.5 text-brand-midnight/80 hover:text-brand-royal active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none rounded-full hover:bg-brand-sky/30"
               aria-label="Open Shopping Cart"
             >
               <ShoppingBag className="h-5 w-5 stroke-[1.5]" />
@@ -81,7 +81,7 @@ export const Navbar: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-brand-midnight/80 hover:text-brand-royal transition-colors duration-200 md:hidden focus:outline-none"
+              className="p-2 text-brand-midnight/80 hover:text-brand-royal active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] md:hidden focus:outline-none"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? (
@@ -103,7 +103,7 @@ export const Navbar: React.FC = () => {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="block py-3 text-base font-medium text-brand-midnight/80 hover:text-brand-royal transition-all duration-200 hover:bg-brand-sky/20 px-3 rounded-lg"
+                className="block py-3 text-base font-medium text-brand-midnight/80 hover:text-brand-royal active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-brand-sky/20 px-3 rounded-lg font-sans"
               >
                 {link.label}
               </Link>

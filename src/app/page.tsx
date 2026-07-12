@@ -42,7 +42,7 @@ export default function Home() {
             </div>
             <Link
               href="/products"
-              className="text-xs font-semibold uppercase tracking-wider text-brand-royal hover:text-brand-ocean transition-colors duration-300 flex items-center gap-1.5"
+              className="text-xs font-semibold uppercase tracking-wider text-brand-royal hover:text-brand-ocean flex items-center gap-1.5 font-sans active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             >
               View all products
               <ArrowRight className="h-4 w-4" />
@@ -51,19 +51,19 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredProducts.map((product) => (
-              <div key={product.id} className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-300 hover:shadow-md">
+              <div key={product.id} className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md">
                 {/* Image Container with Soft Brand Sky Placeholder Background */}
                 <Link href={`/products/${product.id}`} className="relative block aspect-square bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20">
                   <Image
                     src={product.image}
                     alt={product.name}
                     fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     unoptimized
                   />
                   {/* Category tag */}
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full">
+                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
                     {product.category}
                   </span>
                 </Link>
@@ -77,23 +77,23 @@ export default function Home() {
                         <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? "fill-current" : "opacity-35"}`} />
                       ))}
                     </div>
-                    <span className="text-[10px] font-bold text-brand-midnight/50">({product.reviewsCount})</span>
+                    <span className="text-[10px] font-bold text-brand-midnight/50 font-sans">({product.reviewsCount})</span>
                   </div>
 
                   {/* Title & Price */}
-                  <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-300 mb-1 min-h-[48px] line-clamp-2">
+                  <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
                     <Link href={`/products/${product.id}`}>
                       {product.name}
                     </Link>
                   </h3>
-                  <p className="text-sm font-semibold text-brand-royal mb-4">
-                    ${product.price}
+                  <p className="text-sm font-semibold text-brand-royal mb-4 font-sans tracking-wide">
+                    {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price)}
                   </p>
 
                   {/* Quick Add Button with brand-royal and hover transition */}
                   <button
                     onClick={() => addToCart(product, "Queen")}
-                    className="w-full mt-auto py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wider rounded-md shadow-sm transition-all duration-300"
+                    className="w-full mt-auto py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                   >
                     Quick Add to Cart
                   </button>

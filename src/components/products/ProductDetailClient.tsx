@@ -46,10 +46,10 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
       {/* Back link */}
-      <div className="mb-8">
+      <div className="mb-8 font-sans">
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-brand-midnight/60 hover:text-brand-royal transition-all duration-300"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-midnight/60 hover:text-brand-royal active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to bedding collection
@@ -78,7 +78,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 <button
                   key={idx}
                   onClick={() => setActiveImage(img)}
-                  className={`relative h-20 w-20 bg-brand-sky/30 rounded-lg overflow-hidden border transition-all duration-300 ${
+                  className={`relative h-20 w-20 bg-brand-sky/30 rounded-lg overflow-hidden border active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     activeImage === img
                       ? "border-brand-royal ring-2 ring-brand-royal/20"
                       : "border-brand-sky hover:border-brand-royal"
@@ -102,7 +102,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
         <div className="lg:col-span-5 space-y-8">
           <div>
             {/* Category */}
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal font-sans">
               {product.category}
             </span>
             {/* Title */}
@@ -123,11 +123,13 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                     />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-brand-midnight/60">
+                <span className="text-xs font-bold text-brand-midnight/60 font-sans">
                   {product.rating} ({product.reviewsCount} reviews)
                 </span>
               </div>
-              <span className="text-xl font-bold text-brand-royal">${product.price}</span>
+              <span className="text-xl font-bold text-brand-royal font-sans">
+                {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price)}
+              </span>
             </div>
           </div>
 
@@ -137,9 +139,9 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           </p>
 
           {/* Size Selector */}
-          <div className="space-y-3">
+          <div className="space-y-3 font-sans">
             <div className="flex justify-between items-baseline">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand-midnight">
+              <span className="text-xs font-bold uppercase tracking-wide text-brand-midnight">
                 Select Bed Size
               </span>
               <span className="text-xs text-brand-midnight/50">Standard dimensions apply</span>
@@ -149,7 +151,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
                 <button
                   key={size}
                   onClick={() => setSelectedSize(size)}
-                  className={`py-3 rounded-md text-xs font-semibold uppercase tracking-wider border transition-all duration-300 ${
+                  className={`py-3 rounded-md text-xs font-semibold uppercase tracking-wide border active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     selectedSize === size
                       ? "border-brand-royal bg-brand-royal text-white shadow-sm"
                       : "border-brand-sky hover:border-brand-royal text-brand-midnight bg-transparent"
@@ -162,12 +164,12 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           </div>
 
           {/* Quantity and Cart Actions */}
-          <div className="flex gap-4 items-stretch">
+          <div className="flex gap-4 items-stretch font-sans">
             {/* Quantity */}
             <div className="flex items-center border border-brand-sky/40 rounded-md bg-brand-sky/20">
               <button
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                className="px-3 text-brand-midnight/60 hover:text-brand-royal transition-colors duration-300"
+                className="px-3 text-brand-midnight/60 hover:text-brand-royal active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 aria-label="Decrease product count"
               >
                 <Minus className="h-4 w-4" />
@@ -177,7 +179,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
               </span>
               <button
                 onClick={() => setQuantity((q) => q + 1)}
-                className="px-3 text-brand-midnight/60 hover:text-brand-royal transition-colors duration-300"
+                className="px-3 text-brand-midnight/60 hover:text-brand-royal active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 aria-label="Increase product count"
               >
                 <Plus className="h-4 w-4" />
@@ -187,7 +189,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             {/* Add to Cart */}
             <button
               onClick={() => addToCart(product, selectedSize, quantity)}
-              className="flex-1 py-4 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-widest rounded-md shadow-sm transition-all duration-300"
+              className="flex-1 py-4 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
             >
               Add to Shopping Cart
             </button>
@@ -195,7 +197,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
             {/* Wishlist Button */}
             <button
               onClick={() => setWishlist(!wishlist)}
-              className={`px-4 border rounded-md transition-all duration-300 flex items-center justify-center ${
+              className={`px-4 border rounded-md active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center ${
                 wishlist
                   ? "border-brand-royal text-brand-royal bg-brand-royal/5"
                   : "border-brand-sky hover:border-brand-royal text-brand-midnight/60 hover:text-brand-royal"
@@ -217,67 +219,79 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           </div>
 
           {/* Premium Accordions */}
-          <div className="border-t border-brand-sky/30 divide-y divide-brand-sky/30">
+          <div className="border-t border-brand-sky/30 divide-y divide-brand-sky/30 font-sans">
             {/* Accordion 1: Details */}
             <div className="py-4">
               <button
                 onClick={() => toggleAccordion("materials")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-brand-midnight"
+                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 <span>Details & Materials</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-250 ${
+                  className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     accordionOpen.materials ? "rotate-180" : ""
                   }`}
                 />
               </button>
-              {accordionOpen.materials && (
-                <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1">
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  accordionOpen.materials ? "max-h-[300px] opacity-100 mt-3" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-xs text-brand-midnight/75 leading-relaxed pl-1 font-sans">
                   {product.details}
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Accordion 2: Care */}
             <div className="py-4">
               <button
                 onClick={() => toggleAccordion("care")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-brand-midnight"
+                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 <span>Care Instructions</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-250 ${
+                  className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     accordionOpen.care ? "rotate-180" : ""
                   }`}
                 />
               </button>
-              {accordionOpen.care && (
-                <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2">
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  accordionOpen.care ? "max-h-[300px] opacity-100 mt-3" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2 font-sans">
                   <p>Machine wash cold on gentle cycle with similar colors. We recommend using a mild, liquid biodegradable detergent.</p>
                   <p>Tumble dry low or line dry to preserve fabric longevity. Avoid chlorine bleaches, fabric softeners, and harsh dryer sheets.</p>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Accordion 3: Shipping */}
             <div className="py-4">
               <button
                 onClick={() => toggleAccordion("shipping")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wider text-brand-midnight"
+                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
               >
                 <span>Shipping & Returns</span>
                 <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-250 ${
+                  className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                     accordionOpen.shipping ? "rotate-180" : ""
                   }`}
                 />
               </button>
-              {accordionOpen.shipping && (
-                <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2">
+              <div
+                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  accordionOpen.shipping ? "max-h-[300px] opacity-100 mt-3" : "max-h-0 opacity-0"
+                }`}
+              >
+                <div className="text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2 font-sans">
                   <p><strong>Free carbon-neutral shipping</strong> on all continental orders. Shipments arrive within 3–7 business days.</p>
                   <p><strong>100-Night Sleep Guarantee:</strong> If you aren't completely content with your sleep experience, request a full refund within 100 days. We provide free prepaid return labels.</p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -292,28 +306,28 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           {relatedProducts.map((p) => (
             <div
               key={p.id}
-              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-300 hover:shadow-md"
+              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
             >
               <Link href={`/products/${p.id}`} className="relative block aspect-square bg-brand-sky/30 border-b border-brand-sky/20 overflow-hidden">
                 <Image
                   src={p.image}
                   alt={p.name}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 33vw"
                   unoptimized
                 />
               </Link>
               <div className="p-5 flex-grow flex flex-col">
-                <h3 className="font-serif text-sm font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-300 mb-1 truncate">
+                <h3 className="font-serif text-sm font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 truncate">
                   <Link href={`/products/${p.id}`}>{p.name}</Link>
                 </h3>
-                <p className="text-xs text-brand-midnight/55 mb-3">{p.category}</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="text-xs font-semibold text-brand-royal">${p.price}</span>
+                <p className="text-xs text-brand-midnight/55 mb-3 font-sans">{p.category}</p>
+                <div className="flex items-center justify-between mt-auto font-sans">
+                  <span className="text-xs font-semibold text-brand-royal">{Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(p.price)}</span>
                   <button
                     onClick={() => addToCart(p, "Queen")}
-                    className="text-[10px] font-bold uppercase tracking-wider text-brand-royal border-b border-brand-royal/20 hover:text-brand-ocean hover:border-brand-ocean transition-all duration-300 pb-0.5"
+                    className="text-[10px] font-bold uppercase tracking-wide text-brand-royal border-b border-brand-royal/20 hover:text-brand-ocean hover:border-brand-ocean active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] pb-0.5"
                   >
                     Quick Add
                   </button>

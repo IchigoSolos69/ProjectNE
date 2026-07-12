@@ -51,8 +51,8 @@ export default function AuthPage() {
 
         {/* Brand Header */}
         <div className="relative z-10">
-          <Link href="/" className="inline-block group">
-            <span className="font-serif text-2xl font-semibold tracking-wide text-white group-hover:text-brand-sky transition-colors duration-300">
+          <Link href="/" className="inline-block group active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
+            <span className="font-serif text-2xl font-semibold tracking-wide text-white group-hover:text-brand-sky transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
               RareComforts
             </span>
           </Link>
@@ -63,13 +63,13 @@ export default function AuthPage() {
           <h1 className="font-serif text-4xl lg:text-5xl font-bold leading-tight text-white drop-shadow-sm">
             Welcome to the Royal Standard of Sleep.
           </h1>
-          <p className="text-sm text-[#BDE8F5]/90 leading-relaxed">
+          <p className="text-sm text-[#BDE8F5]/90 leading-relaxed font-sans">
             Crafting premium Egyptian cotton and sateen linens designed for restorative rest and quiet morning luxury.
           </p>
         </div>
 
         {/* Faded copyright footer */}
-        <div className="relative z-10 text-xs text-[#BDE8F5]/50">
+        <div className="relative z-10 text-xs text-[#BDE8F5]/50 font-sans">
           &copy; {new Date().getFullYear()} RareComforts Inc. All rights reserved.
         </div>
       </div>
@@ -82,7 +82,7 @@ export default function AuthPage() {
         <div ref={formCardRef} className="w-full max-w-md space-y-8 z-10">
           {/* Mobile Brand Name Header */}
           <div className="text-center md:hidden mb-4">
-            <Link href="/" className="font-serif text-2xl font-semibold text-[#0F2854]">
+            <Link href="/" className="font-serif text-2xl font-semibold text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
               RareComforts
             </Link>
           </div>
@@ -103,7 +103,7 @@ export default function AuthPage() {
             <div className="space-y-4">
               {isSignUp && (
                 <div className="space-y-1">
-                  <label htmlFor="name" className="text-xs font-semibold uppercase tracking-widest text-[#0F2854]">
+                  <label htmlFor="name" className="text-xs font-semibold uppercase tracking-wide text-[#0F2854] font-sans">
                     Name
                   </label>
                   <div className="relative">
@@ -115,14 +115,14 @@ export default function AuthPage() {
                       placeholder="Your Name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-300"
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                     />
                   </div>
                 </div>
               )}
 
               <div className="space-y-1">
-                <label htmlFor="email" className="text-xs font-semibold uppercase tracking-widest text-[#0F2854]">
+                <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wide text-[#0F2854] font-sans">
                   Email Address
                 </label>
                 <div className="relative">
@@ -134,13 +134,13 @@ export default function AuthPage() {
                     placeholder="email@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="password" className="text-xs font-semibold uppercase tracking-widest text-[#0F2854]">
+                <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wide text-[#0F2854] font-sans">
                   Password
                 </label>
                 <div className="relative">
@@ -152,7 +152,7 @@ export default function AuthPage() {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                   />
                 </div>
               </div>
@@ -161,17 +161,17 @@ export default function AuthPage() {
             {/* Primary Action Button */}
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white font-sans text-sm font-semibold uppercase tracking-widest rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer flex items-center justify-center gap-2 group"
+              className="w-full py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white font-sans text-xs font-semibold uppercase tracking-wide rounded-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer flex items-center justify-center gap-2 group"
             >
               {isSignUp ? "Create My Account" : "Sign In to My Account"}
-              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1" />
             </button>
           </form>
 
           {/* Divider */}
           <div className="relative flex py-2 items-center">
             <div className="flex-grow border-t border-[#BDE8F5]" />
-            <span className="flex-shrink mx-4 text-xs uppercase tracking-widest text-[#1C4D8D]/60 font-sans">
+            <span className="flex-shrink mx-4 text-xs uppercase tracking-wide text-[#1C4D8D]/60 font-sans">
               or continue with
             </span>
             <div className="flex-grow border-t border-[#BDE8F5]" />
@@ -181,14 +181,14 @@ export default function AuthPage() {
           <div className="grid grid-cols-2 gap-4">
             <button
               onClick={() => alert("Google Login (Mock)")}
-              className="flex items-center justify-center gap-2 py-3 border border-[#1C4D8D]/30 hover:border-[#1C4D8D] rounded-lg bg-white text-xs font-semibold uppercase tracking-wider text-[#0F2854] transition-all duration-300 cursor-pointer hover:bg-[#F6FAFC]"
+              className="flex items-center justify-center gap-2 py-3 border border-[#1C4D8D]/30 hover:border-[#1C4D8D] rounded-lg bg-white text-xs font-semibold uppercase tracking-wide text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer hover:bg-[#F6FAFC] font-sans"
             >
               <Chrome className="h-4 w-4 text-[#1C4D8D]" />
               Google
             </button>
             <button
               onClick={() => alert("Apple Login (Mock)")}
-              className="flex items-center justify-center gap-2 py-3 border border-[#1C4D8D]/30 hover:border-[#1C4D8D] rounded-lg bg-white text-xs font-semibold uppercase tracking-wider text-[#0F2854] transition-all duration-300 cursor-pointer hover:bg-[#F6FAFC]"
+              className="flex items-center justify-center gap-2 py-3 border border-[#1C4D8D]/30 hover:border-[#1C4D8D] rounded-lg bg-white text-xs font-semibold uppercase tracking-wide text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer hover:bg-[#F6FAFC] font-sans"
             >
               <svg className="h-4 w-4 fill-current text-[#0F2854]" viewBox="0 0 24 24">
                 <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 4.17c.66-.81 1.11-1.93.99-3.06-1 .04-2.21.67-2.93 1.49-.62.69-1.16 1.84-1.01 2.96 1.12.09 2.27-.57 2.95-1.39z" />
@@ -198,10 +198,10 @@ export default function AuthPage() {
           </div>
 
           {/* Toggle Member State */}
-          <div className="text-center">
+          <div className="text-center font-sans">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-xs font-semibold uppercase tracking-widest text-[#1C4D8D] hover:text-[#0F2854] underline transition-colors duration-300 cursor-pointer"
+              className="text-xs font-semibold uppercase tracking-wide text-[#1C4D8D] hover:text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] underline cursor-pointer"
             >
               {isSignUp ? "Already a Member? Sign In" : "New to Luxury? Sign Up"}
             </button>

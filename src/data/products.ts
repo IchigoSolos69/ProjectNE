@@ -17,7 +17,7 @@ export const products: Product[] = [
   {
     id: "classic-percale-core-set",
     name: "Classic Percale Core Set",
-    price: 139,
+    price: 10999,
     description: "Our signature cotton percale sheets are cool, crisp, and breathable. Featuring a matte finish and a structure that gets softer with every wash, they are perfect for hot sleepers.",
     category: "Bedsheets",
     image: "/images/percale-sheets.jpg",
@@ -40,7 +40,7 @@ export const products: Product[] = [
   {
     id: "luxe-sateen-sheet-set",
     name: "Luxe Sateen Sheet Set",
-    price: 159,
+    price: 12999,
     description: "Indulge in a smooth, luminous drape. Woven in a rich 480-thread-count sateen, these sheets feel butter-soft against your skin and provide a cozy warmth for cool nights.",
     category: "Bedsheets",
     image: "/images/sateen-sheets.jpg",
@@ -63,7 +63,7 @@ export const products: Product[] = [
   {
     id: "organic-linen-core-set",
     name: "Organic Linen Core Set",
-    price: 249,
+    price: 19999,
     description: "Crafted from fine European flax, our linen sheets are washed for exceptional softness. Naturally insulating yet exceptionally breathable, they offer a relaxed, textured elegance year-round.",
     category: "Bedsheets",
     image: "/images/linen-sheets.jpg",
@@ -86,7 +86,7 @@ export const products: Product[] = [
   {
     id: "cloud-cotton-quilt",
     name: "Cloud Cotton Quilt",
-    price: 229,
+    price: 17999,
     description: "Light as a cloud, this premium quilt features a textured, multi-layered gauze design. Made from 100% Turkish cotton, it brings an organic, cozy texture to your bed layers.",
     category: "Comforters",
     image: "/images/cotton-quilt.jpg",
@@ -109,7 +109,7 @@ export const products: Product[] = [
   {
     id: "all-season-down-alternative-duvet",
     name: "All-Season Down Alternative Duvet",
-    price: 189,
+    price: 14999,
     description: "Get the lofty feel of down without the allergens. Our hypoallergenic duvet insert features a baffle-box construction to keep the premium microfiber fill perfectly distributed.",
     category: "Comforters",
     image: "/images/down-duvet.jpg",
@@ -132,7 +132,7 @@ export const products: Product[] = [
   {
     id: "premium-down-pillow",
     name: "Premium Down Pillow",
-    price: 109,
+    price: 8999,
     description: "Stuffed with ethically sourced European white down, this pillow offers a plush, cloud-like headrest. Tailored in soft, medium, and firm densities to suit any sleep position.",
     category: "Pillows",
     image: "/images/down-pillow.jpg",
@@ -155,7 +155,7 @@ export const products: Product[] = [
   {
     id: "dual-zone-memory-foam-pillow",
     name: "Dual-Zone Memory Foam Pillow",
-    price: 89,
+    price: 6999,
     description: "Experience pressure-relieving support combined with cooling technology. Features a dual-sided design with cooling gel on one side and adaptive memory foam on the other.",
     category: "Pillows",
     image: "/images/memory-foam-pillow.jpg",
@@ -178,7 +178,7 @@ export const products: Product[] = [
   {
     id: "organic-latex-pillow",
     name: "Organic Latex Pillow",
-    price: 99,
+    price: 7999,
     description: "Responsive, bouncy, and highly breathable. Made from 100% natural, organic Dunlop latex, this pillow provides orthopedic neck alignment and retains its shape for years.",
     category: "Pillows",
     image: "/images/latex-pillow.jpg",

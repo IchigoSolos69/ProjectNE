@@ -131,7 +131,7 @@ export default function EditorialSlider() {
           type="button"
           onClick={goPrev}
           aria-label="Previous slide"
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-brand-midnight/50 hover:bg-brand-midnight/75 text-brand-sky backdrop-blur-sm transition-colors duration-300"
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-brand-midnight/50 hover:bg-brand-midnight/75 text-brand-sky backdrop-blur-sm active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
@@ -182,7 +182,7 @@ export default function EditorialSlider() {
               <motion.div custom={4} variants={textVariants}>
                 <Link
                   href={slide.href}
-                  className="inline-flex items-center justify-center px-10 py-3.5 bg-brand-ocean hover:bg-brand-royal text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-sm transition-colors duration-300"
+                  className="inline-flex items-center justify-center px-10 py-3.5 bg-brand-ocean hover:bg-brand-royal text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                 >
                   Shop Now
                 </Link>
@@ -196,7 +196,7 @@ export default function EditorialSlider() {
           type="button"
           onClick={goNext}
           aria-label="Next slide"
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-brand-ocean/80 hover:bg-brand-ocean text-white transition-colors duration-300"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-brand-ocean/80 hover:bg-brand-ocean text-white active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>

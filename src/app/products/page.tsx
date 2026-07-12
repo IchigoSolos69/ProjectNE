@@ -84,12 +84,12 @@ const CatalogContent: React.FC = () => {
       {/* Filters Toolbar */}
       <div className="flex flex-col lg:flex-row gap-6 items-stretch lg:items-center justify-between pb-8 border-b border-brand-sky/40 mb-10">
         {/* Category Buttons */}
-        <div className="flex flex-wrap gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center font-sans">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => handleCategoryChange(cat)}
-              className={`px-5 py-2 text-xs font-semibold uppercase tracking-wider rounded-md transition-all duration-300 ${
+              className={`px-5 py-2 text-xs font-semibold uppercase tracking-wide rounded-md active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
                 activeCategory === cat
                   ? "bg-brand-royal text-white shadow-sm"
                   : "bg-brand-sky/25 hover:bg-brand-sky/60 text-brand-midnight border border-brand-sky/40"
@@ -140,7 +140,7 @@ const CatalogContent: React.FC = () => {
           </p>
           <button
             onClick={handleResetFilters}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wider rounded-md transition-all duration-300"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             Reset all filters
@@ -151,7 +151,7 @@ const CatalogContent: React.FC = () => {
           {filteredAndSortedProducts.map((product) => (
             <div
               key={product.id}
-              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-300 hover:shadow-md"
+              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
             >
               {/* Product Image with brand-sky background placeholder */}
               <Link
@@ -162,12 +162,12 @@ const CatalogContent: React.FC = () => {
                   src={product.image}
                   alt={product.name}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   unoptimized
                 />
                 {/* Category tag */}
-                <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full">
+                <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
                   {product.category}
                 </span>
               </Link>
@@ -194,7 +194,7 @@ const CatalogContent: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-300 mb-1 min-h-[48px] line-clamp-2">
+                <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
                   <Link href={`/products/${product.id}`}>{product.name}</Link>
                 </h3>
 
@@ -204,14 +204,14 @@ const CatalogContent: React.FC = () => {
                 </p>
 
                 {/* Price */}
-                <p className="text-sm font-semibold text-brand-royal mb-4">
-                  ${product.price}
+                <p className="text-sm font-semibold text-brand-royal mb-4 font-sans tracking-wide">
+                  {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price)}
                 </p>
 
                 {/* Add to Cart CTA */}
                 <button
                   onClick={() => addToCart(product, "Queen")}
-                  className="w-full mt-auto py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wider rounded-md shadow-sm transition-all duration-300"
+                  className="w-full mt-auto py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                 >
                   Quick Add to Cart
                 </button>

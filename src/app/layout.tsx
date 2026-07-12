@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Plus_Jakarta_Sans } from "next/font/google";
+import { Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/cart-context";
 import { Navbar } from "@/components/layout/Navbar";
@@ -14,9 +14,9 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const plusJakarta = Plus_Jakarta_Sans({
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta",
+  variable: "--font-outfit",
   display: "swap",
 });
 
@@ -44,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfair.variable} ${plusJakarta.variable} h-full scroll-smooth`}
+      className={`${playfair.variable} ${outfit.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased font-sans">
         <SmoothScroll>
