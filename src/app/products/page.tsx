@@ -240,9 +240,9 @@ const CatalogContent: React.FC = () => {
         </div>
       ) : filteredAndSortedProducts.length === 0 ? (
         <div className="text-center py-20 bg-brand-sky/15 rounded-2xl border border-brand-sky/30 max-w-xl mx-auto space-y-4">
-          <p className="font-serif text-lg font-semibold text-brand-midnight">No products found</p>
+          <p className="font-serif text-lg font-semibold text-brand-midnight">New collections arriving soon.</p>
           <p className="text-sm text-brand-midnight/60 max-w-sm mx-auto">
-            We couldn&apos;t find any bedding items matching &quot;{searchQuery}&quot; or selected category.
+            Our luxury bedding and sanctuary accessories are currently being replenished. Check back shortly.
           </p>
           <button
             onClick={handleResetFilters}
@@ -257,12 +257,12 @@ const CatalogContent: React.FC = () => {
           {filteredAndSortedProducts.map((product) => (
             <div
               key={product.id}
-              className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
+              className="group relative flex flex-col h-full bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
             >
               {/* Product Image with brand-sky background placeholder */}
               <Link
                 href={`/products/${product.id}`}
-                className="relative block aspect-square bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20"
+                className="relative block aspect-[4/5] bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20"
               >
                 <Image
                   src={product.image}
@@ -274,7 +274,7 @@ const CatalogContent: React.FC = () => {
                 />
                 {/* Category tag */}
                 <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
-                  {product.category}
+                  {product.category.toUpperCase()}
                 </span>
               </Link>
 
@@ -309,18 +309,19 @@ const CatalogContent: React.FC = () => {
                   {product.description}
                 </p>
 
-                {/* Price */}
-                <p className="text-sm font-semibold text-brand-royal mb-4 font-sans tracking-wide">
-                  {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price)}
-                </p>
+                {/* Price & Add to Cart button container pushed to bottom */}
+                <div className="mt-auto pt-2 space-y-4">
+                  <p className="text-sm font-semibold text-brand-royal mb-0 font-sans tracking-wide">
+                    {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price)}
+                  </p>
 
-                {/* Add to Cart CTA */}
-                <button
-                  onClick={() => addToCart(product, "Queen")}
-                  className="w-full mt-auto py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
-                >
-                  Quick Add to Cart
-                </button>
+                  <button
+                    onClick={() => addToCart(product, "Queen")}
+                    className="w-full py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
+                  >
+                    Quick Add to Cart
+                  </button>
+                </div>
               </div>
             </div>
           ))}

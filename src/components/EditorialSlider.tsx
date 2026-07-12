@@ -12,18 +12,20 @@ interface EditorialSlide {
   description: string;
   image: string;
   href: string;
+  buttonText?: string;
 }
 
 const SLIDES: EditorialSlide[] = [
   {
     id: "luxe-satin",
     category: "PREMIUM LINEN",
-    title: "Egyptian Cotton satin",
+    title: "The Art of Rest",
     description:
-      "Woven in a luminous 480-thread-count satin, this set drapes like liquid silk—buttery against the skin, with a subtle sheen that elevates every bedroom into a sanctuary of quiet luxury.",
+      "Wrap yourself in ethically sourced, ultra-premium linens designed to transform your sanctuary. Experience the difference of true craftsmanship.",
     image:
-      "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1615876234886-fd1a81c44868?q=80&w=2000&auto=format&fit=crop",
     href: "/products/luxe-satin-sheet-set",
+    buttonText: "Explore the Collection",
   },
   {
     id: "damask-rose",
@@ -207,7 +209,7 @@ export default function EditorialSlider() {
                     href={s.href}
                     className="inline-flex items-center justify-center px-8 lg:px-10 py-3 lg:py-3.5 bg-brand-ocean hover:bg-brand-royal text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
                   >
-                    Shop Now
+                    {s.buttonText || "Shop Now"}
                   </Link>
                 </div>
               </div>
