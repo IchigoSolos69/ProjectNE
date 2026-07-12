@@ -13,6 +13,7 @@ export interface CartProduct {
   name: string;
   price: number;
   image: string;
+  sku: string;
 }
 
 export interface CartItem {

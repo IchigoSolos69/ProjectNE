@@ -161,7 +161,7 @@ export const CartDrawer: React.FC = () => {
                   <div className="flex items-start justify-between gap-1">
                     <h3 className="text-sm font-semibold text-brand-midnight truncate leading-tight">
                       <Link
-                        href={`/products/${item.product.id}`}
+                        href={`/products/${item.product.sku}`}
                         onClick={() => setIsCartOpen(false)}
                         className="hover:underline hover:text-brand-royal transition-colors duration-300"
                       >

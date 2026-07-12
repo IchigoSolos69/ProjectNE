@@ -141,6 +141,7 @@ export default function ProductClient({ sku }: { sku: string }) {
     name: product.name,
     price: displayPrice,
     image: product.imageUrl,
+    sku: product.sku,
   };
 
   const toggleAccordion = (section: string) => {
