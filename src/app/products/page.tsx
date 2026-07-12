@@ -1,12 +1,51 @@
 "use client";
 
-import React, { useState, useMemo, Suspense } from "react";
+import React, { useEffect, useMemo, useState, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Star, SlidersHorizontal, Search, RotateCcw } from "lucide-react";
-import { products, Product } from "@/data/products";
 import { useCart } from "@/context/cart-context";
+import ProductSkeleton from "@/components/products/ProductSkeleton";
+import { API_URL } from "@/lib/api";
+
+interface DatabaseProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  imageUrl: string;
+  isActive: boolean;
+  rating?: number;
+  reviewsCount?: number;
+}
+
+interface CatalogProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+  rating: number;
+  reviewsCount: number;
+}
+
+const mapDatabaseProduct = (product: DatabaseProduct): CatalogProduct => ({
+  // Preserve the UUID from Neon so cart checkout receives the real productId.
+  id: product.id,
+  name: product.name,
+  description: product.description ?? "",
+  // The API stores prices in paise; the storefront displays prices in rupees.
+  price: product.price / 100,
+  category: product.category,
+  image: product.imageUrl,
+  // These fields are not yet supplied by the inventory API, but the card UI
+  // remains visually consistent until review data is available.
+  rating: product.rating ?? 0,
+  reviewsCount: product.reviewsCount ?? 0,
+});
 
 // Inner component that reads query params
 const CatalogContent: React.FC = () => {
@@ -14,12 +53,65 @@ const CatalogContent: React.FC = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  // Catalog state is populated from the live Render/Neon API on mount.
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   // Filters state
   const activeCategory = searchParams.get("category") || "All";
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("featured");
 
-  const categories = ["All", "Bedsheets", "Comforters", "Pillows"];
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const response = await fetch(`${API_URL}/products`, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Products request failed with status ${response.status}`);
+        }
+
+        const data: unknown = await response.json();
+        if (!Array.isArray(data)) {
+          throw new Error("Products response was not an array.");
+        }
+
+        const activeProducts = (data as DatabaseProduct[])
+          .filter((product) => product.isActive !== false)
+          .map(mapDatabaseProduct);
+
+        setProducts(activeProducts);
+      } catch (fetchError) {
+        if ((fetchError as Error).name === "AbortError") {
+          return;
+        }
+
+        console.error("Failed to fetch catalog products:", fetchError);
+        setError("We couldn't load the bedroom collection. Please refresh and try again.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void fetchProducts();
+
+    return () => controller.abort();
+  }, []);
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(products.map((product) => product.category)))],
+    [products]
+  );
 
   // Handle category change (updates URL search parameter)
   const handleCategoryChange = (category: string) => {
@@ -32,7 +124,7 @@ const CatalogContent: React.FC = () => {
     router.push(`/products?${params.toString()}`);
   };
 
-  // Filter and sort products
+  // Filter and sort the live database products.
   const filteredAndSortedProducts = useMemo(() => {
     let result = [...products];
 
@@ -61,7 +153,7 @@ const CatalogContent: React.FC = () => {
     }
 
     return result;
-  }, [activeCategory, searchQuery, sortBy]);
+  }, [activeCategory, products, searchQuery, sortBy]);
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -132,11 +224,25 @@ const CatalogContent: React.FC = () => {
       </div>
 
       {/* Catalog Results Grid */}
-      {filteredAndSortedProducts.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+          {Array.from({ length: 8 }, (_, index) => (
+            <ProductSkeleton key={index} />
+          ))}
+        </div>
+      ) : error ? (
+        <div
+          role="alert"
+          className="text-center py-12 px-6 bg-red-50 rounded-2xl border border-red-200 max-w-xl mx-auto"
+        >
+          <p className="font-serif text-lg font-semibold text-brand-midnight">Unable to load products</p>
+          <p className="mt-2 text-sm text-brand-midnight/65">{error}</p>
+        </div>
+      ) : filteredAndSortedProducts.length === 0 ? (
         <div className="text-center py-20 bg-brand-sky/15 rounded-2xl border border-brand-sky/30 max-w-xl mx-auto space-y-4">
           <p className="font-serif text-lg font-semibold text-brand-midnight">No products found</p>
           <p className="text-sm text-brand-midnight/60 max-w-sm mx-auto">
-            We couldn't find any bedding items matching "{searchQuery}" or selected category.
+            We couldn&apos;t find any bedding items matching &quot;{searchQuery}&quot; or selected category.
           </p>
           <button
             onClick={handleResetFilters}

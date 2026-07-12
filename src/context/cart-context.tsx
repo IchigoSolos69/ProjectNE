@@ -1,17 +1,29 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Product } from "@/data/products";
+
+/**
+ * The cart only needs the fields used to display an item and create an order.
+ * Keeping this separate from a page-specific product model lets API-backed
+ * catalog products use their real database IDs without requiring fixture-only
+ * detail fields.
+ */
+export interface CartProduct {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+}
 
 export interface CartItem {
-  product: Product;
+  product: CartProduct;
   size: "Twin" | "Queen" | "King";
   quantity: number;
 }
 
 interface CartContextType {
   cart: CartItem[];
-  addToCart: (product: Product, size: "Twin" | "Queen" | "King", quantity?: number) => void;
+  addToCart: (product: CartProduct, size: "Twin" | "Queen" | "King", quantity?: number) => void;
   removeFromCart: (productId: string, size: "Twin" | "Queen" | "King") => void;
   updateQuantity: (productId: string, size: "Twin" | "Queen" | "King", quantity: number) => void;
   cartSubtotal: number;
@@ -50,7 +62,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [cart, isInitialized]);
 
-  const addToCart = (product: Product, size: "Twin" | "Queen" | "King", quantity = 1) => {
+  const addToCart = (product: CartProduct, size: "Twin" | "Queen" | "King", quantity = 1) => {
     setCart((prevCart) => {
       const existingItemIndex = prevCart.findIndex(
         (item) => item.product.id === product.id && item.size === size

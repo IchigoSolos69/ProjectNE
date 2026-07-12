@@ -20,7 +20,7 @@ export default function Home() {
       {/* Hero & Blanket Transition Section */}
       <div
         id="hero-transition-container"
-        className="relative w-full h-[calc(100vh-4.5rem)] min-h-[650px] lg:min-h-[800px] overflow-hidden bg-brand-sky/35"
+        className="relative w-full h-[calc(100dvh-4.5rem)] min-h-screen lg:min-h-[800px] overflow-hidden bg-brand-sky/35"
       >
         <section id="hero-section" className="absolute inset-0 w-full h-full z-10">
           <EditorialSlider />
@@ -126,7 +126,7 @@ export default function Home() {
             </h2>
             <div className="h-[2px] w-12 bg-brand-royal/40"></div>
             <p className="text-sm text-brand-midnight/75 leading-relaxed">
-              We believe a restful night shouldn't cost the Earth. Every product in our catalog is crafted from 100% GOTS-certified organic cotton or sustainably farmed European flax linen, ensuring no harsh chemical chemicals or pesticides make their way into your sheets.
+              We believe a restful night shouldn&apos;t cost the Earth. Every product in our catalog is crafted from 100% GOTS-certified organic cotton or sustainably farmed European flax linen, ensuring no harsh chemical chemicals or pesticides make their way into your sheets.
             </p>
             <p className="text-sm text-brand-midnight/75 leading-relaxed">
               Our partners include family-owned mills in Portugal and Italy, operating under Fair Trade standards. We design bedding that is made to last, reducing bedroom waste and bringing premium hotel comfort directly into your home.
@@ -142,4 +142,3 @@ export default function Home() {
     </div>
   );
 }
-

@@ -3,13 +3,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteProduct = exports.getAllProducts = exports.addProduct = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
+const generateSKU = async (category) => {
+    const mapping = {
+        "Bedsheets": "BED",
+        "Comforters": "COM",
+        "Cushion Covers": "CUS",
+        "Towels": "TOW",
+        "Door Mats": "DOM",
+    };
+    const prefix = mapping[category] || "PROD";
+    const count = await prisma.product.count({
+        where: { category },
+    });
+    const paddedCount = String(count + 1).padStart(3, "0");
+    return `${prefix}-${paddedCount}`;
+};
 const addProduct = async (req, res) => {
     try {
-        const { name, description, price, sku, inventoryCount, category, imageUrl } = req.body;
+        const { name, description, price, inventoryCount, category, imageUrl } = req.body;
         if (!name ||
             !description ||
             price === undefined ||
-            !sku ||
             inventoryCount === undefined ||
             !category ||
             !imageUrl) {
@@ -17,6 +31,8 @@ const addProduct = async (req, res) => {
         }
         // Convert Price from Rupees to Paise (multiply by 100)
         const priceInPaise = Math.round(Number(price) * 100);
+        // Auto-generate unique SKU depending on category counts
+        const sku = await generateSKU(category);
         const product = await prisma.product.create({
             data: {
                 name,
@@ -39,7 +55,18 @@ exports.addProduct = addProduct;
 const getAllProducts = async (req, res) => {
     try {
         const products = await prisma.product.findMany({
+            select: {
+                id: true,
+                name: true,
+                price: true,
+                sku: true,
+                inventoryCount: true,
+                category: true,
+                imageUrl: true,
+                isActive: true,
+            },
             orderBy: { name: "asc" },
+            take: 100, // Optimize database fetch response sizes
         });
         return res.status(200).json(products);
     }

@@ -3,15 +3,30 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+const generateSKU = async (category: string): Promise<string> => {
+  const mapping: Record<string, string> = {
+    "Bedsheets": "BED",
+    "Comforters": "COM",
+    "Cushion Covers": "CUS",
+    "Towels": "TOW",
+    "Door Mats": "DOM",
+  };
+  const prefix = mapping[category] || "PROD";
+  const count = await prisma.product.count({
+    where: { category },
+  });
+  const paddedCount = String(count + 1).padStart(3, "0");
+  return `${prefix}-${paddedCount}`;
+};
+
 export const addProduct = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, sku, inventoryCount, category, imageUrl } = req.body;
+    const { name, description, price, inventoryCount, category, imageUrl } = req.body;
 
     if (
       !name ||
       !description ||
       price === undefined ||
-      !sku ||
       inventoryCount === undefined ||
       !category ||
       !imageUrl
@@ -21,6 +36,9 @@ export const addProduct = async (req: Request, res: Response) => {
 
     // Convert Price from Rupees to Paise (multiply by 100)
     const priceInPaise = Math.round(Number(price) * 100);
+
+    // Auto-generate unique SKU depending on category counts
+    const sku = await generateSKU(category);
 
     const product = await prisma.product.create({
       data: {
@@ -47,6 +65,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
       select: {
         id: true,
         name: true,
+        description: true,
         price: true,
         sku: true,
         inventoryCount: true,

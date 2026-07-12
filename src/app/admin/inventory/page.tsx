@@ -152,7 +152,7 @@ export default function AdminInventoryPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Sateen Duvet Cover"
+                    placeholder="e.g. Satin Duvet Cover"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"

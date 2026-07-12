@@ -77,6 +77,7 @@ const ScrollFloat = ({
           start: scrollStart,
           end: scrollEnd,
           scrub: 0.6,
+          invalidateOnRefresh: true,
         },
       }
     );
@@ -85,7 +86,7 @@ const ScrollFloat = ({
       tween.scrollTrigger?.kill();
       tween.kill();
     };
-  }, [triggerId, animationDuration, ease, scrollStart, scrollEnd, stagger]);
+  }, [children, triggerId, animationDuration, ease, scrollStart, scrollEnd, stagger]);
 
   return (
     <h2 ref={containerRef} className={`scroll-float ${containerClassName}`}>

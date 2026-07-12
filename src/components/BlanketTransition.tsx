@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ScrollFloat from "./ScrollFloat";
@@ -11,8 +11,28 @@ interface BlanketTransitionProps {
   triggerId: string;
 }
 
+const LUXURY_PHRASES = [
+  "The Ultimate Sleep Experience",
+  "Uncompromising Everyday Luxury",
+  "Ethically Sourced, Exquisitely Woven",
+  "Transform Your Sanctuary",
+  "Drift into Pure Serenity",
+] as const;
+
 export default function BlanketTransition({ triggerId }: BlanketTransitionProps) {
   const blanketRef = useRef<HTMLDivElement>(null);
+  // Use a deterministic initial value so SSR and the first client render match.
+  const [activePhrase, setActivePhrase] = useState<string>(LUXURY_PHRASES[0]);
+
+  // Randomize only after mount to avoid a Next.js hydration mismatch.
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      const phraseIndex = Math.floor(Math.random() * LUXURY_PHRASES.length);
+      setActivePhrase(LUXURY_PHRASES[phraseIndex]);
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, []);
 
   useEffect(() => {
     const blanket = blanketRef.current;
@@ -20,71 +40,96 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
     if (!blanket || !triggerElement) return;
 
-    let mm = gsap.matchMedia();
+    let refreshFrame: number | undefined;
+    const scheduleRefresh = () => {
+      if (refreshFrame !== undefined) {
+        window.cancelAnimationFrame(refreshFrame);
+      }
 
-    mm.add("(max-width: 1023px)", () => {
-      // MOBILE & TABLET: Lightweight viewport slide without layout pins
-      gsap.set(blanket, { autoAlpha: 1 });
-      gsap.fromTo(
-        blanket,
-        { yPercent: 100 },
-        {
-          yPercent: 0,
-          ease: "power2.out",
+      refreshFrame = window.requestAnimationFrame(() => {
+        refreshFrame = undefined;
+        ScrollTrigger.refresh();
+      });
+    };
+
+    let media: ReturnType<typeof gsap.matchMedia> | undefined;
+    const context = gsap.context(() => {
+      media = gsap.matchMedia();
+
+      media.add("(max-width: 1023px)", () => {
+        // MOBILE & TABLET: Lightweight viewport slide without layout pins.
+        gsap.set(blanket, { autoAlpha: 1 });
+        gsap.fromTo(
+          blanket,
+          { yPercent: 100 },
+          {
+            yPercent: 0,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: triggerElement,
+              start: "top 72px",
+              end: "bottom top",
+              scrub: 1.5,
+              invalidateOnRefresh: true,
+            },
+          }
+        );
+      });
+
+      media.add("(min-width: 1024px)", () => {
+        // DESKTOP: Pin the stable hero container and sweep the blanket upward.
+        gsap.set(blanket, { autoAlpha: 1 });
+        const timeline = gsap.timeline({
           scrollTrigger: {
             trigger: triggerElement,
             start: "top 72px",
-            end: "bottom top",
-            scrub: 1.5, // High scrub adds momentum to smooth jerky touch screens
+            end: "+=100%",
+            scrub: 1,
+            pin: true,
+            pinSpacing: true,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
           },
-        }
-      );
-    });
+        });
 
-    mm.add("(min-width: 1024px)", () => {
-      // DESKTOP: Full scroll pins and scale sweeps
-      gsap.set(blanket, { autoAlpha: 1 });
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: triggerElement,
-          start: "top 72px",
-          end: "+=100%",
-          scrub: 1,
-          pin: true,
-          pinSpacing: true,
-        },
+        timeline.fromTo(
+          blanket,
+          { yPercent: 100, scaleY: 1.02, transformOrigin: "top center" },
+          { yPercent: 0, scaleY: 1, ease: "none" }
+        );
       });
+    }, blanket);
 
-      tl.fromTo(
-        blanket,
-        { y: "100%", scaleY: 1.02, transformOrigin: "top center" },
-        { y: "0%", scaleY: 1, ease: "none" }
-      );
+    // Refresh after LCP images and responsive layout changes. Observing the
+    // trigger, rather than document.body, avoids a refresh loop from pin spacers.
+    const resizeObserver = new ResizeObserver(scheduleRefresh);
+    resizeObserver.observe(triggerElement);
+
+    const images = Array.from(triggerElement.querySelectorAll("img"));
+    images.forEach((image) => {
+      if (!image.complete) {
+        image.addEventListener("load", scheduleRefresh);
+      }
     });
 
-    // Recalculate ScrollTrigger on screen shifts
-    const resizeObserver = new ResizeObserver(() => {
-      ScrollTrigger.refresh();
-    });
-    resizeObserver.observe(document.body);
+    window.addEventListener("load", scheduleRefresh);
+    window.addEventListener("resize", scheduleRefresh);
+    scheduleRefresh();
 
     return () => {
-      mm.revert();
+      window.removeEventListener("load", scheduleRefresh);
+      window.removeEventListener("resize", scheduleRefresh);
+      images.forEach((image) => image.removeEventListener("load", scheduleRefresh));
       resizeObserver.disconnect();
+      if (refreshFrame !== undefined) {
+        window.cancelAnimationFrame(refreshFrame);
+      }
+      media?.revert();
+      context.revert();
     };
   }, [triggerId]);
 
-  useEffect(() => {
-    const handleRefresh = () => ScrollTrigger.refresh();
-    window.addEventListener("load", handleRefresh);
-    window.addEventListener("resize", handleRefresh);
-    const timeout = setTimeout(handleRefresh, 500);
-    return () => {
-      window.removeEventListener("load", handleRefresh);
-      window.removeEventListener("resize", handleRefresh);
-      clearTimeout(timeout);
-    };
-  }, []);
+  const scrollingPhrase = `${activePhrase}  ${String.fromCodePoint(0x2022)}  ${activePhrase}  ${String.fromCodePoint(0x2022)}`;
 
   return (
     <div
@@ -118,19 +163,20 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
         <rect width="100%" height="100%" fill="url(#damask-weave)" />
       </svg>
 
-      <div className="relative z-40 w-full px-6 sm:px-10 lg:px-16 max-w-5xl mx-auto text-center -translate-y-16 md:-translate-y-24">
+      <div className="relative z-40 w-full max-w-6xl mx-auto px-8 sm:px-12 lg:px-20 text-center -translate-y-16 md:-translate-y-24">
         <ScrollFloat
           triggerId={triggerId}
           scrollStart="top+=50% 72px"
           scrollEnd="top+=102% 72px"
           animationDuration={0.35}
           stagger={0.022}
-          containerClassName="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[4.1rem] font-bold tracking-tight uppercase leading-[1.15]"
-          textClassName="text-brand-midnight font-serif tracking-tight text-center justify-center"
+          containerClassName="font-serif text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-[4.1rem] font-bold uppercase leading-[1.2] tracking-[0.08em]"
+          textClassName="text-brand-midnight font-serif text-center justify-center tracking-[0.1em]"
         >
-          The Ultimate Statement of Style and Comfort
+          {scrollingPhrase}
         </ScrollFloat>
       </div>
     </div>
   );
 }
+
