@@ -42,6 +42,19 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     };
   }, [triggerId]);
 
+  useEffect(() => {
+    const handleRefresh = () => ScrollTrigger.refresh();
+    window.addEventListener("load", handleRefresh);
+    window.addEventListener("resize", handleRefresh);
+    // Force refresh after images likely loaded
+    const timeout = setTimeout(handleRefresh, 500); 
+    return () => {
+      window.removeEventListener("load", handleRefresh);
+      window.removeEventListener("resize", handleRefresh);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   return (
     <div
       ref={blanketRef}

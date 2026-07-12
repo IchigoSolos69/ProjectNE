@@ -78,19 +78,6 @@ const textVariants = {
   },
 };
 
-const imageVariants = {
-  initial: { opacity: 0, scale: 1.04 },
-  animate: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
-  },
-  exit: {
-    opacity: 0,
-    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
-
 export default function EditorialSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -121,10 +108,10 @@ export default function EditorialSlider() {
         <AnimatePresence mode="wait">
           <motion.div
             key={slide.id}
-            variants={imageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
             className="absolute inset-0"
           >
             <Image

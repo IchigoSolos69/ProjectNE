@@ -44,19 +44,21 @@ export const CartDrawer: React.FC = () => {
     }
   };
 
-  if (!isCartOpen) return null;
-
   return (
     <div
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex justify-end bg-brand-midnight/40 backdrop-blur-sm animate-fade-in"
+      className={`fixed inset-0 z-50 flex justify-end bg-[#0F2854]/40 backdrop-blur-sm transition-opacity duration-500 ${
+        isCartOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+      }`}
       role="dialog"
       aria-modal="true"
       aria-label="Shopping Cart Drawer"
     >
       <div
         ref={drawerRef}
-        className="w-full max-w-md bg-background h-full shadow-2xl flex flex-col animate-slide-in-right border-l border-brand-sky/40"
+        className={`w-full max-w-md bg-background h-full shadow-2xl flex flex-col border-l border-brand-sky/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          isCartOpen ? "translate-x-0" : "translate-x-full"
+        }`}
       >
         {/* Drawer Header */}
         <div className="px-6 py-5 border-b border-brand-sky/40 flex items-center justify-between">
