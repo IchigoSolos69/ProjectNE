@@ -61,9 +61,14 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
   return (
     <div
       ref={blanketRef}
-      className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform"
+      className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer"
       style={{
-        background: "radial-gradient(circle at 50% 30%, #F1F9FC 0%, #BDE8F5 70%, #A2D5E3 100%)",
+        background: `
+          linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(73,136,196,0.1) 60%, rgba(255,255,255,0.3) 100%),
+          linear-gradient(75deg, rgba(255,255,255,0) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 80%),
+          #BDE8F5
+        `,
+        backgroundSize: "200% 200%",
       }}
     >
       <svg

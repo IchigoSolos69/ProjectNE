@@ -14,8 +14,9 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { href: "/products?category=Bedsheets", label: "Bedsheets" },
     { href: "/products?category=Comforters", label: "Comforters" },
-    { href: "/products?category=Pillows", label: "Pillows" },
-    { href: "/products", label: "Shop All" },
+    { href: "/products?category=Cushion Covers", label: "Cushion Covers" },
+    { href: "/products?category=Towels", label: "Towels" },
+    { href: "/products?category=Door Mats", label: "Door Mats" },
   ];
 
   return (
