@@ -21,7 +21,18 @@ const generateSKU = async (category: string): Promise<string> => {
 
 export const addProduct = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, inventoryCount, category, imageUrl } = req.body;
+    const {
+      name,
+      description,
+      price,
+      inventoryCount,
+      category,
+      imageUrl,
+      sizes,
+      features,
+      materials,
+      careInstructions,
+    } = req.body;
 
     if (
       !name ||
@@ -49,6 +60,10 @@ export const addProduct = async (req: Request, res: Response) => {
         inventoryCount: Number(inventoryCount),
         category,
         imageUrl,
+        sizes: Array.isArray(sizes) ? sizes : [],
+        features: Array.isArray(features) ? features : [],
+        materials: materials || null,
+        careInstructions: careInstructions || null,
       },
     });
 
@@ -72,6 +87,10 @@ export const getAllProducts = async (req: Request, res: Response) => {
         category: true,
         imageUrl: true,
         isActive: true,
+        sizes: true,
+        features: true,
+        materials: true,
+        careInstructions: true,
       },
       orderBy: { name: "asc" },
       take: 100, // Optimize database fetch response sizes
@@ -103,6 +122,10 @@ export const getProductById = async (req: Request, res: Response) => {
         category: true,
         imageUrl: true,
         isActive: true,
+        sizes: true,
+        features: true,
+        materials: true,
+        careInstructions: true,
       },
     });
 

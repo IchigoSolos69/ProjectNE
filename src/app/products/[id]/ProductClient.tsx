@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Star, Plus, Minus, ArrowLeft, Heart, ShoppingCart } from "lucide-react";
+import { Star, Plus, Minus, ArrowLeft, Heart, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import { useCart } from "@/context/cart-context";
 import { API_URL } from "@/lib/api";
 
@@ -17,6 +17,10 @@ interface DatabaseProduct {
   sku: string;
   inventoryCount: number;
   isActive: boolean;
+  sizes: string[];
+  features: string[];
+  materials?: string;
+  careInstructions?: string;
 }
 
 export default function ProductClient({ id }: { id: string }) {
@@ -27,6 +31,10 @@ export default function ProductClient({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [wishlist, setWishlist] = useState(false);
+
+  // Custom configuration state
+  const [selectedSize, setSelectedSize] = useState<string>("Queen");
+  const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -52,6 +60,11 @@ export default function ProductClient({ id }: { id: string }) {
 
         const data: DatabaseProduct = await response.json();
         setProduct(data);
+
+        // Pre-select first size option if available
+        if (data.sizes && data.sizes.length > 0) {
+          setSelectedSize(data.sizes[0]);
+        }
       } catch (fetchError) {
         if ((fetchError as Error).name === "AbortError") {
           return;
@@ -118,23 +131,20 @@ export default function ProductClient({ id }: { id: string }) {
     );
   }
 
-  // Convert price from paise to rupees for display
   const displayPrice = product.price / 100;
+  const sizes = product.sizes && product.sizes.length > 0 ? product.sizes : ["Twin", "Queen", "King"];
+  const features = product.features || [];
 
   // Map product to cart-compatible format
   const cartProduct = {
     id: product.id,
     name: product.name,
-    description: product.description,
     price: displayPrice,
-    category: product.category as "Bedsheets" | "Comforters" | "Cushion Covers" | "Towels" | "Door Mats",
     image: product.imageUrl,
-    images: [product.imageUrl],
-    sizes: ["Twin", "Queen", "King"] as ("Twin" | "Queen" | "King")[],
-    rating: 4.8,
-    reviewsCount: 0,
-    features: [],
-    details: product.description,
+  };
+
+  const toggleAccordion = (section: string) => {
+    setActiveAccordion(activeAccordion === section ? null : section);
   };
 
   return (
@@ -143,17 +153,17 @@ export default function ProductClient({ id }: { id: string }) {
       <div className="mb-8 font-sans">
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-midnight/60 hover:text-brand-royal active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-midnight/60 hover:text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to bedding collection
+          Back to Bedding Collection
         </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
         {/* Left Column: Premium Image Display */}
-        <div className="lg:col-span-7">
-          <div className="relative aspect-square w-full bg-brand-sky/30 rounded-2xl overflow-hidden border border-brand-sky/40 shadow-lg">
+        <div className="lg:col-span-7 space-y-4">
+          <div className="relative aspect-[4/5] w-full bg-[#F6FAFC] rounded-2xl overflow-hidden border border-brand-sky/40 shadow-md">
             <Image
               src={product.imageUrl}
               alt={product.name}
@@ -163,174 +173,209 @@ export default function ProductClient({ id }: { id: string }) {
               sizes="(max-width: 1024px) 100vw, 60vw"
               unoptimized
             />
-            {/* Category badge */}
-            <span className="absolute top-4 left-4 px-3 py-1.5 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans shadow-sm">
-              {product.category}
-            </span>
+          </div>
+
+          {/* Image Thumbnail strip */}
+          <div className="flex gap-3">
+            <div className="relative h-20 w-16 bg-[#F6FAFC] rounded-lg overflow-hidden border-2 border-[#0F2854] cursor-pointer">
+              <Image
+                src={product.imageUrl}
+                alt="Product thumbnail main"
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
           </div>
         </div>
 
         {/* Right Column: Product Details & Actions */}
-        <div className="lg:col-span-5 space-y-8">
+        <div className="lg:col-span-5 space-y-6">
           <div>
-            {/* Category */}
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal font-sans">
-              {product.category}
+            {/* Category tag */}
+            <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#0F2854]/60 font-sans block mb-2">
+              {product.category.toUpperCase()}
             </span>
-            {/* Title */}
-            <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight text-brand-midnight mt-2 leading-tight">
-              {product.name}
-            </h1>
 
-            {/* Price & Stock Info */}
-            <div className="flex items-center justify-between mt-6 pb-6 border-b border-brand-sky/40">
-              <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold text-brand-royal font-sans">
-                  {Intl.NumberFormat("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    maximumFractionDigits: 0,
-                  }).format(displayPrice)}
+            {/* Name & Price */}
+            <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
+              <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#0F2854] leading-tight">
+                {product.name}
+              </h1>
+              <span className="text-2xl font-bold text-[#0F2854] font-sans whitespace-nowrap">
+                {Intl.NumberFormat("en-IN", {
+                  style: "currency",
+                  currency: "INR",
+                  maximumFractionDigits: 0,
+                }).format(displayPrice)}
+              </span>
+            </div>
+
+            {/* Stock indicator & Rating */}
+            <div className="flex items-center justify-between mt-4 pb-4 border-b border-brand-sky/30">
+              {product.inventoryCount > 0 ? (
+                <span className="text-xs text-brand-midnight/60 font-sans">
+                  {product.inventoryCount} units available in stock
                 </span>
-                {product.inventoryCount > 0 ? (
-                  <span className="text-xs text-brand-midnight/60 font-sans">
-                    {product.inventoryCount} in stock
-                  </span>
-                ) : (
-                  <span className="text-xs text-red-600 font-semibold font-sans">Out of Stock</span>
-                )}
-              </div>
+              ) : (
+                <span className="text-xs text-red-600 font-semibold font-sans">Out of Stock</span>
+              )}
+
               {/* Rating Stars */}
               <div className="flex items-center gap-1.5">
                 <div className="flex text-brand-ocean">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`h-4 w-4 ${i < 4 ? "fill-current" : "opacity-35"}`} />
+                    <Star key={i} className={`h-3.5 w-3.5 ${i < 4 ? "fill-current" : "opacity-35"}`} />
                   ))}
                 </div>
-                <span className="text-xs font-bold text-brand-midnight/60 font-sans">(4.8)</span>
+                <span className="text-[10px] font-bold text-brand-midnight/60 font-sans">(4.8 / 5)</span>
               </div>
             </div>
           </div>
 
           {/* Description */}
-          <div className="space-y-4">
-            <h2 className="text-xs font-bold uppercase tracking-wide text-brand-midnight font-sans">
-              Product Description
-            </h2>
-            <p className="text-sm text-brand-midnight/75 leading-relaxed">{product.description}</p>
-          </div>
+          <p className="text-sm text-[#0F2854]/80 leading-relaxed font-sans">{product.description}</p>
 
-          {/* SKU Info */}
-          <div className="bg-brand-sky/15 p-4 rounded-xl border border-brand-sky/40">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-brand-midnight/60 font-sans">Product SKU:</span>
-              <span className="font-semibold text-brand-midnight font-mono">{product.sku}</span>
+          {/* Size Selector */}
+          <div className="space-y-2.5 font-sans">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#0F2854]/70">
+              SELECT BED SIZE
+            </span>
+            <div className="flex flex-wrap gap-2.5">
+              {sizes.map((size) => {
+                const isActive = selectedSize === size;
+                return (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`px-5 py-2 text-xs font-semibold uppercase tracking-wider border rounded-md transition-all duration-300 ${
+                      isActive
+                        ? "bg-[#0F2854] text-white border-[#0F2854]"
+                        : "bg-white text-[#0F2854] border-[#0F2854] hover:bg-[#F6FAFC]"
+                    }`}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Quantity and Cart Actions */}
-          <div className="space-y-4 font-sans">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wide text-brand-midnight">
-                Quantity
+          {/* Add to Cart Actions row */}
+          <div className="flex gap-3 items-stretch font-sans pt-2">
+            {/* Quantity controls */}
+            <div className="flex items-center border border-brand-sky/40 rounded-md bg-[#F6FAFC]">
+              <button
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="px-3.5 py-2 text-brand-midnight/60 hover:text-[#0F2854] active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                aria-label="Decrease quantity"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-sm font-semibold w-10 text-center text-[#0F2854]">
+                {quantity}
               </span>
-              {/* Quantity controls */}
-              <div className="flex items-center border border-brand-sky/40 rounded-md bg-brand-sky/20">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-4 py-2 text-brand-midnight/60 hover:text-brand-royal active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  aria-label="Decrease quantity"
-                >
-                  <Minus className="h-4 w-4" />
-                </button>
-                <span className="text-sm font-semibold w-12 text-center text-brand-midnight">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() =>
-                    setQuantity((q) => (product.inventoryCount > 0 ? Math.min(product.inventoryCount, q + 1) : q + 1))
-                  }
-                  className="px-4 py-2 text-brand-midnight/60 hover:text-brand-royal active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  aria-label="Increase quantity"
-                >
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 items-stretch">
-              {/* Add to Cart */}
               <button
-                onClick={() => addToCart(cartProduct, "Queen", quantity)}
-                disabled={product.inventoryCount === 0}
-                className="flex-1 py-4 bg-brand-royal hover:bg-brand-ocean text-white text-sm font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                onClick={() =>
+                  setQuantity((q) => (product.inventoryCount > 0 ? Math.min(product.inventoryCount, q + 1) : q + 1))
+                }
+                className="px-3.5 py-2 text-brand-midnight/60 hover:text-[#0F2854] active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                aria-label="Increase quantity"
               >
-                <ShoppingCart className="h-4 w-4" />
-                {product.inventoryCount === 0 ? "Out of Stock" : "Add to Cart"}
-              </button>
-
-              {/* Wishlist Button */}
-              <button
-                onClick={() => setWishlist(!wishlist)}
-                className={`px-5 border rounded-md active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center ${
-                  wishlist
-                    ? "border-brand-royal text-brand-royal bg-brand-royal/5"
-                    : "border-brand-sky hover:border-brand-royal text-brand-midnight/60 hover:text-brand-royal"
-                }`}
-                aria-label="Toggle wishlist"
-              >
-                <Heart className={`h-5 w-5 ${wishlist ? "fill-current" : "stroke-[1.5]"}`} />
+                <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
+
+            {/* Add to Cart */}
+            <button
+              onClick={() => addToCart(cartProduct, selectedSize as any, quantity)}
+              disabled={product.inventoryCount === 0}
+              className="flex-1 py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white text-xs font-semibold uppercase tracking-[0.15em] rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {product.inventoryCount === 0 ? "Out of Stock" : "ADD TO SHOPPING CART"}
+            </button>
+
+            {/* Wishlist Button */}
+            <button
+              onClick={() => setWishlist(!wishlist)}
+              className={`px-4 border rounded-md active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center ${
+                wishlist
+                  ? "border-[#0F2854] text-[#0F2854] bg-[#0F2854]/5"
+                  : "border-brand-sky hover:border-[#0F2854] text-brand-midnight/60 hover:text-[#0F2854]"
+              }`}
+              aria-label="Toggle wishlist"
+            >
+              <Heart className={`h-4.5 w-4.5 ${wishlist ? "fill-[#0F2854] text-[#0F2854]" : "stroke-[1.5]"}`} />
+            </button>
           </div>
 
-          {/* Trust Badges */}
-          <div className="grid grid-cols-2 gap-4 pt-6 border-t border-brand-sky/30">
-            <div className="text-center p-4 bg-brand-sky/10 rounded-lg">
-              <p className="text-xs font-bold text-brand-midnight uppercase tracking-wide">
-                Free Shipping
-              </p>
-              <p className="text-[10px] text-brand-midnight/60 mt-1">On all orders</p>
+          {/* Features Box */}
+          {features.length > 0 && (
+            <div className="bg-[#F0F8FF] p-5 rounded-xl border border-brand-sky/20 space-y-3 font-sans">
+              <h3 className="text-xs font-bold uppercase tracking-wide text-[#0F2854]">Key Features</h3>
+              <ul className="space-y-2">
+                {features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-xs text-[#0F2854]/80 leading-relaxed">
+                    <svg className="h-4 w-4 text-[#4988C4] shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="text-center p-4 bg-brand-sky/10 rounded-lg">
-              <p className="text-xs font-bold text-brand-midnight uppercase tracking-wide">
-                100-Night Trial
-              </p>
-              <p className="text-[10px] text-brand-midnight/60 mt-1">Sleep guarantee</p>
-            </div>
-          </div>
-        </div>
-      </div>
+          )}
 
-      {/* Additional Product Information */}
-      <div className="mt-16 pt-12 border-t border-brand-sky/30">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-brand-midnight font-sans">
-              Premium Quality
-            </h3>
-            <p className="text-xs text-brand-midnight/70 leading-relaxed">
-              Ethically sourced materials crafted with meticulous attention to detail for the ultimate
-              sleep experience.
-            </p>
-          </div>
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-brand-midnight font-sans">
-              Care Instructions
-            </h3>
-            <p className="text-xs text-brand-midnight/70 leading-relaxed">
-              Machine wash cold on gentle cycle. Tumble dry low or line dry to preserve fabric longevity.
-            </p>
-          </div>
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold uppercase tracking-wide text-brand-midnight font-sans">
-              Free Returns
-            </h3>
-            <p className="text-xs text-brand-midnight/70 leading-relaxed">
-              Not completely satisfied? Request a full refund within 100 days with free prepaid return
-              labels.
-            </p>
+          {/* Accordion system */}
+          <div className="border-t border-brand-sky/40 pt-2 font-sans text-xs">
+            {/* Accordion 1: Details & Materials */}
+            <div className="border-b border-brand-sky/40">
+              <button
+                onClick={() => toggleAccordion("details")}
+                className="w-full py-4 flex items-center justify-between text-left font-bold uppercase tracking-wider text-[#0F2854]"
+              >
+                <span>Details & Materials</span>
+                {activeAccordion === "details" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              {activeAccordion === "details" && (
+                <div className="pb-4 text-[#0F2854]/80 leading-relaxed">
+                  {product.materials || "Woven from 100% GOTS-certified organic cotton or French flax, meeting strict criteria for ethical production and low environmental impact."}
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 2: Care Instructions */}
+            <div className="border-b border-brand-sky/40">
+              <button
+                onClick={() => toggleAccordion("care")}
+                className="w-full py-4 flex items-center justify-between text-left font-bold uppercase tracking-wider text-[#0F2854]"
+              >
+                <span>Care Instructions</span>
+                {activeAccordion === "care" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              {activeAccordion === "care" && (
+                <div className="pb-4 text-[#0F2854]/80 leading-relaxed">
+                  {product.careInstructions || "Machine wash warm on gentle cycle. Use natural, mild detergent. Tumble dry low or line dry to preserve fabric durability."}
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 3: Shipping & Returns */}
+            <div className="border-b border-brand-sky/40">
+              <button
+                onClick={() => toggleAccordion("shipping")}
+                className="w-full py-4 flex items-center justify-between text-left font-bold uppercase tracking-wider text-[#0F2854]"
+              >
+                <span>Shipping & Returns</span>
+                {activeAccordion === "shipping" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              {activeAccordion === "shipping" && (
+                <div className="pb-4 text-[#0F2854]/80 leading-relaxed">
+                  Enjoy free shipping across India. Orders are typically processed within 24-48 hours and delivered within 3-5 business days. Returns or size exchanges are accepted within 100 days of purchase.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

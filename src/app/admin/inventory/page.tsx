@@ -15,6 +15,10 @@ interface Product {
   category: string;
   imageUrl: string;
   isActive: boolean;
+  sizes: string[];
+  features: string[];
+  materials?: string;
+  careInstructions?: string;
 }
 
 export default function AdminInventoryPage() {
@@ -26,10 +30,15 @@ export default function AdminInventoryPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState(""); // in Rupees
-  const [sku, setSku] = useState("");
   const [category, setCategory] = useState("Bedsheets");
   const [inventoryCount, setInventoryCount] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(["Queen"]);
+  const [featuresInput, setFeaturesInput] = useState("");
+  const [materials, setMaterials] = useState("");
+  const [careInstructions, setCareInstructions] = useState("");
+
+  const sizeOptions = ["Twin", "Full", "Queen", "King", "Cal King"];
 
   const fetchProducts = async () => {
     try {
@@ -51,11 +60,19 @@ export default function AdminInventoryPage() {
     fetchProducts();
   }, []);
 
+  const handleSizeToggle = (size: string) => {
+    if (selectedSizes.includes(size)) {
+      setSelectedSizes(selectedSizes.filter((s) => s !== size));
+    } else {
+      setSelectedSizes([...selectedSizes, size]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name || !description || !price || !sku || !inventoryCount || !category || !imageUrl) {
-      alert("Please fill in all product credentials.");
+    if (!name || !description || !price || !inventoryCount || !category || !imageUrl) {
+      alert("Please fill in all required product credentials.");
       return;
     }
 
@@ -67,10 +84,13 @@ export default function AdminInventoryPage() {
           name,
           description,
           price: Number(price), // Passed in Rupees, backend converts to paise
-          sku,
           inventoryCount: Number(inventoryCount),
           category,
           imageUrl,
+          sizes: selectedSizes,
+          features: featuresInput.split(",").map((f) => f.trim()).filter(Boolean),
+          materials: materials || null,
+          careInstructions: careInstructions || null,
         }),
       });
 
@@ -83,10 +103,13 @@ export default function AdminInventoryPage() {
       setName("");
       setDescription("");
       setPrice("");
-      setSku("");
       setCategory("Bedsheets");
       setInventoryCount("");
       setImageUrl("");
+      setSelectedSizes(["Queen"]);
+      setFeaturesInput("");
+      setMaterials("");
+      setCareInstructions("");
 
       // Refresh inventory
       fetchProducts();
@@ -152,7 +175,7 @@ export default function AdminInventoryPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Satin Duvet Cover"
+                    placeholder="e.g. Luxe Satin Sheet Set"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full pl-9 pr-4 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
@@ -166,10 +189,10 @@ export default function AdminInventoryPage() {
                   <Info className="absolute left-3 top-3 h-4 w-4 text-[#1C4D8D]/40" />
                   <textarea
                     required
-                    placeholder="Detail the fabric composition, thread count, weave style, etc."
+                    placeholder="Brief description for catalog hover list..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    rows={3}
+                    rows={2}
                     className="w-full pl-9 pr-4 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   />
                 </div>
@@ -209,21 +232,6 @@ export default function AdminInventoryPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="font-semibold uppercase tracking-wide text-[#0F2854]">SKU Code</label>
-                  <div className="relative">
-                    <Key className="absolute left-3 top-3 h-4 w-4 text-[#1C4D8D]/40" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. SAT-BLUSH-QN"
-                      value={sku}
-                      onChange={(e) => setSku(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-1">
                   <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Category</label>
                   <select
                     value={category}
@@ -237,21 +245,73 @@ export default function AdminInventoryPage() {
                     <option value="Door Mats">Door Mats</option>
                   </select>
                 </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Image URL</label>
+                  <div className="relative">
+                    <ImageIcon className="absolute left-3 top-3 h-4 w-4 text-[#1C4D8D]/40" />
+                    <input
+                      type="url"
+                      required
+                      placeholder="https://images.unsplash.com/..."
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sizes Checkboxes */}
+              <div className="space-y-2">
+                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Available Sizes</label>
+                <div className="flex flex-wrap gap-3">
+                  {sizeOptions.map((size) => (
+                    <label key={size} className="flex items-center gap-1.5 cursor-pointer text-sm text-[#0F2854]">
+                      <input
+                        type="checkbox"
+                        checked={selectedSizes.includes(size)}
+                        onChange={() => handleSizeToggle(size)}
+                        className="rounded border-[#BDE8F5] text-[#0F2854] focus:ring-[#4988C4]"
+                      />
+                      {size}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Rich Content Fields */}
+              <div className="space-y-1">
+                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Product Features (comma separated)</label>
+                <textarea
+                  placeholder="e.g. 100% Egyptian Cotton, 480-Thread-Count Satin Weave, Durable double stitching"
+                  value={featuresInput}
+                  onChange={(e) => setFeaturesInput(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                />
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Image URL</label>
-                <div className="relative">
-                  <ImageIcon className="absolute left-3 top-3 h-4 w-4 text-[#1C4D8D]/40" />
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://images.unsplash.com/..."
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                  />
-                </div>
+                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Details & Materials</label>
+                <textarea
+                  placeholder="Composition details, textile weights, weave specifications..."
+                  value={materials}
+                  onChange={(e) => setMaterials(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Care Instructions</label>
+                <textarea
+                  placeholder="Washing instructions, heat restrictions, drying directives..."
+                  value={careInstructions}
+                  onChange={(e) => setCareInstructions(e.target.value)}
+                  rows={2}
+                  className="w-full px-3 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] placeholder-[#0F2854]/45 focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                />
               </div>
 
               <button

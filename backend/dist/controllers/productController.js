@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.getAllProducts = exports.addProduct = void 0;
+exports.deleteProduct = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const generateSKU = async (category) => {
@@ -20,7 +20,7 @@ const generateSKU = async (category) => {
 };
 const addProduct = async (req, res) => {
     try {
-        const { name, description, price, inventoryCount, category, imageUrl } = req.body;
+        const { name, description, price, inventoryCount, category, imageUrl, sizes, features, materials, careInstructions, } = req.body;
         if (!name ||
             !description ||
             price === undefined ||
@@ -42,6 +42,10 @@ const addProduct = async (req, res) => {
                 inventoryCount: Number(inventoryCount),
                 category,
                 imageUrl,
+                sizes: Array.isArray(sizes) ? sizes : [],
+                features: Array.isArray(features) ? features : [],
+                materials: materials || null,
+                careInstructions: careInstructions || null,
             },
         });
         return res.status(201).json(product);
@@ -58,12 +62,17 @@ const getAllProducts = async (req, res) => {
             select: {
                 id: true,
                 name: true,
+                description: true,
                 price: true,
                 sku: true,
                 inventoryCount: true,
                 category: true,
                 imageUrl: true,
                 isActive: true,
+                sizes: true,
+                features: true,
+                materials: true,
+                careInstructions: true,
             },
             orderBy: { name: "asc" },
             take: 100, // Optimize database fetch response sizes
@@ -76,6 +85,41 @@ const getAllProducts = async (req, res) => {
     }
 };
 exports.getAllProducts = getAllProducts;
+const getProductById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ error: "Missing product ID parameter." });
+        }
+        const product = await prisma.product.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                sku: true,
+                inventoryCount: true,
+                category: true,
+                imageUrl: true,
+                isActive: true,
+                sizes: true,
+                features: true,
+                materials: true,
+                careInstructions: true,
+            },
+        });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found." });
+        }
+        return res.status(200).json(product);
+    }
+    catch (error) {
+        console.error("Error fetching product by ID:", error);
+        return res.status(500).json({ error: "Failed to retrieve product." });
+    }
+};
+exports.getProductById = getProductById;
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;
