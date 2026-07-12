@@ -1,22 +1,80 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
-import { products } from "@/data/products";
 import { useCart } from "@/context/cart-context";
 import BlanketTransition from "@/components/BlanketTransition";
 import EditorialSlider from "@/components/EditorialSlider";
+import ProductSkeleton from "@/components/products/ProductSkeleton";
+import { API_URL } from "@/lib/api";
+
+interface DatabaseProduct {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  imageUrl: string;
+  isActive: boolean;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+  rating: number;
+  reviewsCount: number;
+}
 
 export default function Home() {
   const { addToCart } = useCart();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Get 4 featured products for the homepage grid
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await fetch(`${API_URL}/products`);
+        if (!res.ok) throw new Error("Failed to fetch product catalog.");
+        const data: DatabaseProduct[] = await res.json();
+
+        const activeProducts = data
+          .filter((p) => p.isActive !== false)
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            price: p.price / 100, // Convert paise to rupees
+            category: p.category,
+            image: p.imageUrl,
+            rating: 4.8,
+            reviewsCount: 24, // Visual consistent review state
+          }));
+
+        setProducts(activeProducts);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to retrieve catalog listings.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const featuredProducts = products.slice(0, 4);
 
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex flex-col w-full bg-background">
       {/* Hero & Blanket Transition Section */}
       <div
         id="hero-transition-container"
@@ -29,11 +87,11 @@ export default function Home() {
       </div>
 
       {/* Featured Products Grid */}
-      <section className="bg-brand-sky/15 py-20 border-t border-brand-sky/30 transition-colors duration-300">
+      <section className="bg-[#F6FAFC] py-20 border-t border-brand-sky/30 transition-colors duration-300">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-baseline justify-between mb-12 gap-4">
             <div className="space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
+              <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal font-sans">
                 Customer Favorites
               </span>
               <h2 className="font-serif text-3xl font-bold tracking-tight text-brand-midnight">
@@ -49,63 +107,113 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featuredProducts.map((product) => (
-              <div key={product.id} className="group relative flex flex-col bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md">
-                {/* Image Container with Soft Brand Sky Placeholder Background */}
-                <Link href={`/products/${product.id}`} className="relative block aspect-square bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    unoptimized
-                  />
-                  {/* Category tag */}
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
-                    {product.category}
-                  </span>
-                </Link>
-
-                {/* Details */}
-                <div className="p-5 flex-1 flex flex-col">
-                  {/* Rating with brand-ocean accents */}
-                  <div className="flex items-center gap-1 text-brand-ocean mb-2">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`h-3 w-3 ${i < Math.floor(product.rating) ? "fill-current" : "opacity-35"}`} />
-                      ))}
-                    </div>
-                    <span className="text-[10px] font-bold text-brand-midnight/50 font-sans">({product.reviewsCount})</span>
-                  </div>
-
-                  {/* Title & Price */}
-                  <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
-                    <Link href={`/products/${product.id}`}>
-                      {product.name}
-                    </Link>
-                  </h3>
-                  <p className="text-sm font-semibold text-brand-royal mb-4 font-sans tracking-wide">
-                    {Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(product.price)}
-                  </p>
-
-                  {/* Quick Add Button with brand-royal and hover transition */}
-                  <button
-                    onClick={() => addToCart(product, "Queen")}
-                    className="w-full mt-auto py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <ProductSkeleton key={index} />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 px-6 bg-red-50 rounded-2xl border border-red-200 max-w-xl mx-auto">
+              <p className="font-serif text-lg font-semibold text-brand-midnight">Unable to load collection</p>
+              <p className="mt-2 text-sm text-brand-midnight/65">{error}</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="text-center py-20 bg-brand-sky/15 rounded-2xl border border-brand-sky/30 max-w-xl mx-auto space-y-4">
+              <p className="font-serif text-lg font-semibold text-brand-midnight leading-relaxed">
+                Our signature collections are currently being updated.
+              </p>
+              <p className="text-sm text-brand-midnight/60 max-w-sm mx-auto font-sans">
+                Return shortly to explore our premium linens and rest sanctuaries.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {featuredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group relative flex flex-col h-full bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
+                >
+                  {/* Image Container */}
+                  <Link
+                    href={`/products/${product.id}`}
+                    className="relative block aspect-[4/5] bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20"
                   >
-                    Quick Add to Cart
-                  </button>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      unoptimized
+                    />
+                    {/* Category tag */}
+                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
+                      {product.category.toUpperCase()}
+                    </span>
+                  </Link>
+
+                  {/* Details */}
+                  <div className="p-5 flex-1 flex flex-col">
+                    {/* Rating */}
+                    <div className="flex items-center gap-1 text-brand-ocean mb-2">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${
+                              i < Math.floor(product.rating) ? "fill-current" : "opacity-35"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[10px] font-bold text-brand-midnight/50 font-sans">
+                        ({product.reviewsCount})
+                      </span>
+                    </div>
+
+                    {/* Title */}
+                    <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
+                      <Link href={`/products/${product.id}`}>{product.name}</Link>
+                    </h3>
+
+                    {/* Price & Cart CTA Button Container Pushed to bottom */}
+                    <div className="mt-auto pt-2 space-y-4">
+                      <p className="text-sm font-semibold text-brand-royal mb-0 font-sans tracking-wide">
+                        {Intl.NumberFormat("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                          maximumFractionDigits: 0,
+                        }).format(product.price)}
+                      </p>
+
+                      <button
+                        onClick={() =>
+                          addToCart(
+                            {
+                              id: product.id,
+                              name: product.name,
+                              price: product.price,
+                              image: product.image,
+                            },
+                            "Queen"
+                          )
+                        }
+                        className="w-full py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
+                      >
+                        Quick Add to Cart
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* 5. Editorial Philosophy */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+      {/* Editorial Philosophy */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-28 bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="relative h-[300px] sm:h-[400px] lg:h-[450px] rounded-xl overflow-hidden shadow-lg order-last lg:order-first">
             <Image
@@ -118,21 +226,21 @@ export default function Home() {
             />
           </div>
           <div className="space-y-6 lg:pl-6">
-            <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal">
+            <span className="text-xs font-semibold uppercase tracking-widest text-brand-royal font-sans">
               Our Material Philosophy
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-brand-midnight leading-tight">
               Sustainably sourced, ethically crafted.
             </h2>
             <div className="h-[2px] w-12 bg-brand-royal/40"></div>
-            <p className="text-sm text-brand-midnight/75 leading-relaxed">
-              We believe a restful night shouldn&apos;t cost the Earth. Every product in our catalog is crafted from 100% GOTS-certified organic cotton or sustainably farmed European flax linen, ensuring no harsh chemical chemicals or pesticides make their way into your sheets.
+            <p className="text-sm text-brand-midnight/75 leading-relaxed font-sans">
+              We believe a restful night shouldn't cost the Earth. Every product in our catalog is crafted from 100% GOTS-certified organic cotton or sustainably farmed European flax linen, ensuring no harsh chemical chemicals or pesticides make their way into your sheets.
             </p>
-            <p className="text-sm text-brand-midnight/75 leading-relaxed">
+            <p className="text-sm text-brand-midnight/75 leading-relaxed font-sans">
               Our partners include family-owned mills in Portugal and Italy, operating under Fair Trade standards. We design bedding that is made to last, reducing bedroom waste and bringing premium hotel comfort directly into your home.
             </p>
             <div className="pt-2">
-              <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest text-brand-royal border-b border-brand-royal/20 pb-0.5 cursor-not-allowed">
+              <span className="inline-flex items-center text-xs font-semibold uppercase tracking-widest text-brand-royal border-b border-brand-royal/20 pb-0.5 cursor-not-allowed font-sans">
                 Read our transparency report
               </span>
             </div>
