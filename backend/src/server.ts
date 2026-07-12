@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { PrismaClient } from "@prisma/client";
 import { config } from "./config";
+import apiRoutes from "./routes";
 
 const app = express();
 const prisma = new PrismaClient();
@@ -34,6 +35,9 @@ app.use(
 );
 
 app.use(express.json());
+
+// API Routes
+app.use("/api", apiRoutes);
 
 // Health check endpoint
 app.get("/api/health", async (req, res) => {

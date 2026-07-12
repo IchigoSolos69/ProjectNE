@@ -1,8 +1,8 @@
 import { Router } from "express";
+import paymentRoutes from "./paymentRoutes";
 
 const router = Router();
 
-// Routes placeholder for user, product, order flows
-// e.g., router.use("/users", userRouter);
+router.use("/payments", paymentRoutes);
 
 export default router;
