@@ -11,26 +11,13 @@ const config_1 = require("./config");
 const routes_1 = __importDefault(require("./routes"));
 const app = (0, express_1.default)();
 const prisma = new client_1.PrismaClient();
-const allowedOrigins = [
-    config_1.config.corsOrigin,
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-];
 // Security Middlewares
 app.use((0, helmet_1.default)());
+// Allow all origins for now (we will restrict this to Cloudflare later)
 app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        // Allow requests with no origin (like mobile apps, postman, curl)
-        if (!origin)
-            return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1 ||
-            origin.startsWith("http://localhost:") ||
-            origin.endsWith(".vercel.app")) {
-            return callback(null, true);
-        }
-        return callback(new Error("CORS policy violation"), false);
-    },
-    credentials: true,
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
 }));
 app.use(express_1.default.json());
 // API Routes

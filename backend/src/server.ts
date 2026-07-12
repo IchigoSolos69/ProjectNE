@@ -8,29 +8,15 @@ import apiRoutes from "./routes";
 const app = express();
 const prisma = new PrismaClient();
 
-const allowedOrigins = [
-  config.corsOrigin,
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-];
-
 // Security Middlewares
 app.use(helmet());
+
+// Allow all origins for now (we will restrict this to Cloudflare later)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, postman, curl)
-      if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.indexOf(origin) !== -1 ||
-        origin.startsWith("http://localhost:") ||
-        origin.endsWith(".vercel.app")
-      ) {
-        return callback(null, true);
-      }
-      return callback(new Error("CORS policy violation"), false);
-    },
-    credentials: true,
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
