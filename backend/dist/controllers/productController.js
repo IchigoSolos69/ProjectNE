@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.incrementLike = exports.getProductBySku = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
+exports.deleteProduct = exports.toggleWishlist = exports.submitRating = exports.incrementLike = exports.getProductBySku = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const generateSKU = async (category) => {
@@ -47,6 +47,8 @@ const addProduct = async (req, res) => {
                 materials: materials || null,
                 careInstructions: careInstructions || null,
                 likes: 0,
+                averageRating: 0,
+                totalReviews: 0,
             },
         });
         return res.status(201).json(product);
@@ -75,6 +77,8 @@ const getAllProducts = async (req, res) => {
                 materials: true,
                 careInstructions: true,
                 likes: true,
+                averageRating: true,
+                totalReviews: true,
             },
             orderBy: { name: "asc" },
             take: 100, // Optimize database fetch response sizes
@@ -110,6 +114,8 @@ const getProductById = async (req, res) => {
                 materials: true,
                 careInstructions: true,
                 likes: true,
+                averageRating: true,
+                totalReviews: true,
             },
         });
         if (!product) {
@@ -147,6 +153,8 @@ const getProductBySku = async (req, res) => {
                 materials: true,
                 careInstructions: true,
                 likes: true,
+                averageRating: true,
+                totalReviews: true,
             },
         });
         if (!product) {
@@ -185,6 +193,110 @@ const incrementLike = async (req, res) => {
     }
 };
 exports.incrementLike = incrementLike;
+const submitRating = async (req, res) => {
+    try {
+        const { sku } = req.params;
+        const { rating } = req.body;
+        const parsedRating = Number(rating);
+        if (!sku || isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+            return res.status(400).json({ error: "Invalid rating value. Must be an integer between 1 and 5." });
+        }
+        const product = await prisma.product.findUnique({
+            where: { sku },
+            select: {
+                averageRating: true,
+                totalReviews: true,
+            },
+        });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found." });
+        }
+        const newTotalReviews = product.totalReviews + 1;
+        const newAverageRating = (product.averageRating * product.totalReviews + parsedRating) / newTotalReviews;
+        const updatedProduct = await prisma.product.update({
+            where: { sku },
+            data: {
+                totalReviews: newTotalReviews,
+                averageRating: parseFloat(newAverageRating.toFixed(2)),
+            },
+            select: {
+                averageRating: true,
+                totalReviews: true,
+            },
+        });
+        return res.status(200).json({
+            success: true,
+            averageRating: updatedProduct.averageRating,
+            totalReviews: updatedProduct.totalReviews,
+        });
+    }
+    catch (error) {
+        console.error("Error submitting product rating:", error);
+        return res.status(500).json({ error: "Failed to submit product rating." });
+    }
+};
+exports.submitRating = submitRating;
+const toggleWishlist = async (req, res) => {
+    try {
+        const { productId, userId } = req.body;
+        if (!productId || !userId) {
+            return res.status(400).json({ error: "Missing productId or userId in request body." });
+        }
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                wishlist: {
+                    select: { id: true },
+                },
+            },
+        });
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+        const isWishlisted = user.wishlist.some((p) => p.id === productId);
+        let updatedUser;
+        if (isWishlisted) {
+            updatedUser = await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    wishlist: {
+                        disconnect: { id: productId },
+                    },
+                },
+                select: {
+                    wishlist: {
+                        select: { id: true, name: true, sku: true },
+                    },
+                },
+            });
+        }
+        else {
+            updatedUser = await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    wishlist: {
+                        connect: { id: productId },
+                    },
+                },
+                select: {
+                    wishlist: {
+                        select: { id: true, name: true, sku: true },
+                    },
+                },
+            });
+        }
+        return res.status(200).json({
+            success: true,
+            wishlisted: !isWishlisted,
+            wishlist: updatedUser.wishlist,
+        });
+    }
+    catch (error) {
+        console.error("Error toggling wishlist:", error);
+        return res.status(500).json({ error: "Failed to toggle wishlist item." });
+    }
+};
+exports.toggleWishlist = toggleWishlist;
 const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;

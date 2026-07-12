@@ -8,15 +8,17 @@ generator client {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  email        String   @unique
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
   passwordHash String
   name         String
   phone        String?
   address      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   orders       Order[]
+  wishlist     Product[] @relation("UserWishlist")
+  reviews      Review[]
 }
 
 model Product {
@@ -34,7 +36,22 @@ model Product {
   materials        String?     // Details & Materials text
   careInstructions String?     // Care instructions text
   likes            Int         @default(0) // Likes counter for storefront interactions
+  averageRating    Float       @default(0)
+  totalReviews     Int         @default(0)
+  wishlistedBy     User[]      @relation("UserWishlist")
+  reviews          Review[]
   orderItems       OrderItem[]
+}
+
+model Review {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  productId String   @db.Uuid
+  rating    Int      // 1-5 rating scale
+  comment   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
 }
 
 enum OrderStatus {

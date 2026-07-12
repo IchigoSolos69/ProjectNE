@@ -3,11 +3,11 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
-import { useCart } from "@/context/cart-context";
+import { ArrowRight } from "lucide-react";
 import BlanketTransition from "@/components/BlanketTransition";
 import EditorialSlider from "@/components/EditorialSlider";
 import ProductSkeleton from "@/components/products/ProductSkeleton";
+import ProductCard from "@/components/products/ProductCard";
 import { API_URL } from "@/lib/api";
 
 interface DatabaseProduct {
@@ -19,6 +19,8 @@ interface DatabaseProduct {
   imageUrl: string;
   sku: string;
   isActive: boolean;
+  averageRating: number;
+  totalReviews: number;
 }
 
 interface Product {
@@ -28,13 +30,12 @@ interface Product {
   price: number;
   category: string;
   image: string;
-  rating: number;
-  reviewsCount: number;
+  averageRating: number;
+  totalReviews: number;
   sku: string;
 }
 
 export default function Home() {
-  const { addToCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,8 +58,8 @@ export default function Home() {
             price: p.price / 100, // Convert paise to rupees
             category: p.category,
             image: p.imageUrl,
-            rating: 4.8,
-            reviewsCount: 24, // Visual consistent review state
+            averageRating: p.averageRating ?? 0,
+            totalReviews: p.totalReviews ?? 0,
             sku: p.sku,
           }));
 
@@ -133,83 +134,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredProducts.map((product) => (
-                <div
-                  key={product.id}
-                  className="group relative flex flex-col h-full bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
-                >
-                  {/* Image Container */}
-                  <Link
-                    href={`/products/${product.sku}`}
-                    className="relative block aspect-[4/5] bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20"
-                  >
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      fill
-                      className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                      unoptimized
-                    />
-                    {/* Category tag */}
-                    <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
-                      {product.category.toUpperCase()}
-                    </span>
-                  </Link>
-
-                  {/* Details */}
-                  <div className="p-5 flex-1 flex flex-col">
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 text-brand-ocean mb-2">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3 w-3 ${
-                              i < Math.floor(product.rating) ? "fill-current" : "opacity-35"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-[10px] font-bold text-brand-midnight/50 font-sans">
-                        ({product.reviewsCount})
-                      </span>
-                    </div>
-
-                    {/* Title */}
-                    <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
-                      <Link href={`/products/${product.sku}`}>{product.name}</Link>
-                    </h3>
-
-                    {/* Price & Cart CTA Button Container Pushed to bottom */}
-                    <div className="mt-auto pt-2 space-y-4">
-                      <p className="text-sm font-semibold text-brand-royal mb-0 font-sans tracking-wide">
-                        {Intl.NumberFormat("en-IN", {
-                          style: "currency",
-                          currency: "INR",
-                          maximumFractionDigits: 0,
-                        }).format(product.price)}
-                      </p>
-
-                      <button
-                        onClick={() =>
-                          addToCart(
-                            {
-                              id: product.id,
-                              name: product.name,
-                              price: product.price,
-                              image: product.image,
-                              sku: product.sku,
-                            },
-                            "Queen"
-                          )
-                        }
-                        className="w-full py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
-                      >
-                        Quick Add to Cart
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}

@@ -1,12 +1,10 @@
 "use client";
 
 import React, { useEffect, useMemo, useState, Suspense } from "react";
-import Image from "next/image";
-import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Star, SlidersHorizontal, Search, RotateCcw } from "lucide-react";
-import { useCart } from "@/context/cart-context";
+import { SlidersHorizontal, Search, RotateCcw } from "lucide-react";
 import ProductSkeleton from "@/components/products/ProductSkeleton";
+import ProductCard from "@/components/products/ProductCard";
 import { API_URL } from "@/lib/api";
 
 interface DatabaseProduct {
@@ -18,6 +16,8 @@ interface DatabaseProduct {
   imageUrl: string;
   sku: string;
   isActive: boolean;
+  averageRating: number;
+  totalReviews: number;
 }
 
 interface CatalogProduct {
@@ -27,8 +27,8 @@ interface CatalogProduct {
   price: number;
   category: string;
   image: string;
-  rating: number;
-  reviewsCount: number;
+  averageRating: number;
+  totalReviews: number;
   sku: string;
 }
 
@@ -39,13 +39,12 @@ const mapDatabaseProduct = (product: DatabaseProduct): CatalogProduct => ({
   price: product.price / 100, // Convert paise to rupees
   category: product.category,
   image: product.imageUrl,
-  rating: 4.8,
-  reviewsCount: 18, // Consistent rating metrics
+  averageRating: product.averageRating ?? 0,
+  totalReviews: product.totalReviews ?? 0,
   sku: product.sku,
 });
 
 const CatalogContent: React.FC = () => {
-  const { addToCart } = useCart();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -142,7 +141,7 @@ const CatalogContent: React.FC = () => {
     } else if (sortBy === "price-desc") {
       result.sort((a, b) => b.price - a.price);
     } else if (sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating);
+      result.sort((a, b) => b.averageRating - a.averageRating);
     }
 
     return result;
@@ -250,88 +249,7 @@ const CatalogContent: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {filteredAndSortedProducts.map((product) => (
-            <div
-              key={product.id}
-              className="group relative flex flex-col h-full bg-background rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:shadow-md"
-            >
-              {/* Product Image */}
-              <Link
-                href={`/products/${product.sku}`}
-                className="relative block aspect-[4/5] bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20"
-              >
-                <Image
-                  src={product.image}
-                  alt={product.name}
-                  fill
-                  className="object-cover transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  unoptimized
-                />
-                {/* Category tag */}
-                <span className="absolute top-3 left-3 px-2.5 py-1 bg-white/95 backdrop-blur-sm border border-brand-sky/20 text-[10px] font-bold text-brand-midnight uppercase tracking-wider rounded-full font-sans">
-                  {product.category.toUpperCase()}
-                </span>
-              </Link>
-
-              {/* Product Details */}
-              <div className="p-5 flex-1 flex flex-col">
-                {/* Review Stars */}
-                <div className="flex items-center gap-1 text-brand-ocean mb-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3 w-3 ${
-                          i < Math.floor(product.rating) ? "fill-current" : "opacity-35"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[10px] font-bold text-brand-midnight/50">
-                    ({product.reviewsCount})
-                  </span>
-                </div>
-
-                {/* Title */}
-                <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
-                  <Link href={`/products/${product.sku}`}>{product.name}</Link>
-                </h3>
-
-                {/* Short description */}
-                <p className="text-xs text-brand-midnight/60 leading-relaxed mb-4 line-clamp-2">
-                  {product.description}
-                </p>
-
-                {/* Price & Add to Cart Container pushed to bottom */}
-                <div className="mt-auto pt-2 space-y-4">
-                  <p className="text-sm font-semibold text-brand-royal mb-0 font-sans tracking-wide">
-                    {Intl.NumberFormat("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                      maximumFractionDigits: 0,
-                    }).format(product.price)}
-                  </p>
-
-                  <button
-                    onClick={() =>
-                      addToCart(
-                        {
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          image: product.image,
-                          sku: product.sku,
-                        },
-                        "Queen"
-                      )
-                    }
-                    className="w-full py-2.5 bg-brand-royal hover:bg-brand-ocean text-white text-xs font-semibold uppercase tracking-wide rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
-                  >
-                    Quick Add to Cart
-                  </button>
-                </div>
-              </div>
-            </div>
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

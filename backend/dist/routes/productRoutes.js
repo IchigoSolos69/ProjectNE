@@ -7,6 +7,7 @@ router.post("/", productController_1.addProduct);
 router.get("/", productController_1.getAllProducts);
 router.get("/sku/:sku", productController_1.getProductBySku);
 router.patch("/sku/:sku/like", productController_1.incrementLike);
+router.post("/:sku/rate", productController_1.submitRating);
 router.get("/:id", productController_1.getProductById);
 router.delete("/:id", productController_1.deleteProduct);
 exports.default = router;
