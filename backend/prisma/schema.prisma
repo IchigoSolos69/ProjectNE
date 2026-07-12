@@ -33,6 +33,7 @@ model Product {
   features         String[]    // Bulleted selling points
   materials        String?     // Details & Materials text
   careInstructions String?     // Care instructions text
+  likes            Int         @default(0) // Likes counter for storefront interactions
   orderItems       OrderItem[]
 }
 

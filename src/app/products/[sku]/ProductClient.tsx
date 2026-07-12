@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Star, Plus, Minus, ArrowLeft, Heart, ShoppingCart, ChevronDown, ChevronUp } from "lucide-react";
 import { useCart } from "@/context/cart-context";
-import { API_URL } from "@/lib/api";
 
 interface DatabaseProduct {
   id: string;
@@ -21,6 +20,7 @@ interface DatabaseProduct {
   features: string[];
   materials?: string;
   careInstructions?: string;
+  likes: number;
 }
 
 export default function ProductClient({ sku }: { sku: string }) {
@@ -30,9 +30,13 @@ export default function ProductClient({ sku }: { sku: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [wishlist, setWishlist] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Custom configuration state
+  // Likes & Wishlist configuration states
+  const [likeCount, setLikeCount] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+
+  // Custom configurations
   const [selectedSize, setSelectedSize] = useState<string>("Queen");
   const [activeAccordion, setActiveAccordion] = useState<string | null>("details");
 
@@ -64,6 +68,7 @@ export default function ProductClient({ sku }: { sku: string }) {
 
         const data: DatabaseProduct = await response.json();
         setProduct(data);
+        setLikeCount(data.likes || 0);
 
         // Pre-select first size option if available
         if (data.sizes && data.sizes.length > 0) {
@@ -87,6 +92,33 @@ export default function ProductClient({ sku }: { sku: string }) {
 
     return () => controller.abort();
   }, [sku]);
+
+  useEffect(() => {
+    if (!isLoading && product) {
+      // Elegant fade-in mount transitions
+      setIsMounted(true);
+    }
+  }, [isLoading, product]);
+
+  const handleLikeToggle = async () => {
+    if (isLiked) return;
+
+    // Optimistic UI updates
+    setLikeCount((prev) => prev + 1);
+    setIsLiked(true);
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/sku/${sku}/like`, {
+        method: "PATCH",
+      });
+      if (!response.ok) throw new Error("Failed to register like.");
+    } catch (err) {
+      console.error("Failed to like product:", err);
+      // Rollback on failure
+      setLikeCount((prev) => Math.max(0, prev - 1));
+      setIsLiked(false);
+    }
+  };
 
   // Loading skeleton
   if (isLoading) {
@@ -153,12 +185,16 @@ export default function ProductClient({ sku }: { sku: string }) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+    <div
+      className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-16 transition-opacity duration-1000 ease-out ${
+        isMounted ? "opacity-100" : "opacity-0"
+      }`}
+    >
       {/* Back link */}
       <div className="mb-8 font-sans">
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-brand-midnight/60 hover:text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[#0F2854]/60 hover:text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Bedding Collection
@@ -216,14 +252,12 @@ export default function ProductClient({ sku }: { sku: string }) {
               </span>
             </div>
 
-            {/* Stock indicator & Rating */}
-            <div className="flex items-center justify-between mt-4 pb-4 border-b border-brand-sky/30">
+            {/* Stock status indicator */}
+            <div className="mt-4 pb-4 border-b border-brand-sky/30 flex items-center justify-between">
               {product.inventoryCount > 0 ? (
-                <span className="text-xs text-brand-midnight/60 font-sans">
-                  {product.inventoryCount} units available in stock
-                </span>
+                <span className="text-sm tracking-widest text-emerald-700 font-medium font-sans">AVAILABLE</span>
               ) : (
-                <span className="text-xs text-red-600 font-semibold font-sans">Out of Stock</span>
+                <span className="text-sm tracking-widest text-gray-400 font-medium font-sans">OUT OF STOCK</span>
               )}
 
               {/* Rating Stars */}
@@ -238,8 +272,8 @@ export default function ProductClient({ sku }: { sku: string }) {
             </div>
           </div>
 
-          {/* Description */}
-          <p className="text-sm text-[#0F2854]/80 leading-relaxed font-sans">{product.description}</p>
+          {/* Description with luxury line spacing */}
+          <p className="text-sm text-[#0F2854]/85 leading-loose font-sans">{product.description}</p>
 
           {/* Size Selector */}
           <div className="space-y-2.5 font-sans">
@@ -284,7 +318,7 @@ export default function ProductClient({ sku }: { sku: string }) {
                 onClick={() =>
                   setQuantity((q) => (product.inventoryCount > 0 ? Math.min(product.inventoryCount, q + 1) : q + 1))
                 }
-                className="px-3.5 py-2 text-brand-midnight/60 hover:text-[#0F2854] active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                className="px-3.5 py-2 text-[#0F2854]/60 hover:text-[#0F2854] active:scale-[0.9] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 aria-label="Increase quantity"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -295,23 +329,24 @@ export default function ProductClient({ sku }: { sku: string }) {
             <button
               onClick={() => addToCart(cartProduct, selectedSize as any, quantity)}
               disabled={product.inventoryCount === 0}
-              className="flex-1 py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white text-xs font-semibold uppercase tracking-[0.15em] rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+              className="flex-1 py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white text-xs font-semibold uppercase tracking-[0.15em] rounded-md shadow-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer font-medium"
             >
               <ShoppingCart className="h-4 w-4" />
               {product.inventoryCount === 0 ? "Out of Stock" : "ADD TO SHOPPING CART"}
             </button>
 
-            {/* Wishlist Button */}
+            {/* Interactive Likes Button */}
             <button
-              onClick={() => setWishlist(!wishlist)}
-              className={`px-4 border rounded-md active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center ${
-                wishlist
-                  ? "border-[#0F2854] text-[#0F2854] bg-[#0F2854]/5"
+              onClick={handleLikeToggle}
+              className={`px-4 py-3 border rounded-md active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center justify-center gap-2 cursor-pointer ${
+                isLiked
+                  ? "border-[#0F2854] text-[#0F2854] bg-[#0F2854]/5 font-bold"
                   : "border-brand-sky hover:border-[#0F2854] text-brand-midnight/60 hover:text-[#0F2854]"
               }`}
-              aria-label="Toggle wishlist"
+              aria-label="Toggle wishlist like"
             >
-              <Heart className={`h-4.5 w-4.5 ${wishlist ? "fill-[#0F2854] text-[#0F2854]" : "stroke-[1.5]"}`} />
+              <Heart className={`h-4.5 w-4.5 ${isLiked ? "fill-[#0F2854] text-[#0F2854]" : "stroke-[1.5]"}`} />
+              <span className="text-xs font-sans font-semibold">{likeCount}</span>
             </button>
           </div>
 

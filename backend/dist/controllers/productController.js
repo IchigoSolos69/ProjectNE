@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProductBySku = exports.deleteProduct = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
+exports.deleteProduct = exports.incrementLike = exports.getProductBySku = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const generateSKU = async (category) => {
@@ -46,6 +46,7 @@ const addProduct = async (req, res) => {
                 features: Array.isArray(features) ? features : [],
                 materials: materials || null,
                 careInstructions: careInstructions || null,
+                likes: 0,
             },
         });
         return res.status(201).json(product);
@@ -73,6 +74,7 @@ const getAllProducts = async (req, res) => {
                 features: true,
                 materials: true,
                 careInstructions: true,
+                likes: true,
             },
             orderBy: { name: "asc" },
             take: 100, // Optimize database fetch response sizes
@@ -107,6 +109,7 @@ const getProductById = async (req, res) => {
                 features: true,
                 materials: true,
                 careInstructions: true,
+                likes: true,
             },
         });
         if (!product) {
@@ -120,23 +123,6 @@ const getProductById = async (req, res) => {
     }
 };
 exports.getProductById = getProductById;
-const deleteProduct = async (req, res) => {
-    try {
-        const { id } = req.params;
-        if (!id) {
-            return res.status(400).json({ error: "Missing product parameter ID." });
-        }
-        await prisma.product.delete({
-            where: { id },
-        });
-        return res.status(200).json({ success: true, message: "Product record successfully deleted." });
-    }
-    catch (error) {
-        console.error("Error deleting product:", error);
-        return res.status(500).json({ error: "Failed to delete product record." });
-    }
-};
-exports.deleteProduct = deleteProduct;
 const getProductBySku = async (req, res) => {
     try {
         const { sku } = req.params;
@@ -160,6 +146,7 @@ const getProductBySku = async (req, res) => {
                 features: true,
                 materials: true,
                 careInstructions: true,
+                likes: true,
             },
         });
         if (!product) {
@@ -173,3 +160,45 @@ const getProductBySku = async (req, res) => {
     }
 };
 exports.getProductBySku = getProductBySku;
+const incrementLike = async (req, res) => {
+    try {
+        const { sku } = req.params;
+        if (!sku) {
+            return res.status(400).json({ error: "Missing product SKU parameter." });
+        }
+        const product = await prisma.product.update({
+            where: { sku },
+            data: {
+                likes: {
+                    increment: 1,
+                },
+            },
+            select: {
+                likes: true,
+            },
+        });
+        return res.status(200).json({ success: true, likes: product.likes });
+    }
+    catch (error) {
+        console.error("Error incrementing product likes:", error);
+        return res.status(500).json({ error: "Failed to update product likes." });
+    }
+};
+exports.incrementLike = incrementLike;
+const deleteProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({ error: "Missing product parameter ID." });
+        }
+        await prisma.product.delete({
+            where: { id },
+        });
+        return res.status(200).json({ success: true, message: "Product record successfully deleted." });
+    }
+    catch (error) {
+        console.error("Error deleting product:", error);
+        return res.status(500).json({ error: "Failed to delete product record." });
+    }
+};
+exports.deleteProduct = deleteProduct;
