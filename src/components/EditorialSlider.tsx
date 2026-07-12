@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "motion/react";
 import { Crown, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface EditorialSlide {
@@ -60,24 +59,6 @@ const SLIDES: EditorialSlide[] = [
 
 const AUTOPLAY_MS = 5000;
 
-const textVariants = {
-  hidden: { opacity: 0, y: 28 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.65,
-      delay: 0.15 + i * 0.09,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  }),
-  exit: {
-    opacity: 0,
-    y: -16,
-    transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
-  },
-};
-
 export default function EditorialSlider() {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -95,8 +76,6 @@ export default function EditorialSlider() {
     return () => clearInterval(timer);
   }, [activeIndex]);
 
-  const slide = SLIDES[activeIndex];
-
   return (
     <section
       className="relative w-full h-full flex flex-col md:flex-row overflow-hidden"
@@ -105,26 +84,27 @@ export default function EditorialSlider() {
     >
       {/* Left — full-bleed product image */}
       <div className="relative w-full md:w-1/2 flex-1 md:h-full bg-neutral-900">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={slide.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0"
-          >
-            <Image
-              src={slide.image}
-              alt={slide.title}
-              fill
-              priority={activeIndex === 0}
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              unoptimized
-            />
-          </motion.div>
-        </AnimatePresence>
+        {SLIDES.map((s, index) => {
+          const isActive = index === activeIndex;
+          return (
+            <div
+              key={s.id}
+              className={`absolute inset-0 transition-opacity duration-[1000ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${
+                isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
+            >
+              <Image
+                src={s.image}
+                alt={s.title}
+                fill
+                priority={index === 0}
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized
+              />
+            </div>
+          );
+        })}
 
         {/* Prev arrow — image panel */}
         <button
@@ -140,55 +120,47 @@ export default function EditorialSlider() {
       {/* Right — editorial content panel */}
       <div className="relative w-full md:w-1/2 h-full bg-brand-midnight flex items-center justify-center">
         <div className="relative z-10 flex flex-col items-center justify-center text-center px-8 sm:px-12 lg:px-16 py-12 max-w-xl w-full">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide.id}
-              className="flex flex-col items-center space-y-5 sm:space-y-6"
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-            >
-              <motion.div custom={0} variants={textVariants} className="flex flex-col items-center gap-2">
-                <Crown className="h-4 w-4 text-brand-sky stroke-[1.5]" aria-hidden="true" />
-                <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.35em] text-brand-sky">
-                  RARECOMFORTS
+          {SLIDES.map((s, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <div
+                key={s.id}
+                className={`flex flex-col items-center space-y-5 sm:space-y-6 transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${
+                  isActive
+                    ? "opacity-100 translate-y-0 scale-100 z-10 pointer-events-auto"
+                    : "absolute opacity-0 translate-y-4 scale-95 z-0 pointer-events-none"
+                }`}
+              >
+                <div className="flex flex-col items-center gap-2">
+                  <Crown className="h-4 w-4 text-brand-sky stroke-[1.5]" aria-hidden="true" />
+                  <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.35em] text-brand-sky font-sans">
+                    RARECOMFORTS
+                  </span>
+                </div>
+
+                <span className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] text-brand-sky/70 font-sans">
+                  {s.category}
                 </span>
-              </motion.div>
 
-              <motion.span
-                custom={1}
-                variants={textVariants}
-                className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.25em] text-brand-sky/70"
-              >
-                {slide.category}
-              </motion.span>
+                <h2 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+                  {s.title}
+                </h2>
 
-              <motion.h2
-                custom={2}
-                variants={textVariants}
-                className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight"
-              >
-                {slide.title}
-              </motion.h2>
+                <p className="text-sm sm:text-base text-brand-sky/90 leading-relaxed max-w-md font-sans">
+                  {s.description}
+                </p>
 
-              <motion.p
-                custom={3}
-                variants={textVariants}
-                className="text-sm sm:text-base text-brand-sky/90 leading-relaxed max-w-md"
-              >
-                {slide.description}
-              </motion.p>
-
-              <motion.div custom={4} variants={textVariants}>
-                <Link
-                  href={slide.href}
-                  className="inline-flex items-center justify-center px-10 py-3.5 bg-brand-ocean hover:bg-brand-royal text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
-                >
-                  Shop Now
-                </Link>
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
+                <div>
+                  <Link
+                    href={s.href}
+                    className="inline-flex items-center justify-center px-10 py-3.5 bg-brand-ocean hover:bg-brand-royal text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-sm active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans"
+                  >
+                    Shop Now
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Next arrow — content panel */}

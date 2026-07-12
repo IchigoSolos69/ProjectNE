@@ -22,19 +22,7 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
   const [quantity, setQuantity] = useState(1);
   const [wishlist, setWishlist] = useState(false);
 
-  // Accordion drawer states
-  const [accordionOpen, setAccordionOpen] = useState({
-    materials: true,
-    care: false,
-    shipping: false,
-  });
 
-  const toggleAccordion = (tab: "materials" | "care" | "shipping") => {
-    setAccordionOpen((prev) => ({
-      ...prev,
-      [tab]: !prev[tab],
-    }));
-  };
 
   // Get related products (same category or others, excluding current)
   const relatedProducts = useMemo(() => {
@@ -221,78 +209,39 @@ export const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ produc
           {/* Premium Accordions */}
           <div className="border-t border-brand-sky/30 divide-y divide-brand-sky/30 font-sans">
             {/* Accordion 1: Details */}
-            <div className="py-4">
-              <button
-                onClick={() => toggleAccordion("materials")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
+            <details className="group py-4" open>
+              <summary className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight cursor-pointer list-none select-none active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 <span>Details & Materials</span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    accordionOpen.materials ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  accordionOpen.materials ? "max-h-[300px] opacity-100 mt-3" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="text-xs text-brand-midnight/75 leading-relaxed pl-1 font-sans">
-                  {product.details}
-                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-open:rotate-180" />
+              </summary>
+              <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 font-sans">
+                {product.details}
               </div>
-            </div>
+            </details>
 
             {/* Accordion 2: Care */}
-            <div className="py-4">
-              <button
-                onClick={() => toggleAccordion("care")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
+            <details className="group py-4">
+              <summary className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight cursor-pointer list-none select-none active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 <span>Care Instructions</span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    accordionOpen.care ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  accordionOpen.care ? "max-h-[300px] opacity-100 mt-3" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2 font-sans">
-                  <p>Machine wash cold on gentle cycle with similar colors. We recommend using a mild, liquid biodegradable detergent.</p>
-                  <p>Tumble dry low or line dry to preserve fabric longevity. Avoid chlorine bleaches, fabric softeners, and harsh dryer sheets.</p>
-                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-open:rotate-180" />
+              </summary>
+              <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2 font-sans">
+                <p>Machine wash cold on gentle cycle with similar colors. We recommend using a mild, liquid biodegradable detergent.</p>
+                <p>Tumble dry low or line dry to preserve fabric longevity. Avoid chlorine bleaches, fabric softeners, and harsh dryer sheets.</p>
               </div>
-            </div>
+            </details>
 
             {/* Accordion 3: Shipping */}
-            <div className="py-4">
-              <button
-                onClick={() => toggleAccordion("shipping")}
-                className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-              >
+            <details className="group py-4">
+              <summary className="w-full flex items-center justify-between text-left text-xs font-bold uppercase tracking-wide text-brand-midnight cursor-pointer list-none select-none active:scale-[0.99] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]">
                 <span>Shipping & Returns</span>
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                    accordionOpen.shipping ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <div
-                className={`overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  accordionOpen.shipping ? "max-h-[300px] opacity-100 mt-3" : "max-h-0 opacity-0"
-                }`}
-              >
-                <div className="text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2 font-sans">
-                  <p><strong>Free carbon-neutral shipping</strong> on all continental orders. Shipments arrive within 3–7 business days.</p>
-                  <p><strong>100-Night Sleep Guarantee:</strong> If you aren't completely content with your sleep experience, request a full refund within 100 days. We provide free prepaid return labels.</p>
-                </div>
+                <ChevronDown className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-open:rotate-180" />
+              </summary>
+              <div className="mt-3 text-xs text-brand-midnight/75 leading-relaxed pl-1 space-y-2 font-sans">
+                <p><strong>Free carbon-neutral shipping</strong> on all continental orders. Shipments arrive within 3–7 business days.</p>
+                <p><strong>100-Night Sleep Guarantee:</strong> If you aren't completely content with your sleep experience, request a full refund within 100 days. We provide free prepaid return labels.</p>
               </div>
-            </div>
+            </details>
           </div>
         </div>
       </div>
