@@ -16,14 +16,14 @@ interface EditorialSlide {
 
 const SLIDES: EditorialSlide[] = [
   {
-    id: "luxe-sateen",
+    id: "luxe-satin",
     category: "PREMIUM LINEN",
-    title: "Egyptian Cotton Sateen",
+    title: "Egyptian Cotton satin",
     description:
-      "Woven in a luminous 480-thread-count sateen, this set drapes like liquid silk—buttery against the skin, with a subtle sheen that elevates every bedroom into a sanctuary of quiet luxury.",
+      "Woven in a luminous 480-thread-count satin, this set drapes like liquid silk—buttery against the skin, with a subtle sheen that elevates every bedroom into a sanctuary of quiet luxury.",
     image:
       "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&w=1600&q=80",
-    href: "/products/luxe-sateen-sheet-set",
+    href: "/products/luxe-satin-sheet-set",
   },
   {
     id: "damask-rose",
@@ -89,9 +89,8 @@ export default function EditorialSlider() {
           return (
             <div
               key={s.id}
-              className={`absolute inset-0 transition-opacity duration-[1000ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-              }`}
+              className={`absolute inset-0 transition-opacity duration-[1000ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                }`}
             >
               <Image
                 src={s.image}
@@ -125,11 +124,10 @@ export default function EditorialSlider() {
             return (
               <div
                 key={s.id}
-                className={`flex flex-col items-center space-y-5 sm:space-y-6 transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${
-                  isActive
+                className={`flex flex-col items-center space-y-5 sm:space-y-6 transition-all duration-[800ms] ease-[cubic-bezier(0.25,1,0.5,1)] ${isActive
                     ? "opacity-100 translate-y-0 scale-100 z-10 pointer-events-auto"
                     : "absolute opacity-0 translate-y-4 scale-95 z-0 pointer-events-none"
-                }`}
+                  }`}
               >
                 <div className="flex flex-col items-center gap-2">
                   <Crown className="h-4 w-4 text-brand-sky stroke-[1.5]" aria-hidden="true" />
@@ -189,9 +187,8 @@ export default function EditorialSlider() {
                 aria-selected={isActive}
                 aria-label={`Go to slide ${index + 1}: ${s.title}`}
                 onClick={() => goToSlide(index)}
-                className={`h-[2px] rounded-full transition-all duration-300 ${
-                  isActive ? "w-10 bg-brand-sky opacity-100" : "w-6 bg-brand-sky opacity-35 hover:opacity-60"
-                }`}
+                className={`h-[2px] rounded-full transition-all duration-300 ${isActive ? "w-10 bg-brand-sky opacity-100" : "w-6 bg-brand-sky opacity-35 hover:opacity-60"
+                  }`}
               />
             );
           })}

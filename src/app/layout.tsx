@@ -6,7 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
-import ScrollToTop from "@/components/layout/ScrollToTop";
+import ScrollReset from "@/components/layout/ScrollReset";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -48,7 +48,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased font-sans">
         <SmoothScroll>
-          <ScrollToTop />
+          <ScrollReset />
           <CartProvider>
             <Navbar />
             <CartDrawer />

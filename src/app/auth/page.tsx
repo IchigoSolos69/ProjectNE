@@ -36,7 +36,7 @@ export default function AuthPage() {
       <div className="relative hidden md:flex flex-col justify-between p-12 text-white overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/sateen-sheets.jpg"
+            src="/images/satin-sheets.jpg"
             alt="Luxurious organic cotton bedding"
             fill
             className="object-cover object-center"
@@ -64,7 +64,7 @@ export default function AuthPage() {
             Welcome to the Royal Standard of Sleep.
           </h1>
           <p className="text-sm text-[#BDE8F5]/90 leading-relaxed font-sans">
-            Crafting premium Egyptian cotton and sateen linens designed for restorative rest and quiet morning luxury.
+            Crafting premium Egyptian cotton and satin linens designed for restorative rest and quiet morning luxury.
           </p>
         </div>
 
@@ -92,8 +92,8 @@ export default function AuthPage() {
               {isSignUp ? "Become a RareComforts Member" : "Welcome Back to Luxury"}
             </h2>
             <p className="text-sm text-[#1C4D8D] font-sans">
-              {isSignUp 
-                ? "Join our sleep circle for wellness guides, product releases, and member perks." 
+              {isSignUp
+                ? "Join our sleep circle for wellness guides, product releases, and member perks."
                 : "Sign in to access your curated orders, registry, and luxury details."}
             </p>
           </div>

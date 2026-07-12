@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/cart-context";
+import { usePathname } from "next/navigation";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -17,6 +18,13 @@ export const CartDrawer: React.FC = () => {
   } = useCart();
 
   const drawerRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Automatically close the cart drawer and unlock body scrolling when pathname changes
+    setIsCartOpen(false);
+    document.body.style.overflow = "";
+  }, [pathname, setIsCartOpen]);
 
   // Close drawer on pressing Escape key
   useEffect(() => {

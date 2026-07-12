@@ -42,7 +42,16 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       );
     });
 
-    return () => ctx.revert();
+    // Aggressive height recalculation
+    const resizeObserver = new ResizeObserver(() => {
+      ScrollTrigger.refresh();
+    });
+    resizeObserver.observe(document.body);
+
+    return () => {
+      ctx.revert();
+      resizeObserver.disconnect();
+    };
   }, [triggerId]);
 
   useEffect(() => {

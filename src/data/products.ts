@@ -38,27 +38,27 @@ export const products: Product[] = [
     details: "Meticulously woven in Italy, our Classic Percale sheets mimic the luxury of five-star hotel bedding. The weave structure allows for continuous airflow, helping you maintain a balanced body temperature throughout the night."
   },
   {
-    id: "luxe-sateen-sheet-set",
-    name: "Luxe Sateen Sheet Set",
+    id: "luxe-satin-sheet-set",
+    name: "Luxe satin Sheet Set",
     price: 12999,
-    description: "Indulge in a smooth, luminous drape. Woven in a rich 480-thread-count sateen, these sheets feel butter-soft against your skin and provide a cozy warmth for cool nights.",
+    description: "Indulge in a smooth, luminous drape. Woven in a rich 480-thread-count satin, these sheets feel butter-soft against your skin and provide a cozy warmth for cool nights.",
     category: "Bedsheets",
-    image: "/images/sateen-sheets.jpg",
+    image: "/images/satin-sheets.jpg",
     images: [
-      "/images/sateen-sheets.jpg",
-      "/images/sateen-sheets-detail.jpg"
+      "/images/satin-sheets.jpg",
+      "/images/satin-sheets-detail.jpg"
     ],
     sizes: ["Twin", "Queen", "King"],
     rating: 4.9,
     reviewsCount: 842,
     features: [
       "100% premium long-staple cotton",
-      "Luminous, buttery sateen weave",
+      "Luminous, buttery satin weave",
       "480 Thread count for a substantial, cozy weight",
       "OEKO-TEX® certified for clean, safe manufacturing",
       "Wrinkle-resistant finish without harsh chemicals"
     ],
-    details: "For those who prefer a silky, substantial sheet that wraps you in absolute comfort, our Luxe Sateen represents the pinnacle of bedtime luxury. The subtle sheen gives your bedroom a sophisticated aesthetic."
+    details: "For those who prefer a silky, substantial sheet that wraps you in absolute comfort, our Luxe satin represents the pinnacle of bedtime luxury. The subtle sheen gives your bedroom a sophisticated aesthetic."
   },
   {
     id: "organic-linen-core-set",
@@ -145,7 +145,7 @@ export const products: Product[] = [
     reviewsCount: 1403,
     features: [
       "Filled with RDS-certified European white down",
-      "Double-stitched piping with 100% cotton sateen shell",
+      "Double-stitched piping with 100% cotton satin shell",
       "Available in supportive densities (Plush or Firm)",
       "Hypoallergenic and washed 15 times to ensure purity",
       "Made in the USA from imported materials"
