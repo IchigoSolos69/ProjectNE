@@ -83,6 +83,40 @@ export const getAllProducts = async (req: Request, res: Response) => {
   }
 };
 
+export const getProductById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ error: "Missing product ID parameter." });
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        sku: true,
+        inventoryCount: true,
+        category: true,
+        imageUrl: true,
+        isActive: true,
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found." });
+    }
+
+    return res.status(200).json(product);
+  } catch (error) {
+    console.error("Error fetching product by ID:", error);
+    return res.status(500).json({ error: "Failed to retrieve product." });
+  }
+};
+
 export const deleteProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

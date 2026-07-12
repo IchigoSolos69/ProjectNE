@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import ScrollFloat from "./ScrollFloat";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -21,6 +20,7 @@ const LUXURY_PHRASES = [
 
 export default function BlanketTransition({ triggerId }: BlanketTransitionProps) {
   const blanketRef = useRef<HTMLDivElement>(null);
+  const marqueeContainerRef = useRef<HTMLDivElement>(null);
   // Use a deterministic initial value so SSR and the first client render match.
   const [activePhrase, setActivePhrase] = useState<string>(LUXURY_PHRASES[0]);
 
@@ -129,7 +129,36 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     };
   }, [triggerId]);
 
-  const scrollingPhrase = `${activePhrase}  ${String.fromCodePoint(0x2022)}  ${activePhrase}  ${String.fromCodePoint(0x2022)}`;
+  // Infinite Marquee Animation with Fade-In
+  useEffect(() => {
+    const marqueeContainer = marqueeContainerRef.current;
+    if (!marqueeContainer) return;
+
+    // Fade in the marquee text over 2 seconds
+    gsap.to(marqueeContainer, {
+      opacity: 1,
+      duration: 2,
+      ease: "power2.out",
+      delay: 0.5
+    });
+
+    // Create seamless infinite horizontal loop
+    const marqueeWidth = marqueeContainer.scrollWidth / 4; // Width of one repetition
+    
+    const marqueeAnimation = gsap.to(marqueeContainer, {
+      x: -marqueeWidth,
+      duration: 20,
+      ease: "none",
+      repeat: -1,
+      modifiers: {
+        x: gsap.utils.unitize((x) => parseFloat(x) % marqueeWidth)
+      }
+    });
+
+    return () => {
+      marqueeAnimation.kill();
+    };
+  }, [activePhrase]);
 
   return (
     <div
@@ -163,18 +192,22 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
         <rect width="100%" height="100%" fill="url(#damask-weave)" />
       </svg>
 
-      <div className="relative z-40 w-full max-w-6xl mx-auto px-8 sm:px-12 lg:px-20 text-center -translate-y-16 md:-translate-y-24">
-        <ScrollFloat
-          triggerId={triggerId}
-          scrollStart="top+=50% 72px"
-          scrollEnd="top+=102% 72px"
-          animationDuration={0.35}
-          stagger={0.022}
-          containerClassName="font-serif text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-[4.1rem] font-bold uppercase leading-[1.2] tracking-[0.08em]"
-          textClassName="text-brand-midnight font-serif text-center justify-center tracking-[0.1em]"
+      <div className="relative z-40 w-full overflow-hidden">
+        <div 
+          ref={marqueeContainerRef}
+          className="flex whitespace-nowrap opacity-0"
+          style={{ willChange: 'transform' }}
         >
-          {scrollingPhrase}
-        </ScrollFloat>
+          {/* Duplicate the text multiple times to ensure seamless infinite scroll */}
+          {[0, 1, 2, 3].map((index) => (
+            <span
+              key={index}
+              className="font-serif text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-[4.1rem] font-bold uppercase tracking-[0.08em] text-brand-midnight px-8"
+            >
+              {activePhrase} • 
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
