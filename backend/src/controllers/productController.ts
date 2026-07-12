@@ -167,6 +167,8 @@ export const getProductBySku = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Missing product SKU parameter." });
     }
 
+    console.log("Looking for SKU:", req.params.sku);
+
     const product = await prisma.product.findUnique({
       where: { sku },
       select: {

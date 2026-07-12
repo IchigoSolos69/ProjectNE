@@ -44,7 +44,7 @@ export default function ProductClient({ sku }: { sku: string }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`${API_URL}/products/sku/${sku}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/sku/${sku}`, {
           signal: controller.signal,
         });
 

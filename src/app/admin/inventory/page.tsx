@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { SlidersHorizontal, PlusCircle, Trash2, Box, Info, Image as ImageIcon, IndianRupee, Key } from "lucide-react";
+import { SlidersHorizontal, PlusCircle, Trash2, Box, Info, Image as ImageIcon, IndianRupee } from "lucide-react";
 import { API_URL } from "@/lib/api";
 
 interface Product {
@@ -21,6 +21,13 @@ interface Product {
   careInstructions?: string;
 }
 
+// Category sizes configuration mapping
+const CATEGORY_SIZES: Record<string, string[]> = {
+  "Bedsheets": ["Twin", "Full", "Queen", "King", "Cal King"],
+  "Comforters": ["Twin", "Full", "Queen", "King", "Cal King"],
+  "Towels": ["Washcloth", "Hand Towel", "Bath Towel", "Bath Sheet"],
+};
+
 export default function AdminInventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,12 +40,10 @@ export default function AdminInventoryPage() {
   const [category, setCategory] = useState("Bedsheets");
   const [inventoryCount, setInventoryCount] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [selectedSizes, setSelectedSizes] = useState<string[]>(["Queen"]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [featuresInput, setFeaturesInput] = useState("");
   const [materials, setMaterials] = useState("");
   const [careInstructions, setCareInstructions] = useState("");
-
-  const sizeOptions = ["Twin", "Full", "Queen", "King", "Cal King"];
 
   const fetchProducts = async () => {
     try {
@@ -66,6 +71,12 @@ export default function AdminInventoryPage() {
     } else {
       setSelectedSizes([...selectedSizes, size]);
     }
+  };
+
+  const handleCategoryChange = (newCategory: string) => {
+    setCategory(newCategory);
+    // Explicitly reset sizes on category swap to prevent hidden payload leaks
+    setSelectedSizes([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +117,7 @@ export default function AdminInventoryPage() {
       setCategory("Bedsheets");
       setInventoryCount("");
       setImageUrl("");
-      setSelectedSizes(["Queen"]);
+      setSelectedSizes([]);
       setFeaturesInput("");
       setMaterials("");
       setCareInstructions("");
@@ -235,7 +246,7 @@ export default function AdminInventoryPage() {
                   <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Category</label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
                     className="w-full px-3 py-2.5 rounded-md border border-[#BDE8F5] bg-[#F6FAFC] text-sm text-[#0F2854] focus:border-[#4988C4] focus:bg-white focus:outline-none transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   >
                     <option value="Bedsheets">Bedsheets</option>
@@ -262,23 +273,25 @@ export default function AdminInventoryPage() {
                 </div>
               </div>
 
-              {/* Sizes Checkboxes */}
-              <div className="space-y-2">
-                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Available Sizes</label>
-                <div className="flex flex-wrap gap-3">
-                  {sizeOptions.map((size) => (
-                    <label key={size} className="flex items-center gap-1.5 cursor-pointer text-sm text-[#0F2854]">
-                      <input
-                        type="checkbox"
-                        checked={selectedSizes.includes(size)}
-                        onChange={() => handleSizeToggle(size)}
-                        className="rounded border-[#BDE8F5] text-[#0F2854] focus:ring-[#4988C4]"
-                      />
-                      {size}
-                    </label>
-                  ))}
+              {/* Conditionally Render Available Sizes based on Category Config */}
+              {CATEGORY_SIZES[category] && (
+                <div className="space-y-2">
+                  <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Available Sizes</label>
+                  <div className="flex flex-wrap gap-3">
+                    {CATEGORY_SIZES[category].map((size) => (
+                      <label key={size} className="flex items-center gap-1.5 cursor-pointer text-sm text-[#0F2854]">
+                        <input
+                          type="checkbox"
+                          checked={selectedSizes.includes(size)}
+                          onChange={() => handleSizeToggle(size)}
+                          className="rounded border-[#BDE8F5] text-[#0F2854] focus:ring-[#4988C4]"
+                        />
+                        {size}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Rich Content Fields */}
               <div className="space-y-1">
