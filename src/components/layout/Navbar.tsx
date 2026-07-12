@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X, User } from "lucide-react";
@@ -10,6 +10,21 @@ export const Navbar: React.FC = () => {
   const { cartCount, setIsCartOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   const navLinks = [
     { href: "/products?category=Bedsheets", label: "Bedsheets" },
@@ -95,23 +110,37 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Nav Menu */}
+      {/* Mobile Nav Menu (Drawer Overlay) */}
       <div
-        className={`md:hidden border-b border-border/40 bg-background/98 overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-          mobileMenuOpen ? "max-h-[300px] opacity-100 py-4" : "max-h-0 opacity-0 py-0 pointer-events-none"
+        className={`fixed inset-0 top-[72px] z-30 md:hidden bg-[#0F2854]/40 backdrop-blur-md transition-opacity duration-500 ${
+          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
+        onClick={() => setMobileMenuOpen(false)}
       >
-        <div className="space-y-1 px-4 sm:px-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-3 text-base font-medium text-brand-midnight/80 hover:text-brand-royal active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-brand-sky/20 px-3 rounded-lg font-sans"
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`w-4/5 max-w-sm bg-background h-[calc(100vh-72px)] border-r border-brand-sky/40 shadow-2xl flex flex-col px-6 py-8 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+            mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex flex-col space-y-6">
+            {navLinks.map((link, idx) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-3.5 text-lg font-semibold uppercase tracking-wider text-brand-midnight hover:text-brand-royal active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] font-sans border-b border-brand-sky/20 last:border-0"
+                style={{
+                  transform: mobileMenuOpen ? "translateY(0)" : "translateY(24px)",
+                  opacity: mobileMenuOpen ? 1 : 0,
+                  transition: "all 700ms cubic-bezier(0.16, 1, 0.3, 1)",
+                  transitionDelay: mobileMenuOpen ? `${(idx + 1) * 80}ms` : "0ms",
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </header>

@@ -20,16 +20,23 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
     if (!blanket || !triggerElement) return;
 
-    let ctx = gsap.context(() => {
-      // Unhide once JS is ready to animate, avoiding FOUC
+    let mm = gsap.matchMedia();
+
+    mm.add({
+      isMobile: "(max-width: 767px)",
+      isDesktop: "(min-width: 768px)"
+    }, (context) => {
+      // @ts-ignore
+      const { isMobile } = context.conditions;
+
       gsap.set(blanket, { autoAlpha: 1 });
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: triggerElement,
           start: "top 72px",
-          end: "+=100%",
-          scrub: 1, // Smooth out scroll jitter
+          end: isMobile ? "+=70%" : "+=100%",
+          scrub: isMobile ? 0.5 : 1, // Shorter pins and quicker reaction times on mobile
           pin: true,
           pinSpacing: true,
         },
@@ -37,7 +44,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
       tl.fromTo(
         blanket,
-        { y: "100%", scaleY: 1.02, transformOrigin: "top center" },
+        { y: "100%", scaleY: isMobile ? 1.01 : 1.02, transformOrigin: "top center" },
         { y: "0%", scaleY: 1, ease: "none" }
       );
     });
@@ -49,7 +56,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     resizeObserver.observe(document.body);
 
     return () => {
-      ctx.revert();
+      mm.revert();
       resizeObserver.disconnect();
     };
   }, [triggerId]);
