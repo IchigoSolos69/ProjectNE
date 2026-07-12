@@ -22,21 +22,34 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
     let mm = gsap.matchMedia();
 
-    mm.add({
-      isMobile: "(max-width: 767px)",
-      isDesktop: "(min-width: 768px)"
-    }, (context) => {
-      // @ts-ignore
-      const { isMobile } = context.conditions;
-
+    mm.add("(max-width: 1023px)", () => {
+      // MOBILE & TABLET: Lightweight viewport slide without layout pins
       gsap.set(blanket, { autoAlpha: 1 });
+      gsap.fromTo(
+        blanket,
+        { yPercent: 100 },
+        {
+          yPercent: 0,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger: triggerElement,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.5, // High scrub adds momentum to smooth jerky touch screens
+          },
+        }
+      );
+    });
 
+    mm.add("(min-width: 1024px)", () => {
+      // DESKTOP: Full scroll pins and scale sweeps
+      gsap.set(blanket, { autoAlpha: 1 });
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: triggerElement,
           start: "top 72px",
-          end: isMobile ? "+=70%" : "+=100%",
-          scrub: isMobile ? 0.5 : 1, // Shorter pins and quicker reaction times on mobile
+          end: "+=100%",
+          scrub: 1,
           pin: true,
           pinSpacing: true,
         },
@@ -44,12 +57,12 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
       tl.fromTo(
         blanket,
-        { y: "100%", scaleY: isMobile ? 1.01 : 1.02, transformOrigin: "top center" },
+        { y: "100%", scaleY: 1.02, transformOrigin: "top center" },
         { y: "0%", scaleY: 1, ease: "none" }
       );
     });
 
-    // Aggressive height recalculation
+    // Recalculate ScrollTrigger on screen shifts
     const resizeObserver = new ResizeObserver(() => {
       ScrollTrigger.refresh();
     });
@@ -65,7 +78,6 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     const handleRefresh = () => ScrollTrigger.refresh();
     window.addEventListener("load", handleRefresh);
     window.addEventListener("resize", handleRefresh);
-    // Force refresh after images likely loaded
     const timeout = setTimeout(handleRefresh, 500);
     return () => {
       window.removeEventListener("load", handleRefresh);
