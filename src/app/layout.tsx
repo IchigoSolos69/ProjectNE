@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: "RareComforts | Premium Organic Bedding",
     description: "Sustainably crafted bedding designed for restorative sleep and quiet morning luxury.",
-    url: "https://rarecomforts.com",
+    url: "https://rarecomforts.in",
     siteName: "RareComforts",
-    locale: "en_US",
+    locale: "en_IN",
     type: "website",
   },
 };

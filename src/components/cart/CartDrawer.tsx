@@ -47,7 +47,7 @@ export const CartDrawer: React.FC = () => {
   return (
     <div
       onClick={handleOverlayClick}
-      className={`fixed inset-0 z-50 flex justify-end bg-[#0F2854]/40 backdrop-blur-sm transition-opacity duration-500 ${
+      className={`fixed inset-0 z-50 flex justify-end bg-[#0F2854]/50 backdrop-blur-md transition-opacity duration-500 ${
         isCartOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
       }`}
       role="dialog"
@@ -56,7 +56,7 @@ export const CartDrawer: React.FC = () => {
     >
       <div
         ref={drawerRef}
-        className={`w-full max-w-md bg-background h-full shadow-2xl flex flex-col border-l border-brand-sky/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`w-full max-w-md bg-background h-full shadow-2xl flex flex-col border-l border-brand-sky/40 transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
           isCartOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -78,7 +78,7 @@ export const CartDrawer: React.FC = () => {
         {/* Drawer Body (Cart Items List) */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
+            <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12 animate-fade-in">
               <div className="p-4 rounded-full bg-brand-sky text-brand-royal/60">
                 <ShoppingBag className="h-10 w-10 stroke-[1.2]" />
               </div>
@@ -94,10 +94,15 @@ export const CartDrawer: React.FC = () => {
               </button>
             </div>
           ) : (
-            cart.map((item) => (
+            cart.map((item, idx) => (
               <div
                 key={`${item.product.id}-${item.size}`}
-                className="flex items-start gap-4 pb-4 border-b border-brand-sky/20 last:border-0 last:pb-0"
+                className="flex items-start gap-4 pb-4 border-b border-brand-sky/20 last:border-0 last:pb-0 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                style={{
+                  transform: isCartOpen ? "translateY(0)" : "translateY(16px)",
+                  opacity: isCartOpen ? 1 : 0,
+                  transitionDelay: isCartOpen ? `${(idx + 1) * 80}ms` : "0ms",
+                }}
               >
                 {/* Product Image */}
                 <div className="relative h-20 w-20 flex-shrink-0 bg-brand-sky/40 rounded-md overflow-hidden border border-brand-sky/30">
@@ -106,7 +111,7 @@ export const CartDrawer: React.FC = () => {
                     alt={item.product.name}
                     fill
                     sizes="80px"
-                    className="object-cover"
+                    className="object-cover animate-fade-in"
                     unoptimized
                   />
                 </div>

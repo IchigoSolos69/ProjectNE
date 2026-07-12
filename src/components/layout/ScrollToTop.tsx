@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useLenis } from "lenis/react";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function ScrollToTop() {
   const pathname = usePathname();
@@ -13,6 +14,12 @@ export default function ScrollToTop() {
     if (lenis) {
       lenis.scrollTo(0, { immediate: true });
     }
+
+    const timer = setTimeout(() => {
+      ScrollTrigger.refresh();
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [pathname, lenis]);
 
   return null;
