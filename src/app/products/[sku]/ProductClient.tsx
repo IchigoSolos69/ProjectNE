@@ -23,7 +23,7 @@ interface DatabaseProduct {
   careInstructions?: string;
 }
 
-export default function ProductClient({ id }: { id: string }) {
+export default function ProductClient({ sku }: { sku: string }) {
   const { addToCart } = useCart();
 
   const [product, setProduct] = useState<DatabaseProduct | null>(null);
@@ -44,7 +44,7 @@ export default function ProductClient({ id }: { id: string }) {
         setIsLoading(true);
         setError(null);
 
-        const response = await fetch(`${API_URL}/products/${id}`, {
+        const response = await fetch(`${API_URL}/products/sku/${sku}`, {
           signal: controller.signal,
         });
 
@@ -82,7 +82,7 @@ export default function ProductClient({ id }: { id: string }) {
     void fetchProduct();
 
     return () => controller.abort();
-  }, [id]);
+  }, [sku]);
 
   // Loading skeleton
   if (isLoading) {

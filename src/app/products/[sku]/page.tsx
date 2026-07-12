@@ -12,7 +12,7 @@ interface DatabaseProduct {
   isActive: boolean;
 }
 
-// Generate static params for all products at build time
+// Generate static params for all products at build time using SKU
 export async function generateStaticParams() {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/products`, {
@@ -28,7 +28,7 @@ export async function generateStaticParams() {
     const products: DatabaseProduct[] = await response.json();
 
     return products.map((product) => ({
-      id: product.id,
+      sku: product.sku,
     }));
   } catch (error) {
     // If the backend is asleep or unreachable during build time, return empty array
@@ -38,6 +38,6 @@ export async function generateStaticParams() {
   }
 }
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  return <ProductClient id={params.id} />;
+export default function ProductDetailPage({ params }: { params: { sku: string } }) {
+  return <ProductClient sku={params.sku} />;
 }

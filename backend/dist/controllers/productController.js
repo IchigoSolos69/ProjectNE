@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteProduct = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
+exports.getProductBySku = exports.deleteProduct = exports.getProductById = exports.getAllProducts = exports.addProduct = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const generateSKU = async (category) => {
@@ -137,3 +137,38 @@ const deleteProduct = async (req, res) => {
     }
 };
 exports.deleteProduct = deleteProduct;
+const getProductBySku = async (req, res) => {
+    try {
+        const { sku } = req.params;
+        if (!sku) {
+            return res.status(400).json({ error: "Missing product SKU parameter." });
+        }
+        const product = await prisma.product.findUnique({
+            where: { sku },
+            select: {
+                id: true,
+                name: true,
+                description: true,
+                price: true,
+                sku: true,
+                inventoryCount: true,
+                category: true,
+                imageUrl: true,
+                isActive: true,
+                sizes: true,
+                features: true,
+                materials: true,
+                careInstructions: true,
+            },
+        });
+        if (!product) {
+            return res.status(404).json({ error: "Product not found." });
+        }
+        return res.status(200).json(product);
+    }
+    catch (error) {
+        console.error("Error fetching product by SKU:", error);
+        return res.status(500).json({ error: "Failed to retrieve product." });
+    }
+};
+exports.getProductBySku = getProductBySku;

@@ -17,6 +17,7 @@ interface DatabaseProduct {
   price: number;
   category: string;
   imageUrl: string;
+  sku: string;
   isActive: boolean;
 }
 
@@ -29,6 +30,7 @@ interface Product {
   image: string;
   rating: number;
   reviewsCount: number;
+  sku: string;
 }
 
 export default function Home() {
@@ -57,6 +59,7 @@ export default function Home() {
             image: p.imageUrl,
             rating: 4.8,
             reviewsCount: 24, // Visual consistent review state
+            sku: p.sku,
           }));
 
         setProducts(activeProducts);
@@ -136,7 +139,7 @@ export default function Home() {
                 >
                   {/* Image Container */}
                   <Link
-                    href={`/products/${product.id}`}
+                    href={`/products/${product.sku}`}
                     className="relative block aspect-[4/5] bg-brand-sky/30 overflow-hidden border-b border-brand-sky/20"
                   >
                     <Image
@@ -174,7 +177,7 @@ export default function Home() {
 
                     {/* Title */}
                     <h3 className="font-serif text-base font-bold text-brand-midnight group-hover:text-brand-royal transition-colors duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] mb-1 min-h-[48px] line-clamp-2">
-                      <Link href={`/products/${product.id}`}>{product.name}</Link>
+                      <Link href={`/products/${product.sku}`}>{product.name}</Link>
                     </h3>
 
                     {/* Price & Cart CTA Button Container Pushed to bottom */}
