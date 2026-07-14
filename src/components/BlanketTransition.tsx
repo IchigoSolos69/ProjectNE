@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
 
 // Prevent SSR crashes during Next.js server pre-rendering phase
 if (typeof window !== "undefined") {
@@ -42,8 +43,8 @@ const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: B
     };
   }, []);
 
-  // Timeline and ScrollTrigger (Memoized, mounts once, plays once - Directive 2)
-  useEffect(() => {
+  // 1. GSAP ScrollTrigger Timeline (useGSAP instead of useEffect - Directive 2)
+  useGSAP(() => {
     if (typeof window === "undefined") return;
 
     const blanket = blanketRef.current;
@@ -64,66 +65,64 @@ const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: B
     };
 
     let media: ReturnType<typeof gsap.matchMedia> | undefined;
-    const context = gsap.context(() => {
-      media = gsap.matchMedia();
+    media = gsap.matchMedia();
 
-      media.add("(max-width: 1023px)", () => {
-        // MOBILE & TABLET: Lightweight viewport slide without layout pins.
-        gsap.set(blanket, { autoAlpha: 1 });
-        gsap.fromTo(
-          blanket,
-          { yPercent: 100 },
-          {
-            yPercent: 0,
-            ease: "power2.out",
-            scrollTrigger: {
-              trigger: triggerElement,
-              start: "top 72px",
-              end: "bottom top",
-              scrub: 1.5,
-              invalidateOnRefresh: true,
-              // Rely purely on native ScrollTrigger completion events (Directive 3)
-              onLeave: () => {
-                blanket.classList.add("pointer-events-none", "!opacity-0", "!invisible");
-              },
-              onEnterBack: () => {
-                blanket.classList.remove("pointer-events-none", "!opacity-0", "!invisible");
-              },
-            },
-          }
-        );
-      });
-
-      media.add("(min-width: 1024px)", () => {
-        // DESKTOP: Pin the stable hero container and sweep the blanket upward.
-        gsap.set(blanket, { autoAlpha: 1 });
-        const timeline = gsap.timeline({
+    media.add("(max-width: 1023px)", () => {
+      // MOBILE & TABLET: Lightweight viewport slide without layout pins.
+      gsap.set(blanket, { autoAlpha: 1, pointerEvents: "auto", display: "flex" });
+      gsap.fromTo(
+        blanket,
+        { yPercent: 100 },
+        {
+          yPercent: 0,
+          ease: "power2.out",
           scrollTrigger: {
             trigger: triggerElement,
             start: "top 72px",
-            end: "+=100%",
-            scrub: 1,
-            pin: true,
-            pinSpacing: true,
-            anticipatePin: 1,
+            end: "bottom top",
+            scrub: 1.5,
             invalidateOnRefresh: true,
-            // Rely purely on native ScrollTrigger completion events (Directive 3)
-            onLeave: () => {
-              blanket.classList.add("pointer-events-none", "!opacity-0", "!invisible");
-            },
-            onEnterBack: () => {
-              blanket.classList.remove("pointer-events-none", "!opacity-0", "!invisible");
-            },
           },
-        });
+          // Strict Native Completion callbacks (Directive 3)
+          onComplete: () => {
+            gsap.set(blanket, { pointerEvents: "none", display: "none" });
+          },
+          onReverseComplete: () => {
+            gsap.set(blanket, { pointerEvents: "auto", display: "flex" });
+          }
+        }
+      );
+    });
 
-        timeline.fromTo(
-          blanket,
-          { yPercent: 100, scaleY: 1.02, transformOrigin: "top center" },
-          { yPercent: 0, scaleY: 1, ease: "none" }
-        );
+    media.add("(min-width: 1024px)", () => {
+      // DESKTOP: Pin the stable hero container and sweep the blanket upward.
+      gsap.set(blanket, { autoAlpha: 1, pointerEvents: "auto", display: "flex" });
+      const timeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: triggerElement,
+          start: "top 72px",
+          end: "+=100%",
+          scrub: 1,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+        // Strict Native Completion callbacks (Directive 3)
+        onComplete: () => {
+          gsap.set(blanket, { pointerEvents: "none", display: "none" });
+        },
+        onReverseComplete: () => {
+          gsap.set(blanket, { pointerEvents: "auto", display: "flex" });
+        }
       });
-    }, blanket);
+
+      timeline.fromTo(
+        blanket,
+        { yPercent: 100, scaleY: 1.02, transformOrigin: "top center" },
+        { yPercent: 0, scaleY: 1, ease: "none" }
+      );
+    });
 
     // Refresh after images and responsive layout changes.
     const resizeObserver = new ResizeObserver(scheduleRefresh);
@@ -137,7 +136,6 @@ const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: B
     });
 
     window.addEventListener("load", scheduleRefresh);
-    scheduleRefresh();
 
     return () => {
       window.removeEventListener("load", scheduleRefresh);
@@ -147,12 +145,11 @@ const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: B
         window.cancelAnimationFrame(refreshFrame);
       }
       media?.revert();
-      context.revert();
     };
-  }, [triggerId]);
+  }, { dependencies: [triggerId], scope: blanketRef });
 
-  // Infinite Marquee Animation with Fade-In
-  useEffect(() => {
+  // 2. Infinite Marquee Animation with useGSAP
+  useGSAP(() => {
     if (typeof window === "undefined") return;
 
     const marqueeContainer = marqueeContainerRef.current;
@@ -166,7 +163,7 @@ const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: B
     });
 
     const marqueeWidth = marqueeContainer.scrollWidth / 4;
-    const marqueeAnimation = gsap.to(marqueeContainer, {
+    gsap.to(marqueeContainer, {
       x: -marqueeWidth,
       duration: 20,
       ease: "none",
@@ -175,21 +172,11 @@ const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: B
         x: gsap.utils.unitize((x) => parseFloat(x) % marqueeWidth)
       }
     });
-
-    return () => {
-      marqueeAnimation.kill();
-    };
-  }, [activePhrase]);
+  }, { dependencies: [activePhrase], scope: blanketRef });
 
   return (
     <div
       ref={blanketRef}
-      onTransitionEnd={() => {
-        // Native CSS transition completion event fallback (Directive 3)
-        if (blanketRef.current) {
-          blanketRef.current.classList.add("pointer-events-none");
-        }
-      }}
       className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer"
       style={{
         background: `
