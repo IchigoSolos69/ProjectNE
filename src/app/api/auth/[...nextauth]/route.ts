@@ -19,6 +19,14 @@ async function verifyPassword(password: string, hashedPassword: string): Promise
 }
 
 async function getAuthOptions(): Promise<NextAuthOptions> {
+  // Log environment status at request execution time
+  console.log("🔍 [NEXTAUTH_ENV_CHECK] Environment status:");
+  console.log("   DATABASE_URL:", process.env.DATABASE_URL ? "✅ PRESENT" : "❌ MISSING");
+  console.log("   NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "✅ PRESENT" : "❌ MISSING");
+  console.log("   NEXTAUTH_URL:", process.env.NEXTAUTH_URL ? "✅ PRESENT" : "❌ MISSING");
+  console.log("   GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "✅ PRESENT" : "❌ MISSING");
+  console.log("   GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "✅ PRESENT" : "❌ MISSING");
+
   const prisma = getPrisma();
   
   // Dynamic imports prevent Next.js build sandbox from evaluating Node.js imports
