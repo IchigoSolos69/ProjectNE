@@ -21,14 +21,12 @@ const LUXURY_PHRASES = [
   "Drift into Pure Serenity",
 ] as const;
 
-export default function BlanketTransition({ triggerId }: BlanketTransitionProps) {
+const BlanketTransition = React.memo(function BlanketTransition({ triggerId }: BlanketTransitionProps) {
   const blanketRef = useRef<HTMLDivElement>(null);
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
   
   // Use a deterministic initial value so SSR and the first client render match.
   const [activePhrase, setActivePhrase] = useState<string>(LUXURY_PHRASES[0]);
-  const [isOverlayHidden, setIsOverlayHidden] = useState(false);
-  const [pointerEventsNone, setPointerEventsNone] = useState(false);
 
   // Randomize only after mount to avoid a Next.js hydration mismatch.
   useEffect(() => {
@@ -44,27 +42,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     };
   }, []);
 
-  // 1. Scroll Threshold Sync (No Timers Failsafe - Directive 1)
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const checkScroll = () => {
-      // If scroll position exceeds 80% of hero height, immediately hide blanket
-      if (window.scrollY > window.innerHeight * 0.8) {
-        setIsOverlayHidden(true);
-        setPointerEventsNone(true);
-      } else {
-        setIsOverlayHidden(false);
-        setPointerEventsNone(false);
-      }
-    };
-
-    window.addEventListener("scroll", checkScroll, { passive: true });
-    checkScroll();
-    return () => window.removeEventListener("scroll", checkScroll);
-  }, []);
-
-  // 2. Timeline, Resize Snap, and Completion Events (Directive 1)
+  // Timeline and ScrollTrigger (Memoized, mounts once, plays once - Directive 2)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -83,22 +61,6 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
         refreshFrame = undefined;
         ScrollTrigger.refresh();
       });
-    };
-
-    // Debounced window resize snap (prevent mid-animation freezing on address bar shifts)
-    let resizeTimeout: NodeJS.Timeout | undefined;
-    const handleResize = () => {
-      if (resizeTimeout) clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        if (window.scrollY > window.innerHeight * 0.8) {
-          setIsOverlayHidden(true);
-          setPointerEventsNone(true);
-        } else {
-          setIsOverlayHidden(false);
-          setPointerEventsNone(false);
-          scheduleRefresh();
-        }
-      }, 100);
     };
 
     let media: ReturnType<typeof gsap.matchMedia> | undefined;
@@ -120,20 +82,13 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
               end: "bottom top",
               scrub: 1.5,
               invalidateOnRefresh: true,
+              // Rely purely on native ScrollTrigger completion events (Directive 3)
               onLeave: () => {
-                setIsOverlayHidden(true);
-                setPointerEventsNone(true);
+                blanket.classList.add("pointer-events-none", "!opacity-0", "!invisible");
               },
               onEnterBack: () => {
-                setIsOverlayHidden(false);
-                setPointerEventsNone(false);
+                blanket.classList.remove("pointer-events-none", "!opacity-0", "!invisible");
               },
-              onUpdate: (self) => {
-                if (self.progress >= 0.99) {
-                  setIsOverlayHidden(true);
-                  setPointerEventsNone(true);
-                }
-              }
             },
           }
         );
@@ -152,20 +107,13 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
             pinSpacing: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            // Rely purely on native ScrollTrigger completion events (Directive 3)
             onLeave: () => {
-              setIsOverlayHidden(true);
-              setPointerEventsNone(true);
+              blanket.classList.add("pointer-events-none", "!opacity-0", "!invisible");
             },
             onEnterBack: () => {
-              setIsOverlayHidden(false);
-              setPointerEventsNone(false);
+              blanket.classList.remove("pointer-events-none", "!opacity-0", "!invisible");
             },
-            onUpdate: (self) => {
-              if (self.progress >= 0.99) {
-                setIsOverlayHidden(true);
-                setPointerEventsNone(true);
-              }
-            }
           },
         });
 
@@ -189,13 +137,10 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     });
 
     window.addEventListener("load", scheduleRefresh);
-    window.addEventListener("resize", handleResize);
     scheduleRefresh();
 
     return () => {
       window.removeEventListener("load", scheduleRefresh);
-      window.removeEventListener("resize", handleResize);
-      if (resizeTimeout) clearTimeout(resizeTimeout);
       images.forEach((image) => image.removeEventListener("load", scheduleRefresh));
       resizeObserver.disconnect();
       if (refreshFrame !== undefined) {
@@ -240,14 +185,12 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     <div
       ref={blanketRef}
       onTransitionEnd={() => {
-        // Native completion events (Directive 1)
-        if (isOverlayHidden) {
-          setPointerEventsNone(true);
+        // Native CSS transition completion event fallback (Directive 3)
+        if (blanketRef.current) {
+          blanketRef.current.classList.add("pointer-events-none");
         }
       }}
-      className={`absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer ${
-        isOverlayHidden || pointerEventsNone ? "pointer-events-none !opacity-0 !invisible" : ""
-      }`}
+      className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer"
       style={{
         background: `
           linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(73,136,196,0.1) 60%, rgba(255,255,255,0.3) 100%),
@@ -295,4 +238,6 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       </div>
     </div>
   );
-}
+});
+
+export default BlanketTransition;
