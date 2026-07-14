@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Initialize Prisma
+    // Initialize Prisma using Edge Neon HTTP client
     console.log("✅ [REGISTER] Initializing Prisma client");
     const prisma = getEdgePrisma();
 
@@ -70,9 +70,8 @@ export async function POST(req: Request) {
       console.log("✅ [REGISTER] Database connection verified");
     } catch (dbError: any) {
       console.error("🚨 [REGISTER] Database connection failed:", dbError.message);
-      console.error("🚨 [REGISTER] Database error stack:", dbError.stack);
       return NextResponse.json(
-        { error: "Database connection failed. Please try again." },
+        { error: "Database connection failed", details: dbError.message },
         { status: 500 }
       );
     }
@@ -94,7 +93,6 @@ export async function POST(req: Request) {
     // Hash password using bcryptjs
     console.log("🔐 [REGISTER] Hashing password");
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log("✅ [REGISTER] Password hashed successfully");
 
     // Create user
     console.log("💾 [REGISTER] Creating user in database");
@@ -121,14 +119,9 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("🚨 [REGISTER_EDGE_CRASH]:", error.message || error);
-    console.error("🚨 [REGISTER_STACK]:", error.stack);
-    
+    console.error("🚨 Registration Error:", error);
     return NextResponse.json(
-      { 
-        error: "Registration failed. Please try again.",
-        details: process.env.NODE_ENV === "development" ? error.message : undefined
-      },
+      { error: "Registration failed", details: error.message },
       { status: 500 }
     );
   }
