@@ -1,7 +1,7 @@
 export const runtime = "edge";
 
 import type { NextAuthOptions } from "next-auth";
-import { getPrisma } from "@/lib/prisma";
+import { getEdgePrisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 // Helper function to verify password using bcryptjs (Edge-compatible)
@@ -27,15 +27,12 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
   console.log("   GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "✅ PRESENT" : "❌ MISSING");
   console.log("   GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "✅ PRESENT" : "❌ MISSING");
 
-  const prisma = getPrisma();
-  
-  // Dynamic imports prevent Next.js build sandbox from evaluating Node.js imports
+  // Dynamic imports prevent Next.js build sandbox from evaluating Node.js imports during page generation pass
   const { default: CredentialsProvider } = await import("next-auth/providers/credentials");
   const { default: GoogleProvider } = await import("next-auth/providers/google");
-  const { PrismaAdapter } = await import("@next-auth/prisma-adapter");
 
   return {
-    adapter: PrismaAdapter(prisma as any),
+    // ❌ DECOUPLED: PrismaAdapter removed to enforce pure JWT sessions and prevent adapter Edge evaluation errors
     session: {
       strategy: "jwt",
       maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -64,9 +61,10 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
 
             if (!credentials?.email || !credentials?.password) {
               console.error("🚨 [AUTH] Missing credentials");
-              throw new Error("Missing email or password");
+              return null;
             }
 
+            const prisma = getEdgePrisma();
             const user = await prisma.user.findUnique({
               where: { email: credentials.email },
               select: {
@@ -80,12 +78,12 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
 
             if (!user) {
               console.error("🚨 [AUTH] User not found:", credentials.email);
-              throw new Error("Invalid credentials");
+              return null;
             }
 
             if (!user.password) {
               console.error("🚨 [AUTH] User has no password (OAuth-only account):", credentials.email);
-              throw new Error("Please sign in with Google");
+              return null;
             }
 
             const isPasswordCorrect = await verifyPassword(
@@ -95,7 +93,7 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
 
             if (!isPasswordCorrect) {
               console.error("🚨 [AUTH] Password verification failed");
-              throw new Error("Invalid credentials");
+              return null;
             }
 
             return {
@@ -107,6 +105,7 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
           } catch (error: any) {
             console.error("🚨 [AUTH_AUTHORIZE] Exception:", error.message || error);
             console.error("🚨 [AUTH_AUTHORIZE_STACK]:", error.stack);
+            // Return null instead of throwing to prevent Next.js 500 crashes
             return null;
           }
         },
@@ -121,7 +120,7 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
           });
 
           if (account?.provider === "google" && user.email) {
-            const prisma = getPrisma();
+            const prisma = getEdgePrisma();
             let dbUser = await prisma.user.findUnique({
               where: { email: user.email },
             });

@@ -1,18 +1,8 @@
 export const runtime = "edge";
 
 import { NextResponse } from "next/server";
-import { getPrisma } from "@/lib/prisma";
-
-// Edge-compatible password hashing using bcryptjs
-async function hashPassword(password: string): Promise<string> {
-  try {
-    const bcrypt = await import("bcryptjs");
-    return await bcrypt.hash(password, 10);
-  } catch (error: any) {
-    console.error("🚨 [PASSWORD_HASH_ERROR]:", error.message || error);
-    throw new Error("Failed to hash password");
-  }
-}
+import { getEdgePrisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
@@ -72,7 +62,7 @@ export async function POST(req: Request) {
 
     // Initialize Prisma
     console.log("✅ [REGISTER] Initializing Prisma client");
-    const prisma = getPrisma();
+    const prisma = getEdgePrisma();
 
     // Test database connection
     try {
@@ -101,9 +91,9 @@ export async function POST(req: Request) {
       );
     }
 
-    // Hash password
+    // Hash password using bcryptjs
     console.log("🔐 [REGISTER] Hashing password");
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await bcrypt.hash(password, 10);
     console.log("✅ [REGISTER] Password hashed successfully");
 
     // Create user
@@ -133,8 +123,6 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("🚨 [REGISTER_EDGE_CRASH]:", error.message || error);
     console.error("🚨 [REGISTER_STACK]:", error.stack);
-    console.error("🚨 [REGISTER_ERROR_NAME]:", error.name);
-    console.error("🚨 [REGISTER_ERROR_CODE]:", error.code);
     
     return NextResponse.json(
       { 
