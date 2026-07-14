@@ -4,7 +4,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-gsap.registerPlugin(ScrollTrigger);
+// Prevent SSR crashes during Next.js server pre-rendering phase
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 interface BlanketTransitionProps {
   triggerId: string;
@@ -29,6 +32,8 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
   // Randomize only after mount to avoid a Next.js hydration mismatch.
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const frameId = window.requestAnimationFrame(() => {
       const phraseIndex = Math.floor(Math.random() * LUXURY_PHRASES.length);
       setActivePhrase(LUXURY_PHRASES[phraseIndex]);
@@ -41,6 +46,8 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
   // 1. Scroll Threshold Sync (No Timers Failsafe - Directive 1)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const checkScroll = () => {
       // If scroll position exceeds 80% of hero height, immediately hide blanket
       if (window.scrollY > window.innerHeight * 0.8) {
@@ -59,6 +66,8 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
   // 2. Timeline, Resize Snap, and Completion Events (Directive 1)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const blanket = blanketRef.current;
     const triggerElement = document.getElementById(triggerId);
 
@@ -199,6 +208,8 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
   // Infinite Marquee Animation with Fade-In
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const marqueeContainer = marqueeContainerRef.current;
     if (!marqueeContainer) return;
 
