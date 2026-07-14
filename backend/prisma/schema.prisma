@@ -1,28 +1,27 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
 }
 
-model Account {
-  id                 String  @id @default(uuid()) @db.Uuid
-  userId             String  @db.Uuid
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?  @db.Text
-  session_state      String?
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Account {
+  id                String  @id @default(uuid()) @db.Uuid
+  userId            String  @db.Uuid
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -37,22 +36,20 @@ model Session {
 
 model User {
   id            String    @id @default(uuid()) @db.Uuid
-  name          String?
   email         String?   @unique
+  name          String?
+  phone         String?
+  address       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   emailVerified DateTime?
   image         String?
   password      String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
   accounts      Account[]
+  orders        Order[]
+  reviews       Review[]
   sessions      Session[]
-  
-  // Custom existing properties:
-  phone        String?
-  address      String?
-  orders       Order[]
-  wishlist     Product[] @relation("UserWishlist")
-  reviews      Review[]
+  wishlist      Product[] @relation("UserWishlist")
 }
 
 model VerificationToken {
@@ -67,34 +64,59 @@ model Product {
   id               String      @id @default(uuid()) @db.Uuid
   name             String
   description      String
-  price            Int         // Stored in paise for Razorpay integration (smallest currency unit)
+  price            Int
   sku              String      @unique
   inventoryCount   Int
   category         String
   imageUrl         String
   isActive         Boolean     @default(true)
-  sizes            String[]    // Supported sizes (e.g. Twin, Queen, King)
-  features         String[]    // Bulleted selling points
-  materials        String?     // Details & Materials text
-  careInstructions String?     // Care instructions text
-  badges           String[]    // Dynamic product badges (e.g. NEW, BESTSELLER, SALE, ORGANIC)
-  likes            Int         @default(0) // Likes counter for storefront interactions
+  careInstructions String?
+  features         String[]
+  materials        String?
+  sizes            String[]
+  likes            Int         @default(0)
   averageRating    Float       @default(0)
   totalReviews     Int         @default(0)
-  wishlistedBy     User[]      @relation("UserWishlist")
-  reviews          Review[]
+  badges           String[]
   orderItems       OrderItem[]
+  reviews          Review[]
+  wishlistedBy     User[]      @relation("UserWishlist")
 }
 
 model Review {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
   productId String   @db.Uuid
-  rating    Int      // 1-5 rating scale
+  rating    Int
   comment   String?
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id                String      @id @default(uuid()) @db.Uuid
+  userId            String      @db.Uuid
+  totalAmount       Int
+  status            OrderStatus @default(PENDING)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  delhiveryAwb      String?
+  shippingAddress   String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  user              User        @relation(fields: [userId], references: [id])
+  orderItems        OrderItem[]
+}
+
+model OrderItem {
+  id              String  @id @default(uuid()) @db.Uuid
+  orderId         String  @db.Uuid
+  productId       String  @db.Uuid
+  quantity        Int
+  priceAtPurchase Int
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product         Product @relation(fields: [productId], references: [id])
 }
 
 enum OrderStatus {
@@ -104,29 +126,4 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
-}
-
-model Order {
-  id                String      @id @default(uuid()) @db.Uuid
-  userId            String      @db.Uuid
-  user              User        @relation(fields: [userId], references: [id])
-  totalAmount       Int         // Stored in paise for Razorpay
-  status            OrderStatus @default(PENDING)
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-  delhiveryAwb      String?     // Tracking reference for Delhivery integration
-  shippingAddress   String      // Shipping destination detail
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  orderItems        OrderItem[]
-}
-
-model OrderItem {
-  id              String   @id @default(uuid()) @db.Uuid
-  orderId         String   @db.Uuid
-  order           Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId       String   @db.Uuid
-  product         Product  @relation(fields: [productId], references: [id])
-  quantity        Int
-  priceAtPurchase Int      // Price at time of purchase in paise
 }
