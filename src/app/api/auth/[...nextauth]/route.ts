@@ -29,49 +29,67 @@ async function getAuthOptions(): Promise<any> {
           password: { label: "Password", type: "password" },
         },
         async authorize(credentials) {
-          if (!credentials?.email || !credentials?.password) {
-            throw new Error("Missing email or password.");
+          try {
+            if (!credentials?.email || !credentials?.password) {
+              throw new Error("Missing email or password.");
+            }
+
+            const prisma = getPrisma();
+            const user = await prisma.user.findUnique({
+              where: { email: credentials.email },
+            });
+
+            if (!user || !user.password) {
+              throw new Error("Invalid credentials.");
+            }
+
+            const isPasswordCorrect = await bcrypt.compare(
+              credentials.password,
+              user.password
+            );
+
+            if (!isPasswordCorrect) {
+              throw new Error("Invalid credentials.");
+            }
+
+            return {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.image,
+            };
+          } catch (error: any) {
+            console.error("🚨 [NEXTAUTH_AUTHORIZE_EDGE_CRASH]:", error.message || error);
+            console.error("🚨 [NEXTAUTH_AUTHORIZE_STACK]:", error.stack);
+            throw error;
           }
-
-          const prisma = getPrisma();
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-          });
-
-          if (!user || !user.password) {
-            throw new Error("Invalid credentials.");
-          }
-
-          const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
-
-          if (!isPasswordCorrect) {
-            throw new Error("Invalid credentials.");
-          }
-
-          return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            image: user.image,
-          };
         },
       }),
     ],
     callbacks: {
       async jwt({ token, user }: { token: any; user: any }) {
-        if (user) {
-          token.id = user.id;
+        try {
+          if (user) {
+            token.id = user.id;
+          }
+          return token;
+        } catch (error: any) {
+          console.error("🚨 [NEXTAUTH_JWT_EDGE_CRASH]:", error.message || error);
+          console.error("🚨 [NEXTAUTH_JWT_STACK]:", error.stack);
+          throw error;
         }
-        return token;
       },
       async session({ session, token }: { session: any; token: any }) {
-        if (session.user) {
-          (session.user as any).id = token.id;
+        try {
+          if (session.user) {
+            (session.user as any).id = token.id;
+          }
+          return session;
+        } catch (error: any) {
+          console.error("🚨 [NEXTAUTH_SESSION_EDGE_CRASH]:", error.message || error);
+          console.error("🚨 [NEXTAUTH_SESSION_STACK]:", error.stack);
+          throw error;
         }
-        return session;
       },
     },
     pages: {

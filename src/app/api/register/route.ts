@@ -64,9 +64,10 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("🚨 [REGISTER_EDGE_CRASH]:", error.message || error);
+    console.error("🚨 [REGISTER_STACK]:", error.stack);
     return NextResponse.json(
-      { error: error.message || "Database connection failed on Edge" },
+      { message: "Registration failed", error: error.message },
       { status: 500 }
     );
   }
