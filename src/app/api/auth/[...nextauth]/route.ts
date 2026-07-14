@@ -39,8 +39,8 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
     },
     providers: [
       GoogleProvider({
-        clientId: process.env.GOOGLE_CLIENT_ID || "",
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+        clientId: process.env.GOOGLE_CLIENT_ID || "MISSING_ID",
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET || "MISSING_SECRET",
         authorization: {
           params: {
             prompt: "consent",
@@ -187,19 +187,29 @@ async function getAuthOptions(): Promise<NextAuthOptions> {
       signIn: "/auth",
       error: "/auth",
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET || "MISSING_SECRET",
     debug: true,
   };
 }
 
-export async function GET(req: any, res: any) {
-  const { default: NextAuth } = await import("next-auth");
-  const options = await getAuthOptions();
-  return NextAuth(req, res, options);
-}
+const handler = async (req: any, ctx: any) => {
+  try {
+    // Hard-check the environment variables before NextAuth even boots
+    if (!process.env.NEXTAUTH_SECRET) console.error("🚨 CRITICAL: NEXTAUTH_SECRET is missing!");
+    if (!process.env.GOOGLE_CLIENT_ID) console.error("🚨 CRITICAL: GOOGLE_CLIENT_ID is missing!");
 
-export async function POST(req: any, res: any) {
-  const { default: NextAuth } = await import("next-auth");
-  const options = await getAuthOptions();
-  return NextAuth(req, res, options);
-}
+    // Dynamically import to bypass Next.js build-time compiler openid-client crashes
+    const { default: NextAuth } = await import("next-auth");
+    const authOptions = await getAuthOptions();
+
+    return await NextAuth(authOptions)(req, ctx);
+  } catch (error: any) {
+    console.error("🚨 [NEXTAUTH_FATAL_CRASH]:", error);
+    return new Response(
+      JSON.stringify({ error: "NextAuth crashed on boot", details: error.message }), 
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+};
+
+export { handler as GET, handler as POST };
