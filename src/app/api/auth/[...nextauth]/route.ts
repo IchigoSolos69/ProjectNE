@@ -1,10 +1,11 @@
 export const runtime = "edge";
 
+import { NextAuthOptions } from "next-auth";
 import { getPrisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 async function getAuthOptions(): Promise<any> {
-  const prisma = await getPrisma();
+  const prisma = getPrisma();
   
   // Dynamic imports prevent Next.js build sandbox from evaluating Node.js imports
   const { default: CredentialsProvider } = await import("next-auth/providers/credentials");
@@ -32,7 +33,7 @@ async function getAuthOptions(): Promise<any> {
             throw new Error("Missing email or password.");
           }
 
-          const prisma = await getPrisma();
+          const prisma = getPrisma();
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
           });

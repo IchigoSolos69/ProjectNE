@@ -21,11 +21,11 @@ const LUXURY_PHRASES = [
 export default function BlanketTransition({ triggerId }: BlanketTransitionProps) {
   const blanketRef = useRef<HTMLDivElement>(null);
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
-  const failsafeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Use a deterministic initial value so SSR and the first client render match.
   const [activePhrase, setActivePhrase] = useState<string>(LUXURY_PHRASES[0]);
   const [isOverlayHidden, setIsOverlayHidden] = useState(false);
+  const [pointerEventsNone, setPointerEventsNone] = useState(false);
 
   // Randomize only after mount to avoid a Next.js hydration mismatch.
   useEffect(() => {
@@ -36,36 +36,28 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
 
     return () => {
       window.cancelAnimationFrame(frameId);
-      if (failsafeTimeoutRef.current) {
-        clearTimeout(failsafeTimeoutRef.current);
-      }
     };
   }, []);
 
-  // 1. Scroll-linked Threshold Hard-Resets (Directive 2)
+  // 1. Scroll Threshold Sync (No Timers Failsafe - Directive 1)
   useEffect(() => {
     const checkScroll = () => {
-      const triggerElement = document.getElementById(triggerId);
-      if (!triggerElement) return;
-      const rect = triggerElement.getBoundingClientRect();
-
-      // If the hero section is scrolled past, immediately force blanket to hide
-      if (rect.bottom <= 0 || window.scrollY > rect.height) {
+      // If scroll position exceeds 80% of hero height, immediately hide blanket
+      if (window.scrollY > window.innerHeight * 0.8) {
         setIsOverlayHidden(true);
+        setPointerEventsNone(true);
       } else {
-        // Only show if not locked out by a failsafe
-        if (failsafeTimeoutRef.current === null) {
-          setIsOverlayHidden(false);
-        }
+        setIsOverlayHidden(false);
+        setPointerEventsNone(false);
       }
     };
 
     window.addEventListener("scroll", checkScroll, { passive: true });
     checkScroll();
     return () => window.removeEventListener("scroll", checkScroll);
-  }, [triggerId]);
+  }, []);
 
-  // 2. Timeline and Resize triggers (Directive 1 & 2)
+  // 2. Timeline, Resize Snap, and Completion Events (Directive 1)
   useEffect(() => {
     const blanket = blanketRef.current;
     const triggerElement = document.getElementById(triggerId);
@@ -84,20 +76,20 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       });
     };
 
-    // Debounced resize listener to avoid freezing mid-calculation on mobile UI shifts (Directive 2)
+    // Debounced window resize snap (prevent mid-animation freezing on address bar shifts)
     let resizeTimeout: NodeJS.Timeout | undefined;
     const handleResize = () => {
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        scheduleRefresh();
-      }, 150);
-    };
-
-    const triggerFailsafe = () => {
-      if (failsafeTimeoutRef.current) clearTimeout(failsafeTimeoutRef.current);
-      failsafeTimeoutRef.current = setTimeout(() => {
-        setIsOverlayHidden(true);
-      }, 5500); // Failsafe Timeout (Directive 1)
+        if (window.scrollY > window.innerHeight * 0.8) {
+          setIsOverlayHidden(true);
+          setPointerEventsNone(true);
+        } else {
+          setIsOverlayHidden(false);
+          setPointerEventsNone(false);
+          scheduleRefresh();
+        }
+      }, 100);
     };
 
     let media: ReturnType<typeof gsap.matchMedia> | undefined;
@@ -119,12 +111,18 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
               end: "bottom top",
               scrub: 1.5,
               invalidateOnRefresh: true,
-              onToggle: (self) => {
-                if (self.isActive) triggerFailsafe();
+              onLeave: () => {
+                setIsOverlayHidden(true);
+                setPointerEventsNone(true);
+              },
+              onEnterBack: () => {
+                setIsOverlayHidden(false);
+                setPointerEventsNone(false);
               },
               onUpdate: (self) => {
                 if (self.progress >= 0.99) {
                   setIsOverlayHidden(true);
+                  setPointerEventsNone(true);
                 }
               }
             },
@@ -145,12 +143,18 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
             pinSpacing: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
-            onToggle: (self) => {
-              if (self.isActive) triggerFailsafe();
+            onLeave: () => {
+              setIsOverlayHidden(true);
+              setPointerEventsNone(true);
+            },
+            onEnterBack: () => {
+              setIsOverlayHidden(false);
+              setPointerEventsNone(false);
             },
             onUpdate: (self) => {
               if (self.progress >= 0.99) {
                 setIsOverlayHidden(true);
+                setPointerEventsNone(true);
               }
             }
           },
@@ -164,7 +168,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       });
     }, blanket);
 
-    // Refresh after LCP images and responsive layout changes.
+    // Refresh after images and responsive layout changes.
     const resizeObserver = new ResizeObserver(scheduleRefresh);
     resizeObserver.observe(triggerElement);
 
@@ -198,7 +202,6 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     const marqueeContainer = marqueeContainerRef.current;
     if (!marqueeContainer) return;
 
-    // Fade in the marquee text over 2 seconds
     gsap.to(marqueeContainer, {
       opacity: 1,
       duration: 2,
@@ -206,9 +209,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       delay: 0.5
     });
 
-    // Create seamless infinite horizontal loop
-    const marqueeWidth = marqueeContainer.scrollWidth / 4; // Width of one repetition
-    
+    const marqueeWidth = marqueeContainer.scrollWidth / 4;
     const marqueeAnimation = gsap.to(marqueeContainer, {
       x: -marqueeWidth,
       duration: 20,
@@ -227,8 +228,14 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
   return (
     <div
       ref={blanketRef}
+      onTransitionEnd={() => {
+        // Native completion events (Directive 1)
+        if (isOverlayHidden) {
+          setPointerEventsNone(true);
+        }
+      }}
       className={`absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer ${
-        isOverlayHidden ? "pointer-events-none !opacity-0 !invisible" : ""
+        isOverlayHidden || pointerEventsNone ? "pointer-events-none !opacity-0 !invisible" : ""
       }`}
       style={{
         background: `
