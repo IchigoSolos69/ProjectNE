@@ -1,11 +1,12 @@
 export const runtime = "edge";
 
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
   try {
+    const prisma = await getPrisma();
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
