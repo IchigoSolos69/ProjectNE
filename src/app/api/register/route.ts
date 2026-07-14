@@ -63,10 +63,10 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal server error. Failed to register user." },
+      { error: error.message || "Database connection failed on Edge" },
       { status: 500 }
     );
   }

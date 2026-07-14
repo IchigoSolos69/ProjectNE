@@ -97,7 +97,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       if (failsafeTimeoutRef.current) clearTimeout(failsafeTimeoutRef.current);
       failsafeTimeoutRef.current = setTimeout(() => {
         setIsOverlayHidden(true);
-      }, 2500); // Failsafe Timeout (Directive 1)
+      }, 5500); // Failsafe Timeout (Directive 1)
     };
 
     let media: ReturnType<typeof gsap.matchMedia> | undefined;

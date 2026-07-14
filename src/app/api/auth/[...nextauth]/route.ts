@@ -76,7 +76,8 @@ async function getAuthOptions(): Promise<any> {
     pages: {
       signIn: "/auth",
     },
-    secret: process.env.NEXTAUTH_SECRET || "fallback-secret-key-12345",
+    secret: process.env.NEXTAUTH_SECRET,
+    debug: true,
   };
 }
 
