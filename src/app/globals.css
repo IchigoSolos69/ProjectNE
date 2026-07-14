@@ -39,6 +39,13 @@
   --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-fade-in: fade-in 0.2s ease-out forwards;
   --ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Soft luxury box shadow token */
+  --shadow-luxury: 0 10px 40px -10px rgba(0,0,0,0.04);
+
+  /* Soften H1 and Hero typography sizes by 5-10% */
+  --font-size-5xl: 3.5rem; /* ~10% increase from 3rem (48px) */
+  --font-size-6xl: 4.25rem; /* ~10% increase from 3.75rem (60px) */
 }
 
 @keyframes slide-in-right {
@@ -64,6 +71,15 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: 0.025em; /* tracking-wide */
+}
+
+/* Rounded buttons except round/icon ones */
+button:not(.rounded-full), .btn-luxury {
+  border-radius: 12px !important;
 }
 
 /* Custom Scrollbar for premium feel */
@@ -136,6 +152,25 @@ body {
 
 .animate-silk-shimmer {
   animation: silk-shimmer 15s ease-in-out infinite;
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.8);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-heart-pop {
+  animation: heart-pop 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
 

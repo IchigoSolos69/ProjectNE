@@ -32,6 +32,7 @@ export const addProduct = async (req: Request, res: Response) => {
       features,
       materials,
       careInstructions,
+      badges,
     } = req.body;
 
     if (
@@ -64,6 +65,7 @@ export const addProduct = async (req: Request, res: Response) => {
         features: Array.isArray(features) ? features : [],
         materials: materials || null,
         careInstructions: careInstructions || null,
+        badges: Array.isArray(badges) ? badges : [],
         likes: 0,
         averageRating: 0,
         totalReviews: 0,
@@ -94,6 +96,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
         features: true,
         materials: true,
         careInstructions: true,
+        badges: true,
         likes: true,
         averageRating: true,
         totalReviews: true,
@@ -132,6 +135,7 @@ export const getProductById = async (req: Request, res: Response) => {
         features: true,
         materials: true,
         careInstructions: true,
+        badges: true,
         likes: true,
         averageRating: true,
         totalReviews: true,
@@ -175,9 +179,26 @@ export const getProductBySku = async (req: Request, res: Response) => {
         features: true,
         materials: true,
         careInstructions: true,
+        badges: true,
         likes: true,
         averageRating: true,
         totalReviews: true,
+        reviews: {
+          select: {
+            id: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            user: {
+              select: {
+                name: true,
+              },
+            },
+          },
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
       },
     });
 
@@ -222,7 +243,7 @@ export const incrementLike = async (req: Request, res: Response) => {
 export const submitRating = async (req: Request, res: Response) => {
   try {
     const { sku } = req.params;
-    const { rating } = req.body;
+    const { rating, userId, comment } = req.body;
 
     const parsedRating = Number(rating);
     if (!sku || isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
@@ -232,6 +253,7 @@ export const submitRating = async (req: Request, res: Response) => {
     const product = await prisma.product.findUnique({
       where: { sku },
       select: {
+        id: true,
         averageRating: true,
         totalReviews: true,
       },
@@ -241,9 +263,39 @@ export const submitRating = async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Product not found." });
     }
 
-    const newTotalReviews = product.totalReviews + 1;
-    const newAverageRating =
+    // If userId is provided, check if user exists and create a review record
+    if (userId) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        return res.status(404).json({ error: "User not found." });
+      }
+
+      await prisma.review.create({
+        data: {
+          userId,
+          productId: product.id,
+          rating: parsedRating,
+          comment: comment || null,
+        },
+      });
+    }
+
+    let newTotalReviews = product.totalReviews + 1;
+    let newAverageRating =
       (product.averageRating * product.totalReviews + parsedRating) / newTotalReviews;
+
+    // If we have reviews in the database, calculate precisely from the aggregate
+    if (userId) {
+      const aggregate = await prisma.review.aggregate({
+        where: { productId: product.id },
+        _count: { id: true },
+        _avg: { rating: true },
+      });
+      newTotalReviews = aggregate._count.id;
+      newAverageRating = aggregate._avg.rating ?? parsedRating;
+    }
 
     const updatedProduct = await prisma.product.update({
       where: { sku },
@@ -349,5 +401,53 @@ export const deleteProduct = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error deleting product:", error);
     return res.status(500).json({ error: "Failed to delete product record." });
+  }
+};
+
+export const getRecommendations = async (req: Request, res: Response) => {
+  try {
+    const { category } = req.query;
+    const categoryFilter = typeof category === "string" ? category : "";
+
+    const products = await prisma.product.findMany({
+      where: {
+        isActive: true,
+        category: { not: categoryFilter },
+      },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        sku: true,
+        imageUrl: true,
+        category: true,
+        sizes: true,
+      },
+      take: 20,
+    });
+
+    const uniqueCategories = new Set<string>();
+    const recommendations = [];
+    for (const product of products) {
+      if (!uniqueCategories.has(product.category)) {
+        uniqueCategories.add(product.category);
+        recommendations.push(product);
+      }
+      if (recommendations.length >= 3) break;
+    }
+
+    if (recommendations.length < 3) {
+      for (const product of products) {
+        if (!recommendations.some((r) => r.id === product.id)) {
+          recommendations.push(product);
+        }
+        if (recommendations.length >= 3) break;
+      }
+    }
+
+    return res.status(200).json(recommendations);
+  } catch (error) {
+    console.error("Error fetching recommendations:", error);
+    return res.status(500).json({ error: "Failed to fetch recommendations." });
   }
 };

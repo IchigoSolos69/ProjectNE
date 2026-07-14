@@ -2,29 +2,32 @@ import React from "react";
 
 export default function ProductSkeleton() {
   return (
-    <div className="group relative flex flex-col bg-white rounded-xl overflow-hidden border border-brand-sky/40 shadow-sm animate-pulse w-full">
+    <div className="group relative flex flex-col bg-white border border-gray-100 rounded-none w-full animate-pulse">
       {/* Image Skeleton */}
-      <div className="relative aspect-square bg-gray-200" />
+      <div className="relative aspect-[4/5] bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 border-b border-gray-100" />
 
       {/* Details Skeleton */}
-      <div className="p-5 flex-1 flex flex-col space-y-4">
-        {/* Rating Stars Skeleton */}
-        <div className="flex items-center space-x-1">
-          <div className="h-3 w-16 bg-gray-200 rounded" />
-          <div className="h-3 w-6 bg-gray-200 rounded" />
-        </div>
-
+      <div className="p-6 flex-1 flex flex-col space-y-4">
         {/* Title Skeleton */}
-        <div className="space-y-2">
-          <div className="h-4 w-3/4 bg-gray-200 rounded" />
-          <div className="h-4 w-1/2 bg-gray-200 rounded" />
+        <div className="h-4 w-3/4 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
+
+        {/* Rating Stars Skeleton */}
+        <div className="flex items-center space-x-1.5">
+          <div className="h-3 w-20 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
+          <div className="h-3 w-8 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
         </div>
 
-        {/* Price Skeleton */}
-        <div className="h-4 w-1/4 bg-gray-200 rounded" />
+        {/* Description Skeleton */}
+        <div className="space-y-2">
+          <div className="h-3 w-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
+          <div className="h-3 w-5/6 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
+        </div>
 
-        {/* Button Skeleton */}
-        <div className="h-10 w-full bg-gray-200 rounded-md mt-auto pt-2" />
+        {/* Price & Button Skeleton */}
+        <div className="mt-auto pt-2 space-y-4">
+          <div className="h-4 w-1/4 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
+          <div className="h-10 w-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 rounded-none" />
+        </div>
       </div>
     </div>
   );

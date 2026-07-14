@@ -8,18 +8,18 @@ generator client {
 }
 
 model Account {
-  id                String  @id @default(uuid()) @db.Uuid
-  userId            String  @db.Uuid
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
+  id                 String  @id @default(uuid()) @db.Uuid
+  userId             String  @db.Uuid
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -45,13 +45,13 @@ model User {
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
-
+  
   // Custom existing properties:
-  phone    String?
-  address  String?
-  orders   Order[]
-  wishlist Product[] @relation("UserWishlist")
-  reviews  Review[]
+  phone        String?
+  address      String?
+  orders       Order[]
+  wishlist     Product[] @relation("UserWishlist")
+  reviews      Review[]
 }
 
 model VerificationToken {
@@ -66,17 +66,17 @@ model Product {
   id               String      @id @default(uuid()) @db.Uuid
   name             String
   description      String
-  price            Int // Stored in paise for Razorpay integration (smallest currency unit)
+  price            Int         // Stored in paise for Razorpay integration (smallest currency unit)
   sku              String      @unique
   inventoryCount   Int
   category         String
   imageUrl         String
   isActive         Boolean     @default(true)
-  sizes            String[] // Supported sizes (e.g. Twin, Queen, King)
-  features         String[] // Bulleted selling points
-  materials        String? // Details & Materials text
-  careInstructions String? // Care instructions text
-  badges           String[] // Dynamic product badges (e.g. NEW, BESTSELLER, SALE, ORGANIC)
+  sizes            String[]    // Supported sizes (e.g. Twin, Queen, King)
+  features         String[]    // Bulleted selling points
+  materials        String?     // Details & Materials text
+  careInstructions String?     // Care instructions text
+  badges           String[]    // Dynamic product badges (e.g. NEW, BESTSELLER, SALE, ORGANIC)
   likes            Int         @default(0) // Likes counter for storefront interactions
   averageRating    Float       @default(0)
   totalReviews     Int         @default(0)
@@ -89,11 +89,33 @@ model Review {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
   productId String   @db.Uuid
-  rating    Int // 1-5 rating scale
+  rating    Int      // 1-5 rating scale
   comment   String?
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  userId          String      @db.Uuid
+  user            User        @relation(fields: [userId], references: [id])
+  razorpayOrderId String      @unique
+  status          OrderStatus @default(PENDING)
+  totalAmount     Int         // In paise
+  shippingAddress String
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  orderId   String  @db.Uuid
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
 }
 
 enum OrderStatus {
@@ -103,29 +125,4 @@ enum OrderStatus {
   SHIPPED
   DELIVERED
   CANCELLED
-}
-
-model Order {
-  id                String      @id @default(uuid()) @db.Uuid
-  userId            String      @db.Uuid
-  user              User        @relation(fields: [userId], references: [id])
-  totalAmount       Int // Stored in paise for Razorpay
-  status            OrderStatus @default(PENDING)
-  razorpayOrderId   String?
-  razorpayPaymentId String?
-  delhiveryAwb      String? // Tracking reference for Delhivery integration
-  shippingAddress   String // Shipping destination detail
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  orderItems        OrderItem[]
-}
-
-model OrderItem {
-  id              String  @id @default(uuid()) @db.Uuid
-  orderId         String  @db.Uuid
-  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId       String  @db.Uuid
-  product         Product @relation(fields: [productId], references: [id])
-  quantity        Int
-  priceAtPurchase Int // Price at time of purchase in paise
 }

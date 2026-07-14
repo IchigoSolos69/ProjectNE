@@ -5,6 +5,7 @@ const productController_1 = require("../controllers/productController");
 const router = (0, express_1.Router)();
 router.post("/", productController_1.addProduct);
 router.get("/", productController_1.getAllProducts);
+router.get("/recommendations", productController_1.getRecommendations);
 router.get("/sku/:sku", productController_1.getProductBySku);
 router.patch("/sku/:sku/like", productController_1.incrementLike);
 router.post("/:sku/rate", productController_1.submitRating);

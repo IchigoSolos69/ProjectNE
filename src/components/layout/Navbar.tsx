@@ -5,11 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X, User } from "lucide-react";
 import { useCart } from "@/context/cart-context";
+import { useSession, signOut } from "next-auth/react";
 
 export const Navbar: React.FC = () => {
   const { cartCount, setIsCartOpen } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session } = useSession();
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -71,14 +73,28 @@ export const Navbar: React.FC = () => {
 
           {/* Actions (Cart / Menu) */}
           <div className="flex flex-1 items-center justify-end space-x-2 md:flex-initial">
-            {/* Account Icon */}
-            <Link
-              href="/auth"
-              className="p-2.5 text-brand-midnight/80 hover:text-brand-royal active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none rounded-full hover:bg-brand-sky/30"
-              aria-label="Account Login"
-            >
-              <User className="h-5 w-5 stroke-[1.5]" />
-            </Link>
+            {/* Account Icon / Session Avatar */}
+            {session ? (
+              <div className="flex items-center gap-3">
+                <span className="hidden md:inline text-xs font-semibold text-brand-midnight">
+                  Hello, {session.user?.name?.split(" ")[0]}
+                </span>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  className="px-3 py-1.5 border border-brand-midnight/20 hover:border-brand-royal text-brand-midnight/80 hover:text-brand-royal text-[10px] font-bold uppercase tracking-wider transition-colors cursor-pointer"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/auth"
+                className="p-2.5 text-brand-midnight/80 hover:text-brand-royal active:scale-[0.95] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none rounded-full hover:bg-brand-sky/30"
+                aria-label="Account Login"
+              >
+                <User className="h-5 w-5 stroke-[1.5]" />
+              </Link>
+            )}
 
             {/* Cart Button */}
             <button

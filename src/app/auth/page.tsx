@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Mail, Lock, User, Chrome } from "lucide-react";
 import { gsap } from "gsap";
+import { signIn } from "next-auth/react";
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -14,8 +15,11 @@ export default function AuthPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setErrorMsg(null);
     if (!formCardRef.current) return;
     // Buttery GSAP slide-in-up on load & view toggle
     gsap.fromTo(
@@ -25,9 +29,54 @@ export default function AuthPage() {
     );
   }, [isSignUp]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(isSignUp ? "Account created successfully (Mock)!" : "Logged in successfully (Mock)!");
+    setErrorMsg(null);
+    setLoading(true);
+
+    try {
+      if (isSignUp) {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to register account.");
+        }
+
+        const signInResult = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (signInResult?.error) {
+          throw new Error(signInResult.error);
+        }
+
+        window.location.href = "/";
+      } else {
+        const signInResult = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (signInResult?.error) {
+          throw new Error("Invalid email or password.");
+        }
+
+        window.location.href = "/";
+      }
+    } catch (err: any) {
+      console.error("Auth error:", err);
+      setErrorMsg(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,6 +147,12 @@ export default function AuthPage() {
             </p>
           </div>
 
+          {errorMsg && (
+            <div className="p-3.5 bg-red-50 border border-red-200 text-red-800 text-xs font-sans">
+              {errorMsg}
+            </div>
+          )}
+
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
@@ -161,10 +216,11 @@ export default function AuthPage() {
             {/* Primary Action Button */}
             <button
               type="submit"
-              className="w-full py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white font-sans text-xs font-semibold uppercase tracking-wide rounded-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer flex items-center justify-center gap-2 group"
+              disabled={loading}
+              className="w-full py-3.5 bg-[#0F2854] hover:bg-[#1C4D8D] text-white font-sans text-xs font-semibold uppercase tracking-wide rounded-lg shadow-md hover:shadow-lg active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer flex items-center justify-center gap-2 group disabled:opacity-50"
             >
-              {isSignUp ? "Create My Account" : "Sign In to My Account"}
-              <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1" />
+              {loading ? "Processing..." : isSignUp ? "Create My Account" : "Sign In to My Account"}
+              {!loading && <ArrowRight className="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1" />}
             </button>
           </form>
 
@@ -180,7 +236,7 @@ export default function AuthPage() {
           {/* Social Logins */}
           <div className="grid grid-cols-2 gap-4">
             <button
-              onClick={() => alert("Google Login (Mock)")}
+              onClick={() => signIn("google", { callbackUrl: "/" })}
               className="flex items-center justify-center gap-2 py-3 border border-[#1C4D8D]/30 hover:border-[#1C4D8D] rounded-lg bg-white text-xs font-semibold uppercase tracking-wide text-[#0F2854] active:scale-[0.98] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer hover:bg-[#F6FAFC] font-sans"
             >
               <Chrome className="h-4 w-4 text-[#1C4D8D]" />

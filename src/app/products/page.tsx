@@ -18,6 +18,8 @@ interface DatabaseProduct {
   isActive: boolean;
   averageRating: number;
   totalReviews: number;
+  sizes?: string[];
+  badges?: string[];
 }
 
 interface CatalogProduct {
@@ -30,6 +32,8 @@ interface CatalogProduct {
   averageRating: number;
   totalReviews: number;
   sku: string;
+  sizes?: string[];
+  badges?: string[];
 }
 
 const mapDatabaseProduct = (product: DatabaseProduct): CatalogProduct => ({
@@ -42,6 +46,8 @@ const mapDatabaseProduct = (product: DatabaseProduct): CatalogProduct => ({
   averageRating: product.averageRating ?? 0,
   totalReviews: product.totalReviews ?? 0,
   sku: product.sku,
+  sizes: product.sizes ?? [],
+  badges: product.badges ?? [],
 });
 
 const CatalogContent: React.FC = () => {

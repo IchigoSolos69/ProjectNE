@@ -7,6 +7,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
 import ScrollReset from "@/components/layout/ScrollReset";
+import AuthProvider from "@/components/layout/AuthProvider";
 
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -46,16 +47,23 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${outfit.variable} h-full scroll-smooth`}
     >
+      <head>
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased font-sans">
-        <SmoothScroll>
-          <ScrollReset />
-          <CartProvider>
-            <Navbar />
-            <CartDrawer />
-            <main className="flex-grow flex flex-col">{children}</main>
-            <Footer />
-          </CartProvider>
-        </SmoothScroll>
+        <AuthProvider>
+          <SmoothScroll>
+            <ScrollReset />
+            <CartProvider>
+              <Navbar />
+              <CartDrawer />
+              <main className="flex-grow flex flex-col">{children}</main>
+              <Footer />
+            </CartProvider>
+          </SmoothScroll>
+        </AuthProvider>
       </body>
     </html>
   );

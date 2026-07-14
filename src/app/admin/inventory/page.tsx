@@ -19,6 +19,7 @@ interface Product {
   features: string[];
   materials?: string;
   careInstructions?: string;
+  badges?: string[];
 }
 
 // Category sizes configuration mapping
@@ -41,6 +42,7 @@ export default function AdminInventoryPage() {
   const [inventoryCount, setInventoryCount] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedBadges, setSelectedBadges] = useState<string[]>([]);
   const [featuresInput, setFeaturesInput] = useState("");
   const [materials, setMaterials] = useState("");
   const [careInstructions, setCareInstructions] = useState("");
@@ -73,6 +75,14 @@ export default function AdminInventoryPage() {
     }
   };
 
+  const handleBadgeToggle = (badge: string) => {
+    if (selectedBadges.includes(badge)) {
+      setSelectedBadges(selectedBadges.filter((b) => b !== badge));
+    } else {
+      setSelectedBadges([...selectedBadges, badge]);
+    }
+  };
+
   const handleCategoryChange = (newCategory: string) => {
     setCategory(newCategory);
     // Explicitly reset sizes on category swap to prevent hidden payload leaks
@@ -102,6 +112,7 @@ export default function AdminInventoryPage() {
           features: featuresInput.split(",").map((f) => f.trim()).filter(Boolean),
           materials: materials || null,
           careInstructions: careInstructions || null,
+          badges: selectedBadges,
         }),
       });
 
@@ -118,6 +129,7 @@ export default function AdminInventoryPage() {
       setInventoryCount("");
       setImageUrl("");
       setSelectedSizes([]);
+      setSelectedBadges([]);
       setFeaturesInput("");
       setMaterials("");
       setCareInstructions("");
@@ -293,6 +305,24 @@ export default function AdminInventoryPage() {
                 </div>
               )}
 
+              {/* Product Badges selector */}
+              <div className="space-y-2">
+                <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Product Badges</label>
+                <div className="flex flex-wrap gap-3">
+                  {["NEW", "BESTSELLER", "LIMITED", "SALE", "ORGANIC"].map((badge) => (
+                    <label key={badge} className="flex items-center gap-1.5 cursor-pointer text-sm text-[#0F2854]">
+                      <input
+                        type="checkbox"
+                        checked={selectedBadges.includes(badge)}
+                        onChange={() => handleBadgeToggle(badge)}
+                        className="rounded border-[#BDE8F5] text-[#0F2854] focus:ring-[#4988C4]"
+                      />
+                      {badge}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {/* Rich Content Fields */}
               <div className="space-y-1">
                 <label className="font-semibold uppercase tracking-wide text-[#0F2854]">Product Features (comma separated)</label>
@@ -397,6 +427,18 @@ export default function AdminInventoryPage() {
                           <div className="text-[10px] text-brand-midnight/50 mt-0.5">
                             SKU: <span className="font-medium">{p.sku}</span> | Cat: <span className="font-medium">{p.category}</span>
                           </div>
+                          {p.badges && p.badges.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {p.badges.map((badge) => (
+                                <span
+                                  key={badge}
+                                  className="px-1.5 py-0.5 text-[8px] font-semibold rounded bg-brand-sky/40 text-brand-royal uppercase"
+                                >
+                                  {badge}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </td>
                         <td className="py-3 text-right font-semibold text-brand-royal">
                           {Intl.NumberFormat("en-IN", {

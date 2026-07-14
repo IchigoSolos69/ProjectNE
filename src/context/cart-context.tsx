@@ -14,6 +14,7 @@ export interface CartProduct {
   price: number;
   image: string;
   sku: string;
+  category?: string;
 }
 
 export interface CartItem {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
@@ -16,10 +16,36 @@ export const CartDrawer: React.FC = () => {
     updateQuantity,
     removeFromCart,
     cartSubtotal,
+    addToCart,
   } = useCart();
 
   const drawerRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+
+  const FREE_SHIPPING_THRESHOLD = 5000;
+  const amountAway = FREE_SHIPPING_THRESHOLD - cartSubtotal;
+
+  useEffect(() => {
+    if (cart.length === 0) {
+      setRecommendations([]);
+      return;
+    }
+    const fetchRecommendations = async () => {
+      try {
+        const category = cart[0]?.product.category || "";
+        const res = await fetch(`${API_URL}/products/recommendations?category=${encodeURIComponent(category)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setRecommendations(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch recommendations:", err);
+      }
+    };
+    fetchRecommendations();
+  }, [cart.length, cart[0]?.product.category]);
 
   useEffect(() => {
     // Automatically close the cart drawer and unlock body scrolling when pathname changes
@@ -114,6 +140,31 @@ export const CartDrawer: React.FC = () => {
             <X className="h-5 w-5 stroke-[1.5]" />
           </button>
         </div>
+
+        {/* Free Shipping Progress Bar */}
+        {cart.length > 0 && (
+          <div className="px-6 py-4 bg-[#F6FAFC] border-b border-brand-sky/20 font-sans">
+            <div className="flex justify-between items-center mb-2">
+              {amountAway > 0 ? (
+                <span className="text-[11px] font-medium text-brand-midnight uppercase tracking-wider">
+                  Only <span className="font-bold">₹{amountAway}</span> away from <span className="text-brand-royal font-semibold">FREE SHIPPING</span>
+                </span>
+              ) : (
+                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+                  🎉 Your order qualifies for FREE SHIPPING!
+                </span>
+              )}
+            </div>
+            <div className="w-full h-1.5 bg-gray-200 overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${
+                  amountAway <= 0 ? "bg-emerald-600" : "bg-brand-royal"
+                }`}
+                style={{ width: `${Math.min(100, (cartSubtotal / FREE_SHIPPING_THRESHOLD) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Drawer Body (Cart Items List) */}
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
@@ -211,6 +262,60 @@ export const CartDrawer: React.FC = () => {
                 </div>
               </div>
             ))
+          )}
+
+          {/* Cross-Selling Recommendations */}
+          {cart.length > 0 && recommendations.length > 0 && (
+            <div className="mt-8 border-t border-brand-sky/20 pt-6">
+              <h3 className="font-serif text-sm font-semibold text-brand-midnight mb-4">
+                Complete Your Sanctuary
+              </h3>
+              <div className="space-y-3">
+                {recommendations.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 bg-white p-2.5 border border-brand-sky/20 hover:border-brand-midnight/20 transition-all duration-300">
+                    <div className="relative h-12 w-12 flex-shrink-0 bg-brand-sky/10">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        fill
+                        sizes="48px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-xs font-semibold text-brand-midnight truncate leading-tight">
+                        {item.name}
+                      </h4>
+                      <p className="text-[10px] font-semibold text-brand-royal mt-1 font-sans">
+                        {Intl.NumberFormat("en-IN", {
+                          style: "currency",
+                          currency: "INR",
+                          maximumFractionDigits: 0,
+                        }).format(item.price / 100)}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() =>
+                        addToCart(
+                          {
+                            id: item.id,
+                            name: item.name,
+                            price: item.price / 100,
+                            image: item.imageUrl,
+                            sku: item.sku,
+                          },
+                          item.sizes?.[0] || "Queen"
+                        )
+                      }
+                      className="px-3 py-1 bg-brand-midnight hover:bg-brand-royal text-white text-[10px] font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+                    >
+                      + Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
