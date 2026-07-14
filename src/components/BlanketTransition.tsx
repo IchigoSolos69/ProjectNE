@@ -21,8 +21,11 @@ const LUXURY_PHRASES = [
 export default function BlanketTransition({ triggerId }: BlanketTransitionProps) {
   const blanketRef = useRef<HTMLDivElement>(null);
   const marqueeContainerRef = useRef<HTMLDivElement>(null);
+  const failsafeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   // Use a deterministic initial value so SSR and the first client render match.
   const [activePhrase, setActivePhrase] = useState<string>(LUXURY_PHRASES[0]);
+  const [isOverlayHidden, setIsOverlayHidden] = useState(false);
 
   // Randomize only after mount to avoid a Next.js hydration mismatch.
   useEffect(() => {
@@ -31,9 +34,38 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       setActivePhrase(LUXURY_PHRASES[phraseIndex]);
     });
 
-    return () => window.cancelAnimationFrame(frameId);
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      if (failsafeTimeoutRef.current) {
+        clearTimeout(failsafeTimeoutRef.current);
+      }
+    };
   }, []);
 
+  // 1. Scroll-linked Threshold Hard-Resets (Directive 2)
+  useEffect(() => {
+    const checkScroll = () => {
+      const triggerElement = document.getElementById(triggerId);
+      if (!triggerElement) return;
+      const rect = triggerElement.getBoundingClientRect();
+
+      // If the hero section is scrolled past, immediately force blanket to hide
+      if (rect.bottom <= 0 || window.scrollY > rect.height) {
+        setIsOverlayHidden(true);
+      } else {
+        // Only show if not locked out by a failsafe
+        if (failsafeTimeoutRef.current === null) {
+          setIsOverlayHidden(false);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    checkScroll();
+    return () => window.removeEventListener("scroll", checkScroll);
+  }, [triggerId]);
+
+  // 2. Timeline and Resize triggers (Directive 1 & 2)
   useEffect(() => {
     const blanket = blanketRef.current;
     const triggerElement = document.getElementById(triggerId);
@@ -50,6 +82,22 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
         refreshFrame = undefined;
         ScrollTrigger.refresh();
       });
+    };
+
+    // Debounced resize listener to avoid freezing mid-calculation on mobile UI shifts (Directive 2)
+    let resizeTimeout: NodeJS.Timeout | undefined;
+    const handleResize = () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        scheduleRefresh();
+      }, 150);
+    };
+
+    const triggerFailsafe = () => {
+      if (failsafeTimeoutRef.current) clearTimeout(failsafeTimeoutRef.current);
+      failsafeTimeoutRef.current = setTimeout(() => {
+        setIsOverlayHidden(true);
+      }, 2500); // Failsafe Timeout (Directive 1)
     };
 
     let media: ReturnType<typeof gsap.matchMedia> | undefined;
@@ -71,6 +119,14 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
               end: "bottom top",
               scrub: 1.5,
               invalidateOnRefresh: true,
+              onToggle: (self) => {
+                if (self.isActive) triggerFailsafe();
+              },
+              onUpdate: (self) => {
+                if (self.progress >= 0.99) {
+                  setIsOverlayHidden(true);
+                }
+              }
             },
           }
         );
@@ -89,6 +145,14 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
             pinSpacing: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
+            onToggle: (self) => {
+              if (self.isActive) triggerFailsafe();
+            },
+            onUpdate: (self) => {
+              if (self.progress >= 0.99) {
+                setIsOverlayHidden(true);
+              }
+            }
           },
         });
 
@@ -100,8 +164,7 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
       });
     }, blanket);
 
-    // Refresh after LCP images and responsive layout changes. Observing the
-    // trigger, rather than document.body, avoids a refresh loop from pin spacers.
+    // Refresh after LCP images and responsive layout changes.
     const resizeObserver = new ResizeObserver(scheduleRefresh);
     resizeObserver.observe(triggerElement);
 
@@ -113,12 +176,13 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     });
 
     window.addEventListener("load", scheduleRefresh);
-    window.addEventListener("resize", scheduleRefresh);
+    window.addEventListener("resize", handleResize);
     scheduleRefresh();
 
     return () => {
       window.removeEventListener("load", scheduleRefresh);
-      window.removeEventListener("resize", scheduleRefresh);
+      window.removeEventListener("resize", handleResize);
+      if (resizeTimeout) clearTimeout(resizeTimeout);
       images.forEach((image) => image.removeEventListener("load", scheduleRefresh));
       resizeObserver.disconnect();
       if (refreshFrame !== undefined) {
@@ -163,7 +227,9 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
   return (
     <div
       ref={blanketRef}
-      className="absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer"
+      className={`absolute inset-0 z-20 rounded-t-[4rem] md:rounded-t-[10vw] shadow-[0_-20px_40px_rgba(73,136,196,0.2),_0_-35px_80px_rgba(28,77,141,0.45),_inset_0_10px_20px_rgba(255,255,255,0.6),_inset_0_20px_40px_rgba(255,255,255,0.8)] border-t border-brand-ocean/25 overflow-hidden flex items-center justify-center invisible will-change-transform animate-silk-shimmer ${
+        isOverlayHidden ? "pointer-events-none !opacity-0 !invisible" : ""
+      }`}
       style={{
         background: `
           linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 40%, rgba(73,136,196,0.1) 60%, rgba(255,255,255,0.3) 100%),
@@ -212,4 +278,3 @@ export default function BlanketTransition({ triggerId }: BlanketTransitionProps)
     </div>
   );
 }
-
