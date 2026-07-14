@@ -17,6 +17,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useCart } from "@/context/cart-context";
+import { API_URL } from "@/lib/api";
 import dynamic from "next/dynamic";
 
 // Dynamically import heavy below-the-fold component to reduce initial JS payload size
@@ -120,7 +121,7 @@ export default function ProductClient({ sku }: { sku: string }) {
 
   const fetchProduct = async () => {
     try {
-      const targetUrl = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/sku/${sku}`;
+      const targetUrl = `${API_URL}/products/sku/${sku}`;
       const response = await fetch(targetUrl);
 
       if (response.status === 404) {
@@ -171,7 +172,7 @@ export default function ProductClient({ sku }: { sku: string }) {
     setIsLiked(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/sku/${sku}/like`, {
+      const response = await fetch(`${API_URL}/products/sku/${sku}/like`, {
         method: "PATCH",
       });
       if (!response.ok) throw new Error("Failed to register like.");
@@ -188,7 +189,7 @@ export default function ProductClient({ sku }: { sku: string }) {
 
     setIsSubmittingRating(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/products/${sku}/rate`, {
+      const response = await fetch(`${API_URL}/products/${sku}/rate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -269,7 +270,7 @@ export default function ProductClient({ sku }: { sku: string }) {
     addToCart(cartProduct, selectedSize as any, quantity);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"}/payments/create`, {
+      const response = await fetch(`${API_URL}/payments/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
