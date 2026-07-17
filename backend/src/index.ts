@@ -18,11 +18,22 @@ import seoRouter from './routes/seo';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+const allowedOrigins = [
+  FRONTEND_ORIGIN,
+  'http://localhost:5173',
+  'http://127.0.0.1:5173'
+];
 
 // Middleware
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true, // required for SameSite=None secure cookies
   })
 );
