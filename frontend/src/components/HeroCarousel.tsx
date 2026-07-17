@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react';
 import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface CarouselSlide {
   id: string;
@@ -43,11 +47,19 @@ const slides: CarouselSlide[] = [
   },
 ];
 
-export const HeroCarousel: React.FC = () => {
+export const HeroCarousel: React.FC = React.memo(() => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const heroContainerRef = useRef<HTMLDivElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<any>(null);
+
+  // Overlay Refs
+  const blanketOverlayRef = useRef<HTMLDivElement>(null);
+  const blanketBaseRef = useRef<HTMLDivElement>(null);
+  const blanketTopRef = useRef<HTMLDivElement>(null);
+  const overlayTextRef = useRef<HTMLDivElement>(null);
+  const indicatorRef = useRef<HTMLDivElement>(null);
 
   const resetAutoplay = () => {
     if (autoPlayRef.current) {
@@ -67,7 +79,6 @@ export const HeroCarousel: React.FC = () => {
 
   // Handle GSAP transitions when slide changes
   useEffect(() => {
-    // Left Image Animation
     if (imageContainerRef.current) {
       const activeImg = imageContainerRef.current.querySelector(`.slide-img-${activeIndex}`);
       const otherImgs = imageContainerRef.current.querySelectorAll(`.slide-img:not(.slide-img-${activeIndex})`);
@@ -76,7 +87,6 @@ export const HeroCarousel: React.FC = () => {
       gsap.to(otherImgs, { opacity: 0, scale: 1.05, duration: 0.8, ease: 'power2.out' });
     }
 
-    // Right Text Panel Animation
     if (textContainerRef.current) {
       gsap.fromTo(
         textContainerRef.current.children,
@@ -85,6 +95,73 @@ export const HeroCarousel: React.FC = () => {
       );
     }
   }, [activeIndex]);
+
+  // Blanket reveal animation setup using useGSAP
+  useGSAP(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      if (blanketOverlayRef.current) {
+        gsap.set(blanketOverlayRef.current, { opacity: 0, pointerEvents: 'none' });
+      }
+      return;
+    }
+
+    if (!heroContainerRef.current || !blanketOverlayRef.current) return;
+
+    // Create Scroll-linked reveal timeline
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: heroContainerRef.current,
+        start: 'top top',
+        end: '+=60%',
+        scrub: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          if (blanketOverlayRef.current) {
+            // Instantly clear pointer interactions as soon as user begins to scroll down
+            if (self.progress > 0.05) {
+              blanketOverlayRef.current.style.pointerEvents = 'none';
+            } else {
+              blanketOverlayRef.current.style.pointerEvents = 'auto';
+            }
+          }
+        }
+      },
+    });
+
+    // 1. Fade out the overlay wrapper background & container opacity
+    tl.fromTo(blanketOverlayRef.current, 
+      { opacity: 1 }, 
+      { opacity: 0, ease: 'power2.inOut', duration: 1.0 }, 
+      0
+    );
+
+    // 2. Animate the blanket comforter layers sweeping down and scaling out
+    if (blanketBaseRef.current) {
+      tl.fromTo(blanketBaseRef.current,
+        { scaleY: 1, scaleX: 1, y: '0%' },
+        { scaleY: 0.6, scaleX: 0.7, y: '80%', ease: 'power2.inOut', duration: 1.0 },
+        0
+      );
+    }
+
+    if (blanketTopRef.current) {
+      tl.fromTo(blanketTopRef.current,
+        { scaleY: 1, scaleX: 1, y: '0%' },
+        { scaleY: 0.5, scaleX: 0.6, y: '100%', ease: 'power2.inOut', duration: 0.95 },
+        0
+      );
+    }
+
+    // 3. Fade out overlay elements
+    if (overlayTextRef.current) {
+      tl.to(overlayTextRef.current, { opacity: 0, y: -40, duration: 0.5, ease: 'power1.out' }, 0);
+    }
+    if (indicatorRef.current) {
+      tl.to(indicatorRef.current, { opacity: 0, duration: 0.2 }, 0);
+    }
+
+  }, { scope: heroContainerRef, revertOnUpdate: true });
 
   const handlePrev = () => {
     setActiveIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
@@ -99,12 +176,94 @@ export const HeroCarousel: React.FC = () => {
   };
 
   return (
-    <section className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
+    <section ref={heroContainerRef} className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
       
+      {/* 2D Blanket Reveal Overlay (sits above images/panels but below text once scrolled) */}
+      <div
+        ref={blanketOverlayRef}
+        className="absolute inset-0 z-25 bg-[#0F2854] flex items-end justify-center pointer-events-auto overflow-hidden select-none"
+      >
+        {/* Fabric pattern definition */}
+        <svg className="hidden">
+          <defs>
+            <pattern id="reveal-stripe" width="24" height="24" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <line x1="0" y1="0" x2="0" y2="24" stroke="#0F2854" strokeWidth="2.5" opacity="0.18" />
+              <line x1="0" y1="0" x2="24" y2="0" stroke="#0F2854" strokeWidth="2.5" opacity="0.18" />
+            </pattern>
+          </defs>
+        </svg>
+
+        {/* 2D Graphic Blanket */}
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[75vh] md:h-[80vh] flex flex-col justify-end origin-bottom z-10">
+          
+          {/* Base Layer */}
+          <div
+            ref={blanketBaseRef}
+            className="absolute inset-0 w-full h-full bg-[#1C4D8D] rounded-t-[3rem] md:rounded-t-[6rem] overflow-hidden shadow-2xl"
+            style={{ transformOrigin: 'bottom center' }}
+          >
+            <div
+              className="w-full h-full"
+              style={{
+                background: 'repeating-linear-gradient(45deg, #1C4D8D, #1C4D8D 12px, #0F2854 12px, #0F2854 24px)',
+                opacity: 0.85,
+              }}
+            />
+          </div>
+
+          {/* Top Layer */}
+          <div
+            ref={blanketTopRef}
+            className="absolute inset-x-4 top-12 bottom-0 bg-[#4988C4] rounded-t-[2.5rem] md:rounded-t-[5.5rem] overflow-hidden shadow-lg border-t border-white/10"
+            style={{ transformOrigin: 'bottom center' }}
+          >
+            <div
+              className="w-full h-full"
+              style={{
+                background: 'repeating-linear-gradient(-45deg, #4988C4, #4988C4 10px, #1C4D8D 10px, #1C4D8D 20px)',
+                opacity: 0.9,
+              }}
+            />
+            <div className="absolute bottom-6 left-6 font-serif italic text-[#BDE8F5]/80 text-sm md:text-base tracking-wide z-10">
+              RareComforts
+            </div>
+          </div>
+        </div>
+
+        {/* Floating text on overlay */}
+        <div
+          ref={overlayTextRef}
+          className="absolute inset-0 z-20 pointer-events-none p-6 sm:p-16 flex flex-col justify-between"
+        >
+          <div className="self-start text-left max-w-xs md:max-w-md mt-20">
+            <h3 className="font-serif text-3xl md:text-5xl text-white font-medium leading-tight">
+              Woven for stillness.
+            </h3>
+            <span className="font-sans text-[10px] tracking-widest text-[#BDE8F5]/65 uppercase mt-2 block">
+              RareComforts Premium
+            </span>
+          </div>
+          <div className="self-end text-right max-w-xs md:max-w-md mb-20">
+            <h3 className="font-serif text-3xl md:text-5xl text-[#BDE8F5] font-medium leading-tight">
+              The weight of real rest.
+            </h3>
+          </div>
+        </div>
+
+        {/* Scroll down indicator */}
+        <div
+          ref={indicatorRef}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 text-[#BDE8F5] text-[10px] font-sans tracking-widest uppercase flex flex-col items-center gap-1.5"
+        >
+          <span>SCROLL TO UNFURL & REVEAL</span>
+          <ChevronDown className="w-4 h-4 animate-bounce text-[#BDE8F5]" />
+        </div>
+      </div>
+
       {/* Left Carousel Image Section (~58%) */}
       <div
         ref={imageContainerRef}
-        className="relative w-full md:w-[58%] h-[50vh] md:h-full overflow-hidden bg-navy-deep flex-shrink-0 p-0 m-0 border-0"
+        className="relative w-full md:w-[58%] h-[50vh] md:h-full overflow-hidden bg-navy-deep flex-shrink-0 p-0 m-0 border-0 z-10"
       >
         {slides.map((slide, idx) => (
           <div
@@ -194,4 +353,6 @@ export const HeroCarousel: React.FC = () => {
       </div>
     </section>
   );
-};
+});
+
+export default HeroCarousel;
