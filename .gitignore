@@ -33,3 +33,6 @@ yarn-error.log*
 *.sw?
 
 backend/.env
+
+node_modules/
+dist/
