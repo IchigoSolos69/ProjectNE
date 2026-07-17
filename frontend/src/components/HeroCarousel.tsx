@@ -99,23 +99,23 @@ export const HeroCarousel: React.FC = () => {
   };
 
   return (
-    <section className="relative w-full min-h-[calc(100vh-80px)] lg:min-h-[85vh] mt-[70px] flex flex-col lg:flex-row bg-[#F5FAFD]/40">
+    <section className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
       
-      {/* Left Carousel Image Section (~55-60%) */}
+      {/* Left Carousel Image Section (~58%) */}
       <div
         ref={imageContainerRef}
-        className="relative w-full lg:w-[58%] h-[45vh] sm:h-[55vh] lg:h-auto overflow-hidden bg-navy-deep flex-shrink-0"
+        className="relative w-full md:w-[58%] h-[50vh] md:h-full overflow-hidden bg-navy-deep flex-shrink-0 p-0 m-0 border-0"
       >
         {slides.map((slide, idx) => (
           <div
             key={slide.id}
-            className={`absolute inset-0 slide-img slide-img-${idx} opacity-0`}
+            className={`absolute inset-0 slide-img slide-img-${idx} opacity-0 p-0 m-0 border-0 w-full h-full`}
             style={{ zIndex: idx === activeIndex ? 10 : 1 }}
           >
             <img
               src={slide.image}
               alt={slide.name}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover p-0 m-0 border-0"
             />
           </div>
         ))}
@@ -148,8 +148,8 @@ export const HeroCarousel: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Synced Info Panel (~40-45%) */}
-      <div className="w-full lg:w-[42%] flex flex-col justify-center p-8 sm:p-12 lg:p-16 bg-white relative z-10">
+      {/* Right Synced Info Panel (~42%) */}
+      <div className="w-full md:w-[42%] h-auto md:h-full flex flex-col justify-center p-8 sm:p-12 md:p-16 bg-white relative z-10 overflow-y-auto">
         
         {/* Carousel Slide Indicators */}
         <div className="flex gap-2.5 mb-8 justify-start">
@@ -166,7 +166,7 @@ export const HeroCarousel: React.FC = () => {
         </div>
 
         {/* Content Ref container */}
-        <div ref={textContainerRef} className="space-y-4 max-w-md">
+        <div ref={textContainerRef} className="space-y-4 max-w-md my-auto">
           <p className="font-sans text-xs font-bold tracking-widest text-sky-blue uppercase">
             {slides[activeIndex].tagline}
           </p>
