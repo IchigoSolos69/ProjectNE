@@ -181,12 +181,11 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
             className="fixed inset-0 bg-[#0F2854] z-50 cursor-pointer"
           />
 
-          {/* Drawer Panel */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            transition={{ type: 'spring', damping: 28, stiffness: 240 }}
             className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white shadow-2xl z-50 flex flex-col"
           >
             {/* Header */}

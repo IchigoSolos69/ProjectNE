@@ -98,67 +98,88 @@ export const HeroCarousel: React.FC = React.memo(() => {
 
   // Blanket reveal animation setup using useGSAP
   useGSAP(() => {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) {
-      if (blanketOverlayRef.current) {
-        gsap.set(blanketOverlayRef.current, { opacity: 0, pointerEvents: 'none' });
+    try {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion) {
+        // Create simple fade-only scroll trigger timeline for accessibility profiles
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: heroContainerRef.current,
+            start: 'top top',
+            end: '+=60%',
+            scrub: 1,
+            invalidateOnRefresh: true,
+            onUpdate: (self) => {
+              if (blanketOverlayRef.current) {
+                if (self.progress > 0.05) {
+                  blanketOverlayRef.current.style.pointerEvents = 'none';
+                } else {
+                  blanketOverlayRef.current.style.pointerEvents = 'auto';
+                }
+              }
+            }
+          },
+        });
+        tl.to(blanketOverlayRef.current, { opacity: 0, ease: 'power1.out', duration: 1.0 });
+        return;
       }
-      return;
-    }
 
-    if (!heroContainerRef.current || !blanketOverlayRef.current) return;
+      if (!heroContainerRef.current || !blanketOverlayRef.current) return;
 
-    // Create Scroll-linked reveal timeline
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: heroContainerRef.current,
-        start: 'top top',
-        end: '+=60%',
-        scrub: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self) => {
-          if (blanketOverlayRef.current) {
-            // Instantly clear pointer interactions as soon as user begins to scroll down
-            if (self.progress > 0.05) {
-              blanketOverlayRef.current.style.pointerEvents = 'none';
-            } else {
-              blanketOverlayRef.current.style.pointerEvents = 'auto';
+      // Create Scroll-linked reveal timeline
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: heroContainerRef.current,
+          start: 'top top',
+          end: '+=60%',
+          scrub: 1,
+          invalidateOnRefresh: true,
+          onUpdate: (self) => {
+            if (blanketOverlayRef.current) {
+              // Instantly clear pointer interactions as soon as user begins to scroll down
+              if (self.progress > 0.05) {
+                blanketOverlayRef.current.style.pointerEvents = 'none';
+              } else {
+                blanketOverlayRef.current.style.pointerEvents = 'auto';
+              }
             }
           }
-        }
-      },
-    });
+        },
+      });
 
-    // 1. Fade out the overlay wrapper background & container opacity
-    tl.fromTo(blanketOverlayRef.current, 
-      { opacity: 1 }, 
-      { opacity: 0, ease: 'power2.inOut', duration: 1.0 }, 
-      0
-    );
-
-    // 2. Animate the blanket comforter layers sweeping down and scaling out
-    if (blanketBaseRef.current) {
-      tl.fromTo(blanketBaseRef.current,
-        { scaleY: 1, scaleX: 1, y: '0%' },
-        { scaleY: 0.6, scaleX: 0.7, y: '80%', ease: 'power2.inOut', duration: 1.0 },
+      // 1. Fade out the overlay wrapper background & container opacity
+      tl.fromTo(blanketOverlayRef.current, 
+        { opacity: 1 }, 
+        { opacity: 0, ease: 'power2.inOut', duration: 1.0 }, 
         0
       );
-    }
 
-    if (blanketTopRef.current) {
-      tl.fromTo(blanketTopRef.current,
-        { scaleY: 1, scaleX: 1, y: '0%' },
-        { scaleY: 0.5, scaleX: 0.6, y: '100%', ease: 'power2.inOut', duration: 0.95 },
-        0
-      );
-    }
+      // 2. Animate the blanket comforter layers sweeping down and scaling out
+      if (blanketBaseRef.current) {
+        tl.fromTo(blanketBaseRef.current,
+          { scaleY: 1, scaleX: 1, y: '0%' },
+          { scaleY: 0.6, scaleX: 0.7, y: '80%', ease: 'power2.inOut', duration: 1.0 },
+          0
+        );
+      }
 
-    // 3. Fade out overlay elements
-    if (overlayTextRef.current) {
-      tl.to(overlayTextRef.current, { opacity: 0, y: -40, duration: 0.5, ease: 'power1.out' }, 0);
-    }
-    if (indicatorRef.current) {
-      tl.to(indicatorRef.current, { opacity: 0, duration: 0.2 }, 0);
+      if (blanketTopRef.current) {
+        tl.fromTo(blanketTopRef.current,
+          { scaleY: 1, scaleX: 1, y: '0%' },
+          { scaleY: 0.5, scaleX: 0.6, y: '100%', ease: 'power2.inOut', duration: 0.95 },
+          0
+        );
+      }
+
+      // 3. Fade out overlay elements
+      if (overlayTextRef.current) {
+        tl.to(overlayTextRef.current, { opacity: 0, y: -40, duration: 0.5, ease: 'power1.out' }, 0);
+      }
+      if (indicatorRef.current) {
+        tl.to(indicatorRef.current, { opacity: 0, duration: 0.2 }, 0);
+      }
+    } catch (err: any) {
+      console.log('ERROR IN useGSAP:', err.message || err);
     }
 
   }, { scope: heroContainerRef, revertOnUpdate: true });

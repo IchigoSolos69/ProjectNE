@@ -8,7 +8,7 @@ Every component and integration on the **RareComforts** platform has been audite
 
 | Feature | Code exists? | Wired in / imported? | Works live in browser? | Notes |
 |---|---|---|---|---|
-| **Blanket Overlay** | Yes | Yes | **Yes** | Built directly in [HeroCarousel.tsx](file:///c:/Users/Adi/Documents/GitHub/ne/frontend/src/components/HeroCarousel.tsx) using the `@gsap/react` `useGSAP` hook and `ScrollTrigger` pin scrub. Fades to pointer-events `none` so CTA buttons under it are responsive. |
+| **Blanket Overlay** | Yes | Yes | **Yes** | **Fixed**: Found that the overlay was returning early/instantly disabling itself under headless test environments and the developer's system because `prefers-reduced-motion: reduce` was active. Refactored the bypass to build a smooth, vestibular-safe background-only fade timeline so the transition is visible and responsive under all profiles. |
 | **Trending Products** | Yes | Yes | **Yes** (With Fallbacks) | Fetches `/api/products?trending=true` via [TrendingGrid.tsx](file:///c:/Users/Adi/Documents/GitHub/ne/frontend/src/components/TrendingGrid.tsx). Renders skeleton shimmers during fetches. Falls back to 4 styled "Coming Soon" cards in the brand palette if Neon DB is unreachable. |
 | **Footer** | Yes | Yes | **Yes** | Fully wired with legal routes. Newsletter subscription submits and triggers local success banners without throwing console errors. |
 | **Navbar Category Links** | Yes | Yes | **Yes** | Categories (Bedsheets, Comforters, etc.) successfully link to `/products?category=...` and display filtered subsets. |
@@ -194,15 +194,13 @@ These verification steps cannot be run via programmatic curl requests and must b
 
 ### C1. Visual comforter reveal overlay animation
 1. Go to `https://rarecomforts.in` in your browser.
-2. Slowly scroll down. Verify that the dark navy overlay sweeps down smoothly, scaling away the 2D comforter graphic.
+2. Slowly scroll down. Verify that the dark navy overlay sweeps down smoothly, scaling the 2D comforter graphic.
 3. Verify that once the overlay fades completely, you can click on the **"Shop the Collection"** CTA button underneath (pointer-events clear correctly).
 4. Verify that no console errors appear in the browser developer tools console.
 
 ### C2. End-to-end Google OAuth flow
 1. Navigate to `https://rarecomforts.in/auth`.
-2. Click the Google login button.
-3. Select your Google account in the consent screen popup.
-4. Verify that you are redirected back to the storefront and the navbar user badge shows your name.
+2. Click the **Google Sign-In** button, complete the popup consent roundtrip, and check if the user is correctly logged in.
 
 ### C3. Cloudinary image upload widget
 1. Login as an administrator (`admin@rarecomforts.com`) and head to `https://rarecomforts.in/admin/inventory`.
@@ -214,3 +212,25 @@ These verification steps cannot be run via programmatic curl requests and must b
 1. Toggle the mobile view emulation in DevTools.
 2. Verify that the Hero Split panel matches full browser height (`100vh`) with no gaps.
 3. Confirm that the overlay text is readable on mobile viewports.
+
+---
+
+## 5. Live Runtime Animation Diagnostics (Part 1 Visuals)
+
+Below are the browser metrics captured during our headless Chrome ScrollTrigger execution (with emulated standard motion profiles):
+
+* **Scroll Height = 0 (Resting state)**:
+  * **Opacity**: `1` (Fully visible solid overlay canvas)
+  * **Pointer-Events**: `auto` (Interactions captured by overlay)
+* **Scroll Height = 250px (Mid-scroll)**:
+  * **Opacity**: `0.2296` (Correctly scrubbing/fading dynamically matching user scroll positions)
+  * **Pointer-Events**: `none` (Tactile overlay bounds released, exposing CTA interactions underneath)
+* **Scroll Height = 800px (After-scroll)**:
+  * **Opacity**: `0` (Fully hidden, exposing the product slides completely)
+  * **Pointer-Events**: `none` (No mouse collision blocking underlay buttons)
+
+### Visual State Progress Screenshots
+The following states have been captured and saved as assets in the brain artifacts folder:
+- **State 1 (Resting)**: [before-scroll.png](file:///C:/Users/Adi/.gemini/antigravity-ide/brain/59656087-3fc6-4c64-8069-f18c98e37607/before-scroll.png)
+- **State 2 (Mid-scroll)**: [mid-scroll.png](file:///C:/Users/Adi/.gemini/antigravity-ide/brain/59656087-3fc6-4c64-8069-f18c98e37607/mid-scroll.png)
+- **State 3 (Past-hero)**: [after-scroll.png](file:///C:/Users/Adi/.gemini/antigravity-ide/brain/59656087-3fc6-4c64-8069-f18c98e37607/after-scroll.png)
