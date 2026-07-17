@@ -1,0 +1,42 @@
+@import './styles/tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Lenis smooth scrolling rules */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overflow: clip;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+@layer base {
+  body {
+    @apply text-navy-deep bg-white;
+  }
+}
+
+/* Custom premium transitions */
+.transition-luxury {
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.hover-luxury:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(15, 40, 84, 0.15);
+}
