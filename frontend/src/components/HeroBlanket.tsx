@@ -14,6 +14,7 @@ export const HeroBlanket: React.FC = React.memo(() => {
     if (!blanketRef.current) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    console.log('[HeroBlanket] prefers-reduced-motion is:', reduceMotion);
     if (reduceMotion) {
       gsap.set(blanketRef.current, { display: 'none' });
       return;

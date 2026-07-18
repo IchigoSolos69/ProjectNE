@@ -26,7 +26,7 @@ const slides: CarouselSlide[] = [
   {
     id: '2',
     name: 'Imperial Satin Linens Collection',
-    tagline: 'A REVOLUTION IN HAIR & SKINCARE',
+    tagline: 'SILK WITHOUT COMPROMISE',
     description: 'Liquid-smooth organic satin silk engineered for friction-free nights. Keeps temperatures balanced while preserving hair and skin moisture.',
     price: '₹18,500',
     image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200',

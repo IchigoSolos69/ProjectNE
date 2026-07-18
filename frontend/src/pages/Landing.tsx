@@ -10,7 +10,7 @@ export const Landing: React.FC = () => {
       <HeroBlanket />
 
       {/* 2. Hero Carousel Split Layout */}
-      <div className="hero-container relative z-40 w-full">
+      <div className="hero-container relative z-10 w-full">
         <HeroCarousel />
       </div>
 
