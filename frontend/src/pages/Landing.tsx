@@ -1,6 +1,6 @@
 import React from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
-import { TrendingGrid } from '../components/TrendingGrid';
+import { BlanketRevealSection } from '../components/BlanketRevealSection';
 
 export const Landing: React.FC = () => {
   return (
@@ -8,8 +8,8 @@ export const Landing: React.FC = () => {
       {/* 1. Hero Carousel Split Layout */}
       <HeroCarousel />
 
-      {/* 2. Curator-Selected Trending Bedding Grid */}
-      <TrendingGrid />
+      {/* 2. Blanket Reveal Overlay with Trending Bedding Grid */}
+      <BlanketRevealSection />
     </main>
   );
 };

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import gsap from 'gsap';
-import HeroBlanket from './HeroBlanket';
 
 interface CarouselSlide {
   id: string;
@@ -46,7 +45,6 @@ const slides: CarouselSlide[] = [
 
 export const HeroCarousel: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState(0);
-  const heroContainerRef = useRef<HTMLElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<any>(null);
@@ -101,9 +99,7 @@ export const HeroCarousel: React.FC = () => {
   };
 
   return (
-    <>
-      <HeroBlanket heroRef={heroContainerRef} />
-      <section ref={heroContainerRef} className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
+    <section className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
         
         {/* Left Carousel Image Section (~58%) */}
         <div
@@ -197,8 +193,7 @@ export const HeroCarousel: React.FC = () => {
           </div>
         </div>
       </section>
-    </>
-  );
+    );
 };
 
 export default HeroCarousel;
