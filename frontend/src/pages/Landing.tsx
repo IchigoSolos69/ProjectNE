@@ -9,17 +9,17 @@ export const Landing: React.FC = () => {
   return (
     <main className="flex-1 bg-white relative">
       {/* 1. Hero Carousel Split Layout */}
-      <div ref={heroRef} className="relative z-10 w-full">
+      <div ref={heroRef} className="hero-container relative z-40 w-full">
         <HeroCarousel />
       </div>
 
       {/* 2. Checkered Blanket Section (slides up over the pinned Hero) */}
-      <div className="relative z-30 w-full shadow-2xl">
+      <div className="relative z-50 w-full shadow-2xl">
         <BlanketSection heroRef={heroRef} />
       </div>
 
       {/* 3. Featured Bedding Grid */}
-      <div className="relative z-20 w-full bg-white">
+      <div className="relative z-30 w-full bg-white">
         <TrendingGrid />
       </div>
     </main>

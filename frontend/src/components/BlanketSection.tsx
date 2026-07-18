@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -11,28 +11,24 @@ interface BlanketSectionProps {
 }
 
 export const BlanketSection: React.FC<BlanketSectionProps> = React.memo(({ heroRef }) => {
-  const blanketRef = useRef<HTMLDivElement>(null);
-
   useGSAP(() => {
-    if (!heroRef.current || !blanketRef.current) return;
+    if (!heroRef.current) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return; // Scroll naturally on reduced-motion profiles
 
-    // Pin the Hero container while the Blanket scrolls naturally over it in normal flow
+    // Pin the Hero container, let the Blanket scroll natively over it in normal DOM flow
     ScrollTrigger.create({
       trigger: heroRef.current,
       start: 'top top',
-      end: '+=100%',
       pin: true,
       pinSpacing: false,
       invalidateOnRefresh: true,
     });
-  }, { scope: blanketRef, dependencies: [heroRef] });
+  }, { dependencies: [heroRef] });
 
   return (
     <div
-      ref={blanketRef}
       className="relative w-full flex flex-col items-center justify-center select-none overflow-hidden"
       style={{ height: '100vh', width: '100%' }}
       aria-hidden="true"
