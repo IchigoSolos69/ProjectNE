@@ -1,14 +1,43 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ChevronDown } from 'lucide-react';
 
-export const BlanketSection: React.FC = () => {
+gsap.registerPlugin(ScrollTrigger);
+
+interface BlanketSectionProps {
+  heroRef: React.RefObject<HTMLElement>;
+}
+
+export const BlanketSection: React.FC<BlanketSectionProps> = React.memo(({ heroRef }) => {
+  const blanketRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    if (!heroRef.current || !blanketRef.current) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return; // Scroll naturally on reduced-motion profiles
+
+    // Pin the Hero container while the Blanket scrolls naturally over it in normal flow
+    ScrollTrigger.create({
+      trigger: heroRef.current,
+      start: 'top top',
+      end: '+=100%',
+      pin: true,
+      pinSpacing: false,
+      invalidateOnRefresh: true,
+    });
+  }, { scope: blanketRef, dependencies: [heroRef] });
+
   return (
     <div
+      ref={blanketRef}
       className="relative w-full flex flex-col items-center justify-center select-none overflow-hidden"
       style={{ height: '100vh', width: '100%' }}
       aria-hidden="true"
     >
-      {/* Navy base with checkered fabric texture pattern */}
+      {/* Navy base with premium checkered texture pattern */}
       <div className="absolute inset-0 bg-[#0F2854] z-0" />
       
       {/* Woven diagonal stripe overlay */}
@@ -63,6 +92,6 @@ export const BlanketSection: React.FC = () => {
       <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-gradient-to-r from-[#1C4D8D] via-[#4988C4] to-[#BDE8F5]" />
     </div>
   );
-};
+});
 
 export default BlanketSection;
