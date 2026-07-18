@@ -17,7 +17,7 @@ export const Landing: React.FC = () => {
       </div>
 
       {/* 3. Featured Bedding Grid */}
-      <div className="relative z-20 w-full bg-white">
+      <div id="featured-section" className="relative z-20 w-full bg-white">
         <TrendingGrid />
       </div>
     </main>
