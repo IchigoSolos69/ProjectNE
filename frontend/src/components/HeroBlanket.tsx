@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,14 +65,14 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
           <span className="font-sans text-[11px] tracking-[0.3em] text-[#BDE8F5]/50 uppercase">
             RareComforts · Premium Cotton
           </span>
-          
+
           {/* Main static, elegant typography banner showing the random phrase */}
           <h2 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-[#BDE8F5] font-light tracking-tight leading-tight my-2 max-w-3xl">
             {selectedPhrase}
           </h2>
-          
+
           <div className="w-24 h-[1px] bg-[#BDE8F5]/30 my-2" />
-          
+
           {/* Responsive static metadata layout */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-12 text-[#BDE8F5]/70 font-sans text-xs tracking-[0.2em] uppercase select-none mt-2">
             <div className="flex flex-col items-center gap-1">
@@ -90,16 +89,7 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
             </div>
           </div>
         </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#BDE8F5]/50 font-sans text-[10px] tracking-[0.18em] uppercase">
-          <span>Scroll to reveal</span>
-          <ChevronDown className="w-4 h-4 animate-bounce text-[#BDE8F5]/70" />
-        </div>
       </div>
-
-      {/* Accent edges stripe */}
-      <div className="absolute top-0 left-0 right-0 h-[4px] bg-gradient-to-r from-[#BDE8F5] via-[#4988C4] to-[#1C4D8D] rounded-t-full" />
     </div>,
     document.body
   );
