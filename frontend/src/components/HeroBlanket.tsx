@@ -32,22 +32,20 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
   useGSAP(() => {
     if (!blanketRef.current || !heroNode) return;
 
-    // Start fully covering the viewport
-    gsap.set(blanketRef.current, { yPercent: 0 });
+    // Start fully hidden below the viewport
+    gsap.set(blanketRef.current, { yPercent: 100, opacity: 1 });
 
-    // Sync curtain slide up exactly when the next section hits the top of the viewport
-    ScrollTrigger.create({
-      trigger: heroNode,
-      endTrigger: '#featured-section',
-      start: 'top top',
-      end: 'top top',
-      scrub: true,
-      pin: true,
-      animation: gsap.to(blanketRef.current, {
-        yPercent: -100,
-        ease: 'none',
-      }),
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: heroNode,
+        start: 'bottom bottom',   // begins right as the hero's bottom edge reaches the viewport's bottom edge
+        end: '+=100%',            // exactly one viewport height of scroll
+        scrub: true,
+      },
     });
+
+    tl.to(blanketRef.current, { yPercent: 0, ease: 'none' })   // phase 1: rises up to fully cover
+      .to(blanketRef.current, { yPercent: -100, opacity: 0, ease: 'none' }); // phase 2: continues rising, exits off-screen top & fades
   }, { dependencies: [heroNode] });
 
   return createPortal(
@@ -59,7 +57,7 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
         borderRadius: '48px 48px 0 0',
         backgroundColor: '#0F2854', // Solid Navy Deep background
         backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z' fill='none' stroke='%231C4D8D' stroke-width='1' stroke-opacity='0.12'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%231C4D8D' fill-opacity='0.12'/%3E%3C/svg%3E")`, // Tone-on-tone Royal Blue pattern
-        willChange: 'transform',
+        willChange: 'transform, opacity',
       }}
     >
       {/* Visible Viewport Content Area (Offset below the 120px rounded top) */}
