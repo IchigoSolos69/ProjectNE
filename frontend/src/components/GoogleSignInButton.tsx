@@ -133,10 +133,6 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
       if (pollId) {
         clearInterval(pollId);
       }
-
-      if (!authInProgressRef.current) {
-        window.google?.accounts?.id?.cancel?.();
-      }
     };
   }, []);
 
