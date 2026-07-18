@@ -7,29 +7,36 @@ import { ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-export const HeroBlanket: React.FC = React.memo(() => {
+interface HeroBlanketProps {
+  heroRef: React.RefObject<HTMLElement>;
+}
+
+export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroRef }) => {
   const blanketRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!blanketRef.current) return;
+    if (!blanketRef.current || !heroRef.current) return;
 
-    gsap.to(blanketRef.current, {
-      yPercent: -100,
-      opacity: 0,
-      ease: 'none',
+    // Start fully hidden below the viewport
+    gsap.set(blanketRef.current, { yPercent: 100, opacity: 1 });
+
+    const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: document.body,
-        start: 'top top',
-        end: '+=100%',
+        trigger: heroRef.current,
+        start: 'bottom bottom', // begins right as the hero's bottom edge reaches the viewport's bottom edge
+        end: '+=200%',          // two viewport-heights of scroll for the full cover-then-exit motion
         scrub: true,
       },
     });
-  }, []);
+
+    tl.to(blanketRef.current, { yPercent: 0, ease: 'none' })   // Phase 1: rises up to fully cover
+      .to(blanketRef.current, { yPercent: -100, opacity: 0, ease: 'none' }); // Phase 2: continues rising, exits off-screen top & fades
+  }, { dependencies: [heroRef] });
 
   return createPortal(
     <div
       ref={blanketRef}
-      className="fixed inset-0 z-[100] pointer-events-none flex flex-col items-center justify-center select-none overflow-hidden"
+      className="fixed inset-0 z-30 pointer-events-none flex flex-col items-center justify-center select-none overflow-hidden"
       style={{ willChange: 'transform, opacity' }}
     >
       {/* Navy base with premium checkered texture pattern */}
