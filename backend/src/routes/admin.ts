@@ -175,26 +175,60 @@ router.patch('/products/:id', async (req, res) => {
           throw new Error(`SKU "${skuClash.sku}" is already in use by another product variant.`);
         }
 
-        // Drop current variants
-        await tx.productVariant.deleteMany({
+        // Get existing variants for this product
+        const existingVariants = await tx.productVariant.findMany({
           where: { productId: id },
         });
 
-        // Insert new ones
-        const variantsData = variants.map((v: any) => ({
-          productId: id,
-          size: v.size || null,
-          color: v.color || null,
-          sku: v.sku,
-          price: Number(v.price),
-          discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
-          stock: parseInt(v.stock, 10) || 0,
-          images: v.images || [],
-        }));
+        const incomingIds = variants.map((v: any) => v.id).filter(Boolean);
 
-        await tx.productVariant.createMany({
-          data: variantsData,
-        });
+        // Update existing or create new variants
+        for (const v of variants) {
+          const variantData = {
+            productId: id,
+            size: v.size || null,
+            color: v.color || null,
+            sku: v.sku,
+            price: Number(v.price),
+            discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
+            stock: parseInt(v.stock, 10) || 0,
+            images: v.images || [],
+          };
+
+          if (v.id) {
+            await tx.productVariant.update({
+              where: { id: v.id },
+              data: variantData,
+            });
+          } else {
+            await tx.productVariant.create({
+              data: variantData,
+            });
+          }
+        }
+
+        // Clean up removed variants safely
+        const removedVariants = existingVariants.filter(
+          (ev) => !incomingIds.includes(ev.id)
+        );
+
+        for (const rv of removedVariants) {
+          const hasOrders = await tx.orderItem.findFirst({
+            where: { variantId: rv.id },
+          });
+
+          if (!hasOrders) {
+            await tx.productVariant.delete({
+              where: { id: rv.id },
+            });
+          } else {
+            // Soft-deactivate by zeroing out stock to prevent future sales
+            await tx.productVariant.update({
+              where: { id: rv.id },
+              data: { stock: 0 },
+            });
+          }
+        }
       }
     });
 
