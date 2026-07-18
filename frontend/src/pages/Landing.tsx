@@ -1,21 +1,17 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
-import { BlanketSection } from '../components/BlanketSection';
 import { TrendingGrid } from '../components/TrendingGrid';
+import HeroBlanket from '../components/HeroBlanket';
 
 export const Landing: React.FC = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
-
   return (
     <main className="flex-1 bg-white relative">
-      {/* 1. Hero Carousel Split Layout */}
-      <div ref={heroRef} className="hero-container relative z-40 w-full">
-        <HeroCarousel />
-      </div>
+      {/* 1. Portal-mounted HeroBlanket overlay */}
+      <HeroBlanket />
 
-      {/* 2. Checkered Blanket Section (slides up over the pinned Hero) */}
-      <div className="relative z-50 w-full shadow-2xl">
-        <BlanketSection heroRef={heroRef} />
+      {/* 2. Hero Carousel Split Layout */}
+      <div className="hero-container relative z-40 w-full">
+        <HeroCarousel />
       </div>
 
       {/* 3. Featured Bedding Grid */}

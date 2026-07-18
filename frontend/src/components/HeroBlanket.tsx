@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -6,32 +7,36 @@ import { ChevronDown } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface BlanketSectionProps {
-  heroRef: React.RefObject<HTMLElement>;
-}
+export const HeroBlanket: React.FC = React.memo(() => {
+  const blanketRef = useRef<HTMLDivElement>(null);
 
-export const BlanketSection: React.FC<BlanketSectionProps> = React.memo(({ heroRef }) => {
   useGSAP(() => {
-    if (!heroRef.current) return;
+    if (!blanketRef.current) return;
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduceMotion) return; // Scroll naturally on reduced-motion profiles
+    if (reduceMotion) {
+      gsap.set(blanketRef.current, { display: 'none' });
+      return;
+    }
 
-    // Pin the Hero container, let the Blanket scroll natively over it in normal DOM flow
-    ScrollTrigger.create({
-      trigger: heroRef.current,
-      start: 'top top',
-      pin: true,
-      pinSpacing: false,
-      invalidateOnRefresh: true,
+    gsap.to(blanketRef.current, {
+      yPercent: -100,
+      opacity: 0,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: document.body,
+        start: 'top top',
+        end: '+=100%',
+        scrub: true,
+      },
     });
-  }, { dependencies: [heroRef] });
+  }, []);
 
-  return (
+  return createPortal(
     <div
-      className="relative w-full flex flex-col items-center justify-center select-none overflow-hidden"
-      style={{ height: '100vh', width: '100%' }}
-      aria-hidden="true"
+      ref={blanketRef}
+      className="fixed inset-0 z-[100] pointer-events-none flex flex-col items-center justify-center select-none overflow-hidden"
+      style={{ willChange: 'transform, opacity' }}
     >
       {/* Navy base with premium checkered texture pattern */}
       <div className="absolute inset-0 bg-[#0F2854] z-0" />
@@ -86,8 +91,9 @@ export const BlanketSection: React.FC<BlanketSectionProps> = React.memo(({ heroR
       {/* Accent edges stripes */}
       <div className="absolute top-0 left-0 right-0 h-[4px] bg-gradient-to-r from-[#BDE8F5] via-[#4988C4] to-[#1C4D8D]" />
       <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-gradient-to-r from-[#1C4D8D] via-[#4988C4] to-[#BDE8F5]" />
-    </div>
+    </div>,
+    document.body
   );
 });
 
-export default BlanketSection;
+export default HeroBlanket;
