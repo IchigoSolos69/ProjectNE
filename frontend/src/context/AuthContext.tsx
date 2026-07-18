@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchWishlistIds = async () => {
     try {
-      const data = await apiRequest('/api/wishlist');
+      const data: any = await apiRequest('/api/wishlist');
       if (Array.isArray(data)) {
         setWishlistIds(data.map((item: any) => item.id));
       }
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const fetchMe = async () => {
       try {
-        const data = await apiRequest('/api/auth/me');
+        const data: any = await apiRequest('/api/auth/me');
         if (data && data.user) {
           setUser(data.user);
         }
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
-      const data = await apiRequest('/api/auth/login', {
+      const data: any = await apiRequest('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       });
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const register = async (name: string, email: string, password: string) => {
     setLoading(true);
     try {
-      const data = await apiRequest('/api/auth/register', {
+      const data: any = await apiRequest('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify({ name, email, password }),
       });
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const loginWithGoogle = async (idToken: string) => {
     setLoading(true);
     try {
-      const data = await apiRequest('/api/auth/google', {
+      const data: any = await apiRequest('/api/auth/google', {
         method: 'POST',
         body: JSON.stringify({ idToken }),
       });

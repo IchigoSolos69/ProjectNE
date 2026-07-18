@@ -51,7 +51,7 @@ export const ProductDetail: React.FC = () => {
 
   const fetchReviews = async () => {
     try {
-      const data = await apiRequest(`/api/products/${slug}/reviews`);
+      const data: any = await apiRequest(`/api/products/${slug}/reviews`);
       setReviews(data.reviews || []);
     } catch (err) {
       console.error('Failed to load reviews:', err);

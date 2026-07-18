@@ -163,7 +163,7 @@ export const AdminInventory: React.FC = () => {
       const file = files[0];
 
       // 1. Get Signed details from backend
-      const { signature, timestamp, apiKey, cloudName } = await apiRequest('/api/admin/upload', {
+      const { signature, timestamp, apiKey, cloudName }: any = await apiRequest('/api/admin/upload', {
         method: 'POST',
         body: JSON.stringify({ folder: 'rarecomforts' }),
       });

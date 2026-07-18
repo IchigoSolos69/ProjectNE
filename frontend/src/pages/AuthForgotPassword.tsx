@@ -18,7 +18,7 @@ export const AuthForgotPassword: React.FC = () => {
     setSuccessMsg('');
 
     try {
-      const data = await apiRequest('/api/auth/forgot-password', {
+      const data: any = await apiRequest('/api/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({ email }),
       });

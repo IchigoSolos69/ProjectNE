@@ -136,7 +136,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const applyCoupon = async (code: string) => {
     if (!user) throw new Error('Sign in to apply coupons.');
     try {
-      const data = await apiRequest('/api/cart/apply-coupon', {
+      const data: any = await apiRequest('/api/cart/apply-coupon', {
         method: 'POST',
         body: JSON.stringify({ code }),
       });
@@ -154,7 +154,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   const recalculateCoupon = async (code: string) => {
     try {
-      const data = await apiRequest('/api/cart/apply-coupon', {
+      const data: any = await apiRequest('/api/cart/apply-coupon', {
         method: 'POST',
         body: JSON.stringify({ code }),
       });
