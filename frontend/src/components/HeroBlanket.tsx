@@ -8,21 +8,21 @@ import { ChevronDown } from 'lucide-react';
 gsap.registerPlugin(ScrollTrigger);
 
 interface HeroBlanketProps {
-  heroRef: React.RefObject<HTMLElement>;
+  heroNode: HTMLElement | null;
 }
 
-export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroRef }) => {
+export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode }) => {
   const blanketRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    if (!blanketRef.current || !heroRef.current) return;
+    if (!blanketRef.current || !heroNode) return;
 
     // Start fully hidden below the viewport
     gsap.set(blanketRef.current, { yPercent: 100, opacity: 1 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
-        trigger: heroRef.current,
+        trigger: heroNode,
         start: 'bottom bottom', // begins right as the hero's bottom edge reaches the viewport's bottom edge
         end: '+=200%',          // two viewport-heights of scroll for the full cover-then-exit motion
         scrub: true,
@@ -31,7 +31,7 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroRef }) 
 
     tl.to(blanketRef.current, { yPercent: 0, ease: 'none' })   // Phase 1: rises up to fully cover
       .to(blanketRef.current, { yPercent: -100, opacity: 0, ease: 'none' }); // Phase 2: continues rising, exits off-screen top & fades
-  }, { dependencies: [heroRef] });
+  }, { dependencies: [heroNode] });
 
   return createPortal(
     <div

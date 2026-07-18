@@ -1,18 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { HeroCarousel } from '../components/HeroCarousel';
 import { TrendingGrid } from '../components/TrendingGrid';
 import HeroBlanket from '../components/HeroBlanket';
 
 export const Landing: React.FC = () => {
-  const heroRef = useRef<HTMLDivElement>(null);
+  const [heroNode, setHeroNode] = useState<HTMLDivElement | null>(null);
 
   return (
     <main className="flex-1 bg-white relative">
       {/* 1. Portal-mounted HeroBlanket overlay */}
-      <HeroBlanket heroRef={heroRef} />
+      <HeroBlanket heroNode={heroNode} />
 
       {/* 2. Hero Carousel Split Layout */}
-      <div ref={heroRef} className="hero-container relative z-10 w-full">
+      <div ref={setHeroNode} className="hero-container relative z-10 w-full">
         <HeroCarousel />
       </div>
 
