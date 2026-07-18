@@ -8,8 +8,5 @@
     "dev:frontend": "npm run dev --prefix frontend",
     "build:backend": "npm run build --prefix backend",
     "build:frontend": "npm run build --prefix frontend"
-  },
-  "devDependencies": {
-    "puppeteer-core": "^25.3.0"
   }
 }

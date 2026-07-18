@@ -43,7 +43,7 @@ export const Navbar: React.FC = () => {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-medium ease-smooth ${
+        className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
           isScrolled
             ? 'bg-white/95 backdrop-blur-md border-b border-[#BDE8F5]/30 shadow-sm py-4'
             : 'bg-white/40 backdrop-blur-sm border-b border-transparent py-5'
@@ -54,21 +54,21 @@ export const Navbar: React.FC = () => {
           {/* Logo */}
           <Link
             to="/"
-            className="font-serif text-2xl font-bold tracking-tight text-navy-deep hover:text-royal-blue transition-all duration-fast ease-soft"
+            className="font-serif text-2xl font-bold tracking-tight text-navy-deep hover:text-royal-blue transition-colors"
           >
             RareComforts
           </Link>
- 
+
           {/* Desktop Categories */}
           <nav className="hidden lg:flex items-center gap-8">
             {categories.map((cat) => (
               <Link
                 key={cat.slug}
                 to={`/products?category=${cat.slug}`}
-                className="font-sans text-xs font-semibold tracking-wide text-navy-deep hover:text-royal-blue transition-colors duration-fast ease-soft relative group py-1"
+                className="font-sans text-xs font-semibold tracking-wide text-navy-deep hover:text-royal-blue transition-colors relative group py-1"
               >
                 {cat.name}
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-royal-blue transition-all duration-medium ease-smooth group-hover:w-full" />
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-royal-blue transition-all group-hover:w-full" />
               </Link>
             ))}
           </nav>

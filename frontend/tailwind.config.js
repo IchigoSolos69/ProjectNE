@@ -20,16 +20,6 @@ export default {
       letterSpacing: {
         wide: '0.08em',
       },
-      transitionTimingFunction: {
-        'smooth': 'var(--ease-smooth)',
-        'soft': 'var(--ease-soft)',
-      },
-      transitionDuration: {
-        'instant': 'var(--duration-instant)',
-        'fast': 'var(--duration-fast)',
-        'medium': 'var(--duration-medium)',
-        'slow': 'var(--duration-slow)',
-      },
     },
   },
   plugins: [],

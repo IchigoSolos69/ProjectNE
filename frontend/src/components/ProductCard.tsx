@@ -126,14 +126,14 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
             src={displayImage}
             alt={product.name}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-slow ease-smooth group-hover:scale-[1.06]"
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
           />
 
           {/* Hover Actions Overlay */}
-          <div className="absolute inset-0 bg-navy-deep/20 opacity-0 group-hover:opacity-100 transition-opacity duration-medium ease-smooth flex items-center justify-center gap-3 z-10">
+          <div className="absolute inset-0 bg-navy-deep/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-10">
             <Link
               to={`/products/${product.slug}`}
-              className="p-3 bg-white text-navy-deep rounded-full shadow-lg hover:bg-navy-deep hover:text-white transition-all duration-fast ease-soft active:scale-[0.93]"
+              className="p-3 bg-white text-navy-deep rounded-full shadow-lg hover:bg-navy-deep hover:text-white transition-colors"
               title="View Details"
             >
               <Eye className="w-4 h-4" />
@@ -142,7 +142,7 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
               <button
                 onClick={handleQuickAdd}
                 disabled={loading}
-                className="p-3 bg-white text-navy-deep rounded-full shadow-lg hover:bg-navy-deep hover:text-white transition-all duration-fast ease-soft active:scale-[0.93] disabled:opacity-50"
+                className="p-3 bg-white text-navy-deep rounded-full shadow-lg hover:bg-navy-deep hover:text-white transition-colors disabled:opacity-50"
                 title="Quick Add to Cart"
               >
                 <ShoppingCart className="w-4 h-4" />
@@ -154,12 +154,12 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
         {/* Wishlist Heart Toggle */}
         <button
           onClick={handleWishlistToggle}
-          className="absolute top-2 right-2 z-25 p-2 bg-white/95 backdrop-blur-sm text-navy-deep rounded-full shadow-sm hover:text-red-500 hover:scale-105 active:scale-90 transition-all duration-fast ease-soft"
+          className="absolute top-2 right-2 z-25 p-2 bg-white/95 backdrop-blur-sm text-navy-deep rounded-full shadow-sm hover:text-red-500 transition-all scale-100 active:scale-90"
           title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
         >
           <Heart
-            className={`w-3.5 h-3.5 transition-all duration-fast ease-soft ${
-              isWishlisted ? 'fill-red-500 text-red-500 scale-110' : 'text-navy-deep scale-100'
+            className={`w-3.5 h-3.5 transition-colors ${
+              isWishlisted ? 'fill-red-500 text-red-500' : 'text-navy-deep'
             }`}
           />
         </button>

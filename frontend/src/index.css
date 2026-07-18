@@ -31,25 +31,12 @@ html.lenis body {
   }
 }
 
-/* Custom premium transitions using motion tokens */
+/* Custom premium transitions */
 .transition-luxury {
-  transition: all var(--duration-medium) var(--ease-smooth);
-}
-
-.transition-smooth {
-  transition: all var(--duration-medium) var(--ease-smooth);
-}
-
-.transition-soft {
-  transition: all var(--duration-fast) var(--ease-soft);
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .hover-luxury:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -10px rgba(15, 40, 84, 0.18);
-}
-
-/* Global input field buttery focus transitions */
-input, select, textarea {
-  transition: border-color var(--duration-fast) var(--ease-soft), box-shadow var(--duration-fast) var(--ease-soft), background-color var(--duration-fast) var(--ease-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px -10px rgba(15, 40, 84, 0.15);
 }
