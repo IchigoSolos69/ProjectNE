@@ -18,22 +18,37 @@ import seoRouter from './routes/seo';
 const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+
 const allowedOrigins = [
-  FRONTEND_ORIGIN,
+  'https://rarecomforts.in',
+  'https://www.rarecomforts.in',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
 ];
+if (FRONTEND_ORIGIN) {
+  allowedOrigins.push(FRONTEND_ORIGIN);
+}
 
 // Middleware
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+      const normalizedOrigin = origin.replace(/\/$/, '');
+      const isAllowed = allowedOrigins.some(
+        (allowed) => allowed.replace(/\/$/, '') === normalizedOrigin
+      );
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(null, false);
       }
     },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // required for SameSite=None secure cookies
   })
 );
