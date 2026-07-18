@@ -21,7 +21,7 @@ export const Auth: React.FC = () => {
 
   // ✅ FIX #3: Track Google initialization to prevent multiple initializations
   const googleInitializedRef = useRef(false);
-  const googleCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const googleCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Redirect if already logged in
   useEffect(() => {

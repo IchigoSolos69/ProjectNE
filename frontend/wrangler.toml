@@ -1,2 +1,7 @@
 name = "rarecomforts-frontend"
 pages_build_output_dir = "./dist"
+
+[vars]
+NEXT_PUBLIC_API_URL = "https://projectne.onrender.com/api"
+NEXTAUTH_URL = "https://rarecomforts.in"
+GOOGLE_CLIENT_ID = "58688158374-h8d6rtcs9h14qsvmddpvuidng5hfsl2l.apps.googleusercontent.com"
