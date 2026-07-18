@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import { HelmetProvider } from 'react-helmet-async';
 import Lenis from 'lenis';
 import gsap from 'gsap';
@@ -99,36 +98,33 @@ const NotFound: React.FC = () => (
 );
 
 const rootElement = document.getElementById('root')!;
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder_google_client_id.apps.googleusercontent.com';
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <HelmetProvider>
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <AuthProvider>
-          <CartProvider>
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<AppLayout />}>
-                  <Route index element={<Landing />} />
-                  <Route path="products" element={<ProductListing />} />
-                  <Route path="products/:slug" element={<ProductDetail />} />
-                  <Route path="auth" element={<Auth />} />
-                  <Route path="auth/forgot-password" element={<AuthForgotPassword />} />
-                  <Route path="auth/reset-password" element={<AuthResetPassword />} />
-                  <Route path="account" element={<Account />} />
-                  <Route path="admin/inventory" element={<AdminInventory />} />
-                  <Route path="admin/orders" element={<AdminOrders />} />
-                  <Route path="admin/reviews" element={<AdminReviews />} />
-                  <Route path="admin/coupons" element={<AdminCoupons />} />
-                  <Route path="legal/:policyName" element={<LegalPage />} />
-                  <Route path="*" element={<NotFound />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </CartProvider>
-        </AuthProvider>
-      </GoogleOAuthProvider>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<AppLayout />}>
+                <Route index element={<Landing />} />
+                <Route path="products" element={<ProductListing />} />
+                <Route path="products/:slug" element={<ProductDetail />} />
+                <Route path="auth" element={<Auth />} />
+                <Route path="auth/forgot-password" element={<AuthForgotPassword />} />
+                <Route path="auth/reset-password" element={<AuthResetPassword />} />
+                <Route path="account" element={<Account />} />
+                <Route path="admin/inventory" element={<AdminInventory />} />
+                <Route path="admin/orders" element={<AdminOrders />} />
+                <Route path="admin/reviews" element={<AdminReviews />} />
+                <Route path="admin/coupons" element={<AdminCoupons />} />
+                <Route path="legal/:policyName" element={<LegalPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
     </HelmetProvider>
   </React.StrictMode>
 );

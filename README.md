@@ -63,7 +63,7 @@ CLOUDINARY_API_SECRET="your-secret"
 
 Create a file named `.env` inside the `frontend/` directory (`frontend/.env` or `.env.local`):
 ```env
-VITE_API_BASE_URL="http://localhost:5000"
+VITE_API_URL="http://localhost:5000/api"
 VITE_GOOGLE_CLIENT_ID="xxxx.apps.googleusercontent.com"
 ```
 
@@ -95,7 +95,7 @@ npm run dev:frontend
 - **Build Command**: `npm run build`
 - **Output Directory**: `dist`
 - **Deep Routing**: The `public/_redirects` file is pre-configured to rewrite `/* /index.html 200` to prevent 404 errors on manual page refreshes.
-- Set `VITE_API_BASE_URL` and `VITE_GOOGLE_CLIENT_ID` in Cloudflare's environment variables dashboard.
+- Set `VITE_API_URL="https://projectne.onrender.com/api"` and `VITE_GOOGLE_CLIENT_ID` in Cloudflare's environment variables dashboard (also configured in `frontend/wrangler.toml`).
 
 ### Backend: Render
 - **Build Command**: `npm install && npx prisma generate && npm run build`
