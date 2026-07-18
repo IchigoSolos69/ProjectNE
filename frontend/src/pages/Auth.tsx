@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Mail, Lock, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +19,10 @@ export const Auth: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // ✅ FIX #3: Track Google initialization to prevent multiple initializations
+  const googleInitializedRef = useRef(false);
+  const googleCheckIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -26,13 +30,19 @@ export const Auth: React.FC = () => {
     }
   }, [user, navigate, redirectPath]);
 
-  // Google Identity Services (GIS) button render
+  // ✅ FIX #3: Google Identity Services (GIS) - PREVENT DUPLICATE INITIALIZATION
   useEffect(() => {
     if (user) return;
+    if (googleInitializedRef.current) return; // Already initialized, skip
 
     const initializeGoogleOAuth = () => {
-      if ((window as any).google) {
-        (window as any).google.accounts.id.initialize({
+      if (googleInitializedRef.current) return; // Double-check before init
+      
+      const googleWindow = window as any;
+      if (googleWindow.google?.accounts?.id) {
+        console.log('[Google Auth] Initializing Google Sign-In...');
+        
+        googleWindow.google.accounts.id.initialize({
           client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder_google_client_id.apps.googleusercontent.com',
           callback: async (response: any) => {
             setError('');
@@ -47,26 +57,58 @@ export const Auth: React.FC = () => {
             }
           },
         });
+        
+        googleInitializedRef.current = true;
+        console.log('[Google Auth] Initialization complete');
       }
     };
 
-    // Retry if script tag hasn't loaded yet
-    const checkGSI = setInterval(() => {
-      if ((window as any).google?.accounts?.id) {
-        initializeGoogleOAuth();
-        clearInterval(checkGSI);
-      }
-    }, 200);
+    // Check if Google script is already loaded
+    if ((window as any).google?.accounts?.id) {
+      initializeGoogleOAuth();
+    } else {
+      // Retry checking if script tag hasn't loaded yet (max 10 seconds)
+      let attempts = 0;
+      const maxAttempts = 50; // 50 × 200ms = 10 seconds
+      
+      googleCheckIntervalRef.current = setInterval(() => {
+        attempts++;
+        
+        if ((window as any).google?.accounts?.id) {
+          initializeGoogleOAuth();
+          if (googleCheckIntervalRef.current) {
+            clearInterval(googleCheckIntervalRef.current);
+            googleCheckIntervalRef.current = null;
+          }
+        } else if (attempts >= maxAttempts) {
+          console.warn('[Google Auth] Google Identity Services script failed to load after 10 seconds');
+          if (googleCheckIntervalRef.current) {
+            clearInterval(googleCheckIntervalRef.current);
+            googleCheckIntervalRef.current = null;
+          }
+        }
+      }, 200);
+    }
 
-    return () => clearInterval(checkGSI);
+    // Cleanup function
+    return () => {
+      if (googleCheckIntervalRef.current) {
+        clearInterval(googleCheckIntervalRef.current);
+        googleCheckIntervalRef.current = null;
+      }
+    };
   }, [user, loginWithGoogle, navigate, redirectPath]);
 
   const handleGoogleSignInTrigger = () => {
-    if ((window as any).google?.accounts?.id) {
-      (window as any).google.accounts.id.prompt(); // Shows the Google One Tap prompt
-    } else {
+    const googleWindow = window as any;
+    
+    if (!googleInitializedRef.current || !googleWindow.google?.accounts?.id) {
       alert('Google identity services script is still loading. Please try again in a moment.');
+      return;
     }
+    
+    // Show the Google One Tap prompt
+    googleWindow.google.accounts.id.prompt();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

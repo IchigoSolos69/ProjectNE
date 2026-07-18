@@ -27,14 +27,29 @@ export async function apiRequest<T = any>(
 
   const response = await fetch(url, mergedOptions);
 
+  // ✅ FIX #2: Check content-type BEFORE parsing to prevent HTML/JSON crashes
+  const contentType = response.headers.get('content-type');
+  const isJson = contentType && contentType.includes('application/json');
+
   if (!response.ok) {
     let errorMessage = 'An error occurred on the server.';
-    try {
-      const errorJson = await response.json();
-      errorMessage = errorJson.error || errorJson.message || errorMessage;
-    } catch {
-      // ignore JSON parse error for text/html errors
+    
+    // Only try to parse JSON if content-type is actually JSON
+    if (isJson) {
+      try {
+        const errorJson = await response.json();
+        errorMessage = errorJson.error || errorJson.message || errorMessage;
+      } catch (parseError) {
+        console.error('[API] Failed to parse error response as JSON:', parseError);
+        errorMessage = `Server returned ${response.status} ${response.statusText}`;
+      }
+    } else {
+      // Server returned HTML or plain text (likely 404 or 500 error page)
+      const textResponse = await response.text();
+      console.error('[API] Non-JSON error response:', textResponse.substring(0, 200));
+      errorMessage = `Server error (${response.status}): Expected JSON, received ${contentType || 'unknown'} content`;
     }
+    
     throw new Error(errorMessage);
   }
 
@@ -43,5 +58,16 @@ export async function apiRequest<T = any>(
     return {} as T;
   }
 
-  return response.json();
+  // ✅ FIX #2: Validate JSON response before parsing
+  if (!isJson) {
+    console.error('[API] Success response is not JSON. Content-Type:', contentType);
+    throw new Error(`API returned non-JSON response. Expected application/json, got ${contentType}`);
+  }
+
+  try {
+    return await response.json();
+  } catch (parseError) {
+    console.error('[API] Failed to parse success response as JSON:', parseError);
+    throw new Error('Server returned invalid JSON response');
+  }
 }
