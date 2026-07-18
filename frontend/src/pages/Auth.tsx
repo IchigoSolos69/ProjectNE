@@ -68,7 +68,7 @@ export const Auth: React.FC = () => {
               Welcome to the Royal Standard of Sleep.
             </h2>
             <p className="font-sans text-xs sm:text-sm text-[#BDE8F5]/85 leading-relaxed font-light">
-              Crafting premium Egyptian cotton and satin linens designed for restorative rest and quiet morning luxury.
+              Crafting premium Egyptian cotton and satin bedding designed for restorative rest and quiet morning luxury.
             </p>
           </div>
 

@@ -459,7 +459,7 @@ export const Account: React.FC = () => {
                   onClick={() => navigate('/products')}
                   className="px-5 py-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-semibold rounded-full"
                 >
-                  SHOP LINENS
+                  SHOP BEDDING
                 </button>
               </div>
             ) : (

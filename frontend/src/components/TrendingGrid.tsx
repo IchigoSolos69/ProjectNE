@@ -111,7 +111,7 @@ export const TrendingGrid: React.FC = () => {
             >
               <div className="space-y-2">
                 <p className="text-[9px] font-sans font-bold tracking-widest text-[#BDE8F5] uppercase">RARECOMFORTS</p>
-                <h3 className="font-serif text-lg font-bold">Linen Showcase</h3>
+                <h3 className="font-serif text-lg font-bold">Cotton Showcase</h3>
                 <p className="text-[11px] text-[#BDE8F5]/70 font-sans leading-relaxed">
                   A signature textile creation currently being unrolled for the seasonal catalogs.
                 </p>

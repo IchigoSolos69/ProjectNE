@@ -25,7 +25,7 @@ export const ProductListing: React.FC = () => {
   useEffect(() => {
     const fetchCats = async () => {
       try {
-        const data = await apiRequest('/api/categories');
+        const data = await apiRequest<{ id: string; name: string; slug: string }[]>('/api/categories');
         setCategories(data);
       } catch (err) {
         console.error('Failed to load categories', err);
@@ -49,7 +49,10 @@ export const ProductListing: React.FC = () => {
       if (currentCategory) queryStr += `&category=${currentCategory}`;
       if (currentSort) queryStr += `&sort=${currentSort}`;
 
-      const data = await apiRequest(queryStr);
+      const data = await apiRequest<{
+        products: Product[];
+        pagination: { page: number; pages: number };
+      }>(queryStr);
       if (data && data.products) {
         // Filter price client-side to make interactions smoother
         const filtered = data.products.filter((p: Product) => {
@@ -107,15 +110,18 @@ export const ProductListing: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 mt-[80px] bg-white min-h-screen py-10 px-6 max-w-7xl mx-auto">
+    <main className="flex-1 mt-[80px] bg-[#FAF9F6] min-h-screen py-16 px-8 md:px-12 max-w-7xl mx-auto transition-colors duration-500">
       {/* Page Header */}
-      <div className="border-b border-[#BDE8F5]/30 pb-6 mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+      <div className="border-b border-[#0F2854]/10 pb-8 mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="font-serif text-3xl md:text-4xl text-navy-deep font-bold capitalize">
-            {currentCategory ? currentCategory.replace('-', ' ') : 'Our Closet Collections'}
+          <span className="font-sans text-[10px] tracking-[0.25em] text-[#0F2854]/60 uppercase">
+            RareComforts Collections
+          </span>
+          <h1 className="font-serif text-4xl md:text-5xl text-navy-deep font-normal tracking-tight mt-2 capitalize">
+            {currentCategory ? currentCategory.replace('-', ' ') : 'Pure Cotton Bedding'}
           </h1>
-          <p className="text-xs text-muted-gray tracking-wide mt-1.5 uppercase font-sans">
-            {products.length} {products.length === 1 ? 'Linen Item' : 'Linen Items'} available
+          <p className="text-[10px] text-muted-gray tracking-[0.18em] mt-3 uppercase font-sans">
+            {products.length} {products.length === 1 ? 'Cotton Product' : 'Cotton Products'} available
           </p>
         </div>
 
@@ -123,7 +129,7 @@ export const ProductListing: React.FC = () => {
         <div className="flex gap-4 w-full md:w-auto">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 border border-[#BDE8F5] rounded-full text-xs font-semibold text-navy-deep hover:bg-[#BDE8F5]/25 transition-luxury flex-1 md:flex-none"
+            className="flex items-center justify-center gap-2 px-6 py-3 border border-[#0F2854]/20 rounded-full text-xs font-semibold text-navy-deep hover:bg-[#0F2854]/5 transition-luxury flex-1 md:flex-none"
           >
             <SlidersHorizontal className="w-4 h-4" />
             FILTERS
@@ -133,47 +139,47 @@ export const ProductListing: React.FC = () => {
             <select
               value={currentSort}
               onChange={(e) => handleSortSelect(e.target.value)}
-              className="appearance-none bg-white border border-[#BDE8F5] rounded-full px-5 py-2.5 pr-10 text-xs font-semibold text-navy-deep focus:outline-none focus:border-royal-blue cursor-pointer w-full"
+              className="appearance-none bg-[#FAF9F6] border border-[#0F2854]/20 rounded-full px-6 py-3 pr-12 text-xs font-semibold text-navy-deep focus:outline-none focus:border-navy-deep cursor-pointer w-full tracking-wider"
             >
               <option value="newest">Newest First</option>
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
               <option value="trending">Most Popular</option>
             </select>
-            <ArrowUpDown className="w-3.5 h-3.5 text-navy-deep absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ArrowUpDown className="w-3.5 h-3.5 text-navy-deep absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-10 items-start">
+      <div className="flex flex-col lg:flex-row gap-16 items-start">
         {/* Left Sidebar Filter Section */}
         <aside
-          className={`w-full lg:w-64 space-y-8 flex-shrink-0 lg:block ${
+          className={`w-full lg:w-64 space-y-10 flex-shrink-0 lg:block ${
             showFilters ? 'block' : 'hidden'
           }`}
         >
           {/* Categories select list */}
-          <div className="space-y-4">
-            <h3 className="font-sans text-xs font-bold tracking-widest text-navy-deep uppercase">Categories</h3>
-            <div className="flex flex-wrap lg:flex-col gap-2">
+          <div className="space-y-5">
+            <h3 className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#0F2854]/80 uppercase border-b border-[#0F2854]/10 pb-2">Categories</h3>
+            <div className="flex flex-wrap lg:flex-col gap-2.5">
               <button
                 onClick={() => handleCategorySelect('')}
-                className={`px-4 py-2 text-left text-xs font-medium rounded-full transition-luxury ${
+                className={`px-5 py-2.5 text-left text-xs font-medium tracking-wider uppercase rounded-full transition-luxury ${
                   currentCategory === ''
                     ? 'bg-navy-deep text-white shadow-sm'
-                    : 'bg-[#BDE8F5]/10 text-navy-deep hover:bg-[#BDE8F5]/30'
+                    : 'bg-[#0F2854]/5 text-navy-deep hover:bg-[#0F2854]/10'
                 }`}
               >
-                All Linens
+                All Collections
               </button>
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => handleCategorySelect(cat.slug)}
-                  className={`px-4 py-2 text-left text-xs font-medium rounded-full transition-luxury ${
+                  className={`px-5 py-2.5 text-left text-xs font-medium tracking-wider uppercase rounded-full transition-luxury ${
                     currentCategory === cat.slug
                       ? 'bg-navy-deep text-white shadow-sm'
-                      : 'bg-[#BDE8F5]/10 text-navy-deep hover:bg-[#BDE8F5]/30'
+                      : 'bg-[#0F2854]/5 text-navy-deep hover:bg-[#0F2854]/10'
                   }`}
                 >
                   {cat.name}
@@ -183,9 +189,9 @@ export const ProductListing: React.FC = () => {
           </div>
 
           {/* Pricing range filter */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-baseline">
-              <h3 className="font-sans text-xs font-bold tracking-widest text-navy-deep uppercase">Max Price</h3>
+          <div className="space-y-5">
+            <div className="flex justify-between items-baseline border-b border-[#0F2854]/10 pb-2">
+              <h3 className="font-sans text-[10px] font-bold tracking-[0.2em] text-[#0F2854]/80 uppercase">Max Price</h3>
               <span className="text-xs font-bold text-royal-blue">₹{priceMax.toLocaleString('en-IN')}</span>
             </div>
             <input
@@ -195,9 +201,9 @@ export const ProductListing: React.FC = () => {
               step="500"
               value={priceMax}
               onChange={(e) => setPriceMax(Number(e.target.value))}
-              className="w-full h-1 bg-[#BDE8F5] rounded-lg appearance-none cursor-pointer accent-royal-blue"
+              className="w-full h-1 bg-[#0F2854]/10 rounded-lg appearance-none cursor-pointer accent-navy-deep"
             />
-            <div className="flex justify-between text-[10px] text-muted-gray font-semibold">
+            <div className="flex justify-between text-[10px] text-muted-gray font-semibold tracking-wider">
               <span>₹1,000</span>
               <span>₹30,000</span>
             </div>
@@ -206,7 +212,7 @@ export const ProductListing: React.FC = () => {
           {/* Clear Filters Button */}
           <button
             onClick={clearAllFilters}
-            className="w-full py-2.5 border border-dashed border-[#BDE8F5] text-navy-deep hover:border-royal-blue hover:text-royal-blue transition-colors text-xs font-semibold uppercase tracking-wider rounded-md"
+            className="w-full py-3 border border-dashed border-[#0F2854]/35 text-navy-deep hover:border-navy-deep hover:text-navy-deep transition-colors text-xs font-semibold uppercase tracking-[0.15em] rounded-none"
           >
             Clear Active Filters
           </button>
@@ -216,35 +222,35 @@ export const ProductListing: React.FC = () => {
         <div className="flex-1 w-full">
           {loading ? (
             /* Skeleton Loading Grid */
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-24">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="flex flex-col space-y-4 border border-gray-50 p-4 rounded">
-                  <div className="aspect-[4/5] bg-gray-100 animate-pulse rounded-md" />
-                  <div className="h-4 bg-gray-100 rounded w-2/3 animate-pulse" />
-                  <div className="h-3 bg-gray-50 rounded w-1/2 animate-pulse" />
-                  <div className="h-4 bg-gray-100 rounded w-1/3 animate-pulse" />
+                <div key={i} className="flex flex-col space-y-4">
+                  <div className="aspect-[3/4] bg-gray-100 animate-pulse rounded-none" />
+                  <div className="h-5 bg-gray-100 rounded w-2/3 animate-pulse" />
+                  <div className="h-4 bg-gray-50 rounded w-1/2 animate-pulse" />
+                  <div className="h-5 bg-gray-100 rounded w-1/3 animate-pulse" />
                 </div>
               ))}
             </div>
           ) : products.length === 0 ? (
             /* Empty State */
-            <div className="py-24 text-center space-y-4 border border-dashed border-[#BDE8F5]/30 rounded-lg">
-              <span className="text-3xl block">🏺</span>
-              <h2 className="font-serif text-2xl text-navy-deep font-semibold">Collection Curating</h2>
-              <p className="text-muted-gray text-sm max-w-sm mx-auto leading-relaxed">
-                This beautiful segment of our collections is currently being curated. Check back soon for hand-crafted releases.
+            <div className="py-32 text-center space-y-6 border border-dashed border-[#0F2854]/20 rounded-none bg-transparent">
+              <span className="text-4xl block">🏺</span>
+              <h2 className="font-serif text-2xl text-navy-deep font-normal tracking-tight">Collection Curating</h2>
+              <p className="text-muted-gray text-sm max-w-sm mx-auto leading-relaxed font-light">
+                This beautiful segment of our pure cotton collections is currently being curated. Check back soon for hand-crafted releases.
               </p>
               <button
                 onClick={clearAllFilters}
-                className="mt-2 px-6 py-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-semibold rounded-full hover:bg-royal-blue transition-luxury"
+                className="mt-2 px-8 py-3 bg-navy-deep text-white font-sans text-xs uppercase tracking-[0.2em] font-semibold rounded-full hover:bg-royal-blue transition-luxury"
               >
                 SHOW ALL PRODUCTS
               </button>
             </div>
           ) : (
             /* Actual Grid */
-            <div className="space-y-12">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="space-y-20">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-16 gap-y-24">
                 {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -252,13 +258,13 @@ export const ProductListing: React.FC = () => {
 
               {/* Infinite Scroll Load More Button */}
               {hasMore && (
-                <div className="text-center pt-4">
+                <div className="text-center pt-8">
                   <button
                     onClick={() => setPage((prev) => prev + 1)}
                     disabled={loadingMore}
-                    className="px-8 py-3 border border-royal-blue text-royal-blue font-sans text-xs uppercase tracking-wider font-semibold hover:bg-royal-blue hover:text-white transition-luxury rounded-full disabled:opacity-40"
+                    className="px-10 py-3.5 border border-[#0F2854] text-navy-deep font-sans text-xs uppercase tracking-[0.2em] font-semibold hover:bg-navy-deep hover:text-white transition-luxury rounded-full disabled:opacity-40"
                   >
-                    {loadingMore ? 'UNROLING ITEMS...' : 'LOAD MORE COLLECTIONS'}
+                    {loadingMore ? 'UNROLLING ITEMS...' : 'LOAD MORE COLLECTIONS'}
                   </button>
                 </div>
               )}

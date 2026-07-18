@@ -25,12 +25,12 @@ const slides: CarouselSlide[] = [
   },
   {
     id: '2',
-    name: 'Imperial Satin Linens Collection',
+    name: 'Imperial Satin Cotton Collection',
     tagline: 'SILK WITHOUT COMPROMISE',
     description: 'Liquid-smooth organic satin silk engineered for friction-free nights. Keeps temperatures balanced while preserving hair and skin moisture.',
     price: '₹18,500',
     image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200',
-    link: '/products/imperial-satin-linens-collection',
+    link: '/products/imperial-satin-cotton-collection',
   },
   {
     id: '3',

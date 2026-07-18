@@ -34,10 +34,15 @@ gsap.registerPlugin(ScrollTrigger);
 // Global Layout wrapper containing header/footer persistent frames
 const AppLayout: React.FC = () => {
   const location = useLocation();
+  const lenisRef = React.useRef<Lenis | null>(null);
 
-  // Scroll to top on route change
+  // Scroll to top on route change via Lenis
   useEffect(() => {
-    window.scrollTo(0, 0);
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
   }, [location.pathname]);
 
   // Connect Lenis Smooth Scroll to GSAP Ticker
@@ -49,6 +54,7 @@ const AppLayout: React.FC = () => {
       gestureOrientation: 'vertical',
       smoothWheel: true,
     });
+    lenisRef.current = lenis;
 
     // Update ScrollTrigger on scroll ticks
     lenis.on('scroll', ScrollTrigger.update);
@@ -62,6 +68,7 @@ const AppLayout: React.FC = () => {
 
     return () => {
       lenis.destroy();
+      lenisRef.current = null;
       gsap.ticker.remove(gsapTick);
     };
   }, []);

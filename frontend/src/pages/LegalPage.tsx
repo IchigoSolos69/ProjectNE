@@ -81,7 +81,7 @@ export const LegalPage: React.FC = () => {
     'shipping-policy': {
       title: 'Shipping Policy',
       icon: <Truck className="w-8 h-8 text-royal-blue" />,
-      seoDesc: 'RareComforts shipping policy. Details on complimentary white-glove linen shipping across India and courier tracking expectations.',
+      seoDesc: 'RareComforts shipping policy. Details on complimentary white-glove bedding shipping across India and courier tracking expectations.',
       content: (
         <div className="space-y-6 text-sm text-muted-gray leading-relaxed font-sans">
           <p>
@@ -105,14 +105,14 @@ export const LegalPage: React.FC = () => {
     'returns-and-refunds': {
       title: 'Returns & Refunds Policy',
       icon: <RotateCcw className="w-8 h-8 text-royal-blue" />,
-      seoDesc: 'RareComforts returns rules. Linen hygiene restrictions, unopened product guidelines, and 10-day replacement replacement periods.',
+      seoDesc: 'RareComforts returns rules. Bedding hygiene restrictions, unopened product guidelines, and 10-day replacement replacement periods.',
       content: (
         <div className="space-y-6 text-sm text-muted-gray leading-relaxed font-sans">
           <p>
-            Due to strict sanitation and hygiene standards surrounding premium bedding textiles, <strong>RareComforts cannot accept returns on sheets, linens, or comforters that have been unrolled, opened, or washed.</strong>
+            Due to strict sanitation and hygiene standards surrounding premium bedding textiles, <strong>RareComforts cannot accept returns on sheets, bedding, or comforters that have been unrolled, opened, or washed.</strong>
           </p>
           <div className="bg-amber-50 border border-amber-200 p-4 rounded text-xs text-amber-800 leading-normal">
-            <strong>Hygiene Warning:</strong> Bedding materials directly touch skin during rest. We maintain a strict guarantee that every linen delivered is brand new and has never been opened. If you open the packaging seal, the item becomes ineligible for return.
+            <strong>Hygiene Warning:</strong> Bedding materials directly touch skin during rest. We maintain a strict guarantee that every item delivered is brand new and has never been opened. If you open the packaging seal, the item becomes ineligible for return.
           </div>
           <div>
             <h3 className="text-navy-deep font-bold font-serif text-base mb-2">1. Eligible Returns</h3>

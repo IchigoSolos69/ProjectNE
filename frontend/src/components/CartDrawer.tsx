@@ -202,7 +202,7 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                 )}
                 <ShoppingBag className="w-5 h-5 text-navy-deep" />
                 <h3 className="font-serif text-lg font-semibold text-navy-deep">
-                  {step === 1 ? 'Your Linen Closet' : 'Shipping & Review'}
+                  {step === 1 ? 'Your Bedding Closet' : 'Shipping & Review'}
                 </h3>
                 <span className="bg-navy-deep text-white text-xs px-2 py-0.5 rounded-full font-sans">
                   {cartCount}

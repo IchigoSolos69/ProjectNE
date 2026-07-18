@@ -291,7 +291,7 @@ export const AdminInventory: React.FC = () => {
       {/* Dashboard header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#BDE8F5]/30 pb-6">
         <div>
-          <h1 className="font-serif text-3xl font-bold text-navy-deep">Linen Inventory Dashboard</h1>
+          <h1 className="font-serif text-3xl font-bold text-navy-deep">Showroom Inventory Dashboard</h1>
           <p className="text-xs text-muted-gray mt-1 uppercase tracking-wide">
             Manage your digital showroom showroom variants, stocks, and coupons configs
           </p>
@@ -301,7 +301,7 @@ export const AdminInventory: React.FC = () => {
           onClick={handleOpenAdd}
           className="flex items-center gap-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-bold px-6 py-3 rounded-full hover:bg-royal-blue transition-luxury shadow-md"
         >
-          <Plus className="w-4 h-4" /> ADD NEW LINEN
+          <Plus className="w-4 h-4" /> ADD NEW SHOWCASE
         </button>
       </div>
 
@@ -345,7 +345,7 @@ export const AdminInventory: React.FC = () => {
           <span className="text-3xl block">🏺</span>
           <h3 className="font-serif text-lg font-semibold text-navy-deep">No matching items</h3>
           <p className="text-xs text-muted-gray max-w-xs mx-auto">
-            Try adjusting your search keywords, or add a new linen to populate the lists.
+            Try adjusting your search keywords, or add a new showcase item to populate the lists.
           </p>
         </div>
       ) : (
@@ -354,7 +354,7 @@ export const AdminInventory: React.FC = () => {
             <thead>
               <tr className="bg-[#F5FAFD]/60 text-navy-deep text-[11px] font-bold tracking-wider uppercase border-b border-[#BDE8F5]/20">
                 <th className="p-4">Item Image</th>
-                <th className="p-4">Linen Title</th>
+                <th className="p-4">Product Title</th>
                 <th className="p-4">Category</th>
                 <th className="p-4">Lowest Price</th>
                 <th className="p-4">Total Stock</th>
@@ -425,14 +425,14 @@ export const AdminInventory: React.FC = () => {
                         <button
                           onClick={() => handleOpenEdit(prod)}
                           className="p-2 border border-[#BDE8F5] hover:bg-royal-blue hover:text-white rounded-full text-navy-deep transition-all"
-                          title="Edit Linen"
+                          title="Edit Product"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(prod.id)}
                           className="p-2 border border-red-200 hover:bg-red-500 hover:text-white rounded-full text-red-600 transition-all"
-                          title="Delete Linen"
+                          title="Delete Product"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -454,7 +454,7 @@ export const AdminInventory: React.FC = () => {
             {/* Modal Header */}
             <div className="p-5 border-b border-[#BDE8F5]/30 flex justify-between items-center bg-[#F5FAFD]/45">
               <h2 className="font-serif text-xl font-bold text-navy-deep">
-                {editingProduct ? 'Configure Existing Linen' : 'Add Custom Showcase Linen'}
+                {editingProduct ? 'Configure Existing Bedding' : 'Add Custom Showcase Bedding'}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -732,7 +732,7 @@ export const AdminInventory: React.FC = () => {
                   className="px-6 py-2.5 bg-navy-deep text-white hover:bg-royal-blue rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-luxury"
                 >
                   <Check className="w-4 h-4" />
-                  {editingProduct ? 'SAVE CHANGES' : 'CREATE LINEN'}
+                  {editingProduct ? 'SAVE CHANGES' : 'CREATE PRODUCT'}
                 </button>
               </div>
 

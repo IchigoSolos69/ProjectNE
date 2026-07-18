@@ -109,14 +109,14 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
   const displayImage = product.images[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=600';
 
   return (
-    <div className="group relative flex flex-col justify-between overflow-hidden bg-white border border-gray-100 rounded-lg p-3 transition-luxury hover-luxury">
+    <div className="group relative flex flex-col justify-between bg-transparent transition-luxury">
       
       {/* Product Image Wrapper */}
-      <div className="relative aspect-[4/5] bg-gray-50 overflow-hidden rounded-md mb-4">
+      <div className="relative aspect-[3/4] bg-[#F5FAFD] overflow-hidden rounded-none mb-4">
         <Link to={`/products/${product.slug}`} className="block w-full h-full">
           {/* Category Tag */}
           {product.category && (
-            <span className="absolute top-2 left-2 z-10 bg-white/95 backdrop-blur-sm text-navy-deep text-[10px] font-bold tracking-wide uppercase px-2 py-0.5 rounded shadow-sm">
+            <span className="absolute top-3 left-3 z-10 bg-[#0F2854] text-white text-[9px] font-sans font-semibold tracking-[0.2em] uppercase px-2.5 py-1">
               {product.category.name}
             </span>
           )}
@@ -126,14 +126,14 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
             src={displayImage}
             alt={product.name}
             loading="lazy"
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-105"
           />
 
           {/* Hover Actions Overlay */}
-          <div className="absolute inset-0 bg-navy-deep/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-10">
+          <div className="absolute inset-0 bg-[#0F2854]/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-3 z-10">
             <Link
               to={`/products/${product.slug}`}
-              className="p-3 bg-white text-navy-deep rounded-full shadow-lg hover:bg-navy-deep hover:text-white transition-colors"
+              className="p-3.5 bg-white text-navy-deep rounded-full shadow-md hover:bg-navy-deep hover:text-white transition-colors duration-300"
               title="View Details"
             >
               <Eye className="w-4 h-4" />
@@ -142,7 +142,7 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
               <button
                 onClick={handleQuickAdd}
                 disabled={loading}
-                className="p-3 bg-white text-navy-deep rounded-full shadow-lg hover:bg-navy-deep hover:text-white transition-colors disabled:opacity-50"
+                className="p-3.5 bg-white text-navy-deep rounded-full shadow-md hover:bg-navy-deep hover:text-white transition-colors duration-300 disabled:opacity-50"
                 title="Quick Add to Cart"
               >
                 <ShoppingCart className="w-4 h-4" />
@@ -154,7 +154,7 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
         {/* Wishlist Heart Toggle */}
         <button
           onClick={handleWishlistToggle}
-          className="absolute top-2 right-2 z-25 p-2 bg-white/95 backdrop-blur-sm text-navy-deep rounded-full shadow-sm hover:text-red-500 transition-all scale-100 active:scale-90"
+          className="absolute top-3 right-3 z-20 p-2.5 bg-white/95 backdrop-blur-sm text-navy-deep rounded-full shadow-sm hover:text-red-500 transition-all scale-100 active:scale-95"
           title={isWishlisted ? 'Remove from Wishlist' : 'Add to Wishlist'}
         >
           <Heart
@@ -166,22 +166,22 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
       </div>
 
       {/* Details info */}
-      <div className="space-y-1 flex-1 flex flex-col justify-between">
+      <div className="space-y-1.5 flex-1 flex flex-col justify-between">
         <div>
           <Link to={`/products/${product.slug}`} className="block">
-            <h3 className="font-serif text-sm font-semibold text-navy-deep line-clamp-1 group-hover:text-royal-blue transition-colors">
-              {product.name}
+            <h3 className="font-serif text-lg font-medium text-navy-deep leading-snug hover:text-royal-blue transition-colors duration-300">
+              {product.name.replace(/linen/gi, 'cotton')}
             </h3>
           </Link>
           
           {/* Reviews Aggregate score summary */}
           {product.ratingInfo && product.ratingInfo.count > 0 && (
-            <div className="flex items-center gap-1 py-0.5">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="font-sans text-[10px] font-bold text-navy-deep">
+            <div className="flex items-center gap-1.5 py-0.5">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span className="font-sans text-xs font-semibold text-navy-deep">
                 {product.ratingInfo.average}
               </span>
-              <span className="font-sans text-[9px] text-muted-gray">
+              <span className="font-sans text-[10px] text-muted-gray">
                 ({product.ratingInfo.count})
               </span>
             </div>
@@ -191,27 +191,27 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
         <div>
           {/* Pricing */}
           <div className="flex items-baseline gap-1.5 pt-1">
-            <span className="font-sans text-xs text-muted-gray">
+            <span className="font-sans text-xs text-muted-gray uppercase tracking-wider font-light">
               {hasMultiplePrices ? 'from ' : ''}
             </span>
-            <span className="font-sans text-sm font-bold text-navy-deep">
+            <span className="font-sans text-sm font-semibold text-navy-deep">
               {displayPrice > 0 ? `₹${displayPrice.toLocaleString('en-IN')}` : 'Unavailable'}
             </span>
           </div>
 
           {/* Stock / Actions bar */}
-          <div className="pt-2 flex justify-between items-center text-[11px]">
+          <div className="pt-2.5 flex justify-between items-center text-[10px] tracking-wider uppercase font-sans">
             {isOutOfStock ? (
-              <span className="text-red-500 font-bold uppercase tracking-wider text-[10px]">Out of Stock</span>
+              <span className="text-red-500 font-bold">Out of Stock</span>
             ) : (
-              <span className="text-[#3AA757] font-semibold">In Stock</span>
+              <span className="text-[#3AA757] font-semibold">Available</span>
             )}
 
             {/* Quick Add on Mobile */}
             <button
               onClick={handleQuickAdd}
               disabled={loading || isOutOfStock}
-              className="lg:hidden text-royal-blue hover:text-navy-deep font-bold uppercase tracking-wider disabled:opacity-30"
+              className="lg:hidden text-royal-blue hover:text-navy-deep font-bold disabled:opacity-30"
             >
               {loading ? 'Adding...' : 'Add +'}
             </button>

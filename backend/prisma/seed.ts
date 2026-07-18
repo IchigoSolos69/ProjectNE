@@ -101,9 +101,9 @@ async function main() {
       }
     },
     {
-      name: 'Imperial Satin Linens Collection',
-      slug: 'imperial-satin-linens-collection',
-      description: 'Lustrous, liquid-smooth satin linens that glide over skin. Crafted to minimize friction and lock in overnight moisture, offering a sensory sleep experience.',
+      name: 'Imperial Satin Cotton Collection',
+      slug: 'imperial-satin-cotton-collection',
+      description: 'Lustrous, liquid-smooth satin cotton that glides over skin. Crafted to minimize friction and lock in overnight moisture, offering a sensory sleep experience.',
       images: [
         'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200',
         'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=1200'
@@ -167,9 +167,9 @@ async function main() {
       }
     },
     {
-      name: 'Minimalist Raw Linen Cushion Covers',
-      slug: 'minimalist-raw-linen-cushion-covers',
-      description: 'Stonewashed linen cushion covers that embody rustic luxury. Highly durable, textured, and naturally hypoallergenic.',
+      name: 'Minimalist Raw Cotton Cushion Covers',
+      slug: 'minimalist-raw-cotton-cushion-covers',
+      description: 'Stonewashed cotton cushion covers that embody rustic luxury. Highly durable, textured, and naturally hypoallergenic.',
       images: [
         'https://images.unsplash.com/photo-1579656381226-5fc0f0100c3b?q=80&w=1200'
       ],

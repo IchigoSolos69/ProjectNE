@@ -128,7 +128,7 @@ function wrapWithBrandLayout(title: string, bodyContent: string): string {
           </div>
           <div class="footer">
             <p>&copy; 2026 RareComforts Inc. All rights reserved.</p>
-            <p>Egyptian cotton and satin linens designed for restorative sleep.</p>
+            <p>Egyptian cotton and satin bedding designed for restorative sleep.</p>
           </div>
         </div>
       </body>
@@ -211,7 +211,7 @@ export const emailService = {
   sendOrderDeliveredEmail: async (email: string, order: any, name: string) => {
     const orderRef = order.id.slice(-8).toUpperCase();
     const html = wrapWithBrandLayout(
-      'Your Linens Have Arrived',
+      'Your Bedding Has Arrived',
       `
       <p>Dear ${name},</p>
       <p>Your order #${orderRef} has been delivered. We hope your new premium bedding provides the weight of real rest.</p>

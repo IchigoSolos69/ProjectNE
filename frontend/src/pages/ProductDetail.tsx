@@ -190,9 +190,9 @@ export const ProductDetail: React.FC = () => {
     return (
       <main className="flex-1 mt-[80px] py-24 text-center space-y-4">
         <span className="text-3xl">🏺</span>
-        <h2 className="font-serif text-2xl font-semibold text-navy-deep">{errorMsg || 'Linen details unavailable'}</h2>
+        <h2 className="font-serif text-2xl font-semibold text-navy-deep">{errorMsg || 'Product details unavailable'}</h2>
         <Link to="/products" className="inline-block px-6 py-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide rounded-full">
-          BACK TO LINENS
+          BACK TO COLLECTIONS
         </Link>
       </main>
     );
@@ -297,7 +297,7 @@ export const ProductDetail: React.FC = () => {
               </span>
             )}
             <h1 className="font-serif text-3xl md:text-4xl text-navy-deep font-bold leading-tight">
-              {product.name}
+              {product.name.replace(/linen/gi, 'cotton')}
             </h1>
             
             {/* Reviews aggregate score */}
@@ -336,7 +336,7 @@ export const ProductDetail: React.FC = () => {
           </div>
 
           <p className="text-sm text-muted-gray leading-relaxed font-sans">
-            {product.description}
+            {product.description.replace(/linen/gi, 'cotton')}
           </p>
 
           {/* Variant Selection Filters */}
@@ -442,7 +442,7 @@ export const ProductDetail: React.FC = () => {
                   'ADDING TO CLOSET...'
                 ) : (
                   <>
-                    <ShoppingBag className="w-4 h-4" /> ADD TO LINEN CLOSET
+                    <ShoppingBag className="w-4 h-4" /> ADD TO BEDDING CLOSET
                   </>
                 )}
               </button>
@@ -477,7 +477,7 @@ export const ProductDetail: React.FC = () => {
 
           {/* List of reviews */}
           {reviews.length === 0 ? (
-            <p className="text-center text-sm text-muted-gray font-sans py-4">No reviews have been written for this linen yet. Sleepers who purchase can leave their ratings below.</p>
+            <p className="text-center text-sm text-muted-gray font-sans py-4">No reviews have been written for this product yet. Sleepers who purchase can leave their ratings below.</p>
           ) : (
             <div className="space-y-6">
               {reviews.map((rev) => (
