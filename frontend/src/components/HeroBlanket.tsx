@@ -18,13 +18,13 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
     if (!blanketRef.current || !heroNode) return;
 
     // Start fully hidden below the viewport
-    gsap.set(blanketRef.current, { yPercent: 100 });
+    gsap.set(blanketRef.current, { yPercent: 100, opacity: 1 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: heroNode,
         start: 'bottom bottom',   // begins right as the hero's bottom edge reaches the viewport's bottom edge
-        end: '+=200%',            // two viewport-heights of scroll for the full cover-then-exit motion
+        end: '+=100%',            // exactly one viewport height of scroll
         scrub: true,
       },
     });
@@ -52,32 +52,32 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
         style={{
           height: 'calc(100vh + 120px)',
           borderRadius: '48px 48px 0 0',
-          backgroundColor: '#BDE8F5',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z' fill='none' stroke='%230F2854' stroke-width='1' stroke-opacity='0.08'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%230F2854' fill-opacity='0.08'/%3E%3C/svg%3E")`,
+          backgroundColor: '#0F2854', // Navy Deep
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z' fill='none' stroke='%231C4D8D' stroke-width='1' stroke-opacity='0.12'/%3E%3Ccircle cx='30' cy='30' r='3' fill='%231C4D8D' fill-opacity='0.12'/%3E%3C/svg%3E")`, // Tone-on-tone Royal Blue at 12% opacity
           willChange: 'transform, opacity',
-          boxShadow: '0 -20px 40px -10px rgba(15, 40, 84, 0.15)',
+          boxShadow: '0 -20px 40px -10px rgba(15, 40, 84, 0.3)',
         }}
       >
         {/* Visible Viewport Content Area (Offset below the 120px rounded top) */}
         <div className="absolute inset-x-0 bottom-0 top-[120px] flex flex-col items-center justify-center gap-8">
           
           {/* Marquee Ticker */}
-          <div className="w-full overflow-hidden whitespace-nowrap py-6 border-y border-[#0F2854]/15">
-            <div className="animate-marquee-loop whitespace-nowrap font-serif font-bold text-[#0F2854] text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-widest uppercase">
+          <div className="w-full overflow-hidden whitespace-nowrap py-6 border-y border-[#BDE8F5]/15">
+            <div className="animate-marquee-loop whitespace-nowrap font-serif font-bold text-[#BDE8F5] text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-widest uppercase">
               EXQUISITELY WOVEN &nbsp;&nbsp;•&nbsp;&nbsp; ETHICALLY SOURCED &nbsp;&nbsp;•&nbsp;&nbsp;
               EXQUISITELY WOVEN &nbsp;&nbsp;•&nbsp;&nbsp; ETHICALLY SOURCED &nbsp;&nbsp;•&nbsp;&nbsp;
             </div>
           </div>
 
           {/* Small Branding Badge */}
-          <span className="font-sans text-[10px] tracking-[0.25em] text-[#0F2854]/60 uppercase">
+          <span className="font-sans text-[10px] tracking-[0.25em] text-[#BDE8F5]/50 uppercase">
             RareComforts · Premium Bedding
           </span>
 
           {/* Scroll Indicator */}
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#0F2854]/60 font-sans text-[10px] tracking-[0.18em] uppercase">
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#BDE8F5]/50 font-sans text-[10px] tracking-[0.18em] uppercase">
             <span>Scroll to reveal</span>
-            <ChevronDown className="w-4 h-4 animate-bounce text-[#0F2854]/80" />
+            <ChevronDown className="w-4 h-4 animate-bounce text-[#BDE8F5]/70" />
           </div>
         </div>
 
