@@ -4,6 +4,12 @@ import { requireAuth, AuthenticatedRequest } from '../middleware/requireAuth';
 
 const router = Router();
 
+// In-memory cache to mitigate regional database latency and N+1 query compiles
+export const productsCache = new Map<string, { data: any; expiry: number }>();
+export function clearProductsCache() {
+  productsCache.clear();
+}
+
 // Helper to get active price of a variant (considers discount)
 function getVariantActivePrice(variant: any): number {
   return variant.discountPrice ? Number(variant.discountPrice) : Number(variant.price);
@@ -25,6 +31,12 @@ router.get('/categories', async (req, res) => {
 // GET /api/products - Lists products with variants and sorting
 router.get('/products', async (req, res) => {
   try {
+    const cacheKey = JSON.stringify(req.query);
+    const cached = productsCache.get(cacheKey);
+    if (cached && cached.expiry > Date.now()) {
+      return res.status(200).json(cached.data);
+    }
+
     const { category, trending, sort, page = '1', limit = '12' } = req.query;
 
     const pageNum = parseInt(page as string, 10) || 1;
@@ -95,7 +107,7 @@ router.get('/products', async (req, res) => {
     const totalCount = formattedProducts.length;
     const paginatedProducts = formattedProducts.slice(skip, skip + limitNum);
 
-    return res.status(200).json({
+    const responsePayload = {
       products: paginatedProducts,
       pagination: {
         total: totalCount,
@@ -103,7 +115,12 @@ router.get('/products', async (req, res) => {
         limit: limitNum,
         pages: Math.ceil(totalCount / limitNum),
       },
-    });
+    };
+
+    // Cache responses for 60 seconds (60000ms)
+    productsCache.set(cacheKey, { data: responsePayload, expiry: Date.now() + 60000 });
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.error('Error fetching products:', error);
     return res.status(500).json({ error: 'Failed to retrieve products.' });
@@ -293,7 +310,14 @@ router.post('/products/:slug/reviews', requireAuth, async (req: AuthenticatedReq
         isVerifiedPurchase,
         status: 'PENDING', // Default to admin moderation queue
       },
+      include: {
+        user: {
+          select: { name: true },
+        },
+      },
     });
+
+    clearProductsCache();
 
     return res.status(201).json({
       success: true,

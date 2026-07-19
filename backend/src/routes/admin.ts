@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 import { requireAdmin } from '../middleware/requireAuth';
 import { generateUploadSignature, cloudinary } from '../lib/cloudinary';
 import { emailService } from '../lib/emails';
+import { clearProductsCache } from './products';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -121,6 +122,7 @@ router.post('/products', async (req, res) => {
       return newProduct;
     });
 
+    clearProductsCache();
     return res.status(201).json(product);
   } catch (error) {
     console.error('Error creating product:', error);
@@ -245,6 +247,7 @@ router.patch('/products/:id', async (req, res) => {
       }
     });
 
+    clearProductsCache();
     return res.status(200).json({ success: true, message: 'Product updated successfully.' });
   } catch (error: any) {
     console.error('Error updating product:', error);
@@ -262,6 +265,7 @@ router.delete('/products/:id', async (req, res) => {
     }
 
     await prisma.product.delete({ where: { id } });
+    clearProductsCache();
     return res.status(200).json({ success: true, message: 'Product deleted successfully.' });
   } catch (error) {
     console.error('Error deleting product:', error);
@@ -448,6 +452,7 @@ router.patch('/reviews/:id', async (req, res) => {
       data: { status },
     });
 
+    clearProductsCache();
     return res.status(200).json(updated);
   } catch (error) {
     console.error('Error moderating review:', error);
