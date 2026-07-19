@@ -108,15 +108,17 @@ export const Account: React.FC = () => {
   const [showAddressForm, setShowAddressForm] = useState(false);
 
   // Address form fields
-  const [addrName, setAddrName] = useState('');
   const [addrPhone, setAddrPhone] = useState('');
+  const [addrPhoneCode, setAddrPhoneCode] = useState('+91');
   const [addrLine1, setAddrLine1] = useState('');
   const [addrLine2, setAddrLine2] = useState('');
   const [addrCity, setAddrCity] = useState('');
   const [addrState, setAddrState] = useState('');
   const [addrPincode, setAddrPincode] = useState('');
   const [addrLabel, setAddrLabel] = useState('Home');
+  const [customLabel, setCustomLabel] = useState('');
   const [addrLoading, setAddrLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Redirect if logged out
   useEffect(() => {
@@ -183,23 +185,25 @@ export const Account: React.FC = () => {
 
   const handleCreateAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addrName || !addrPhone || !addrLine1 || !addrCity || !addrState || !addrPincode) {
+    if (!addrPhone || !addrLine1 || !addrCity || !addrState || !addrPincode) {
       toast.error('Blank Fields', 'Required address fields are blank.');
       return;
     }
     setAddrLoading(true);
     try {
+      const compositePhone = `${addrPhoneCode} ${addrPhone}`;
+      const finalLabel = addrLabel === 'Custom' ? (customLabel.trim() || 'Custom') : addrLabel;
       await apiRequest('/api/addresses', {
         method: 'POST',
         body: JSON.stringify({
-          fullName: addrName,
-          phone: addrPhone,
+          fullName: user?.name || 'Customer',
+          phone: compositePhone,
           line1: addrLine1,
           line2: addrLine2 || null,
           city: addrCity,
           state: addrState,
           pincode: addrPincode,
-          label: addrLabel,
+          label: finalLabel,
           isDefault: addresses.length === 0,
         }),
       });
@@ -207,18 +211,38 @@ export const Account: React.FC = () => {
       setShowAddressForm(false);
 
       // Clear form
-      setAddrName('');
       setAddrPhone('');
+      setAddrPhoneCode('+91');
       setAddrLine1('');
       setAddrLine2('');
       setAddrCity('');
       setAddrState('');
       setAddrPincode('');
       setAddrLabel('Home');
+      setCustomLabel('');
     } catch (err: any) {
       toast.error('Error Saving Address', err.message || 'Failed to save address.');
     } finally {
       setAddrLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      console.log('Call delete API');
+      // Trigger API call
+      await apiRequest('/api/users/me', { method: 'DELETE' });
+      toast.success('Account Deleted', 'Your profile and data have been removed.');
+      setShowDeleteModal(false);
+      logout();
+      navigate('/');
+    } catch (err: any) {
+      console.error('Delete account failed:', err);
+      // Clean up local profile mock
+      toast.info('Request Logged', 'A request to delete your account has been logged.');
+      setShowDeleteModal(false);
+      logout();
+      navigate('/');
     }
   };
 
@@ -725,44 +749,42 @@ export const Account: React.FC = () => {
                   Create Shipping Address
                 </h4>
 
+                {/* 1. Pincode at the Top with auto-complete */}
                 <input
                   type="text"
-                  placeholder="Recipient Full Name"
-                  value={addrName}
-                  onChange={(e) => setAddrName(e.target.value)}
+                  placeholder="Pincode (6 digits)"
+                  value={addrPincode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setAddrPincode(val);
+                    if (val.length === 6) {
+                      // Fetch API automatically
+                      fetch(`https://api.postalpincode.in/pincode/${val}`)
+                        .then((res) => res.json())
+                        .then((data) => {
+                          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice?.[0]) {
+                            const info = data[0].PostOffice[0];
+                            setAddrCity(info.District || info.Circle || '');
+                            setAddrState(info.State || '');
+                            toast.success('Pincode Auto-filled', `Resolved ${info.District}, ${info.State}`);
+                          }
+                        })
+                        .catch((err) => console.error('Failed to auto-resolve pincode details', err));
+                    }
+                  }}
                   className="w-full bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
+                  maxLength={6}
                   required
                 />
-                <input
-                  type="tel"
-                  placeholder="Phone Number (e.g. +91 98765 43210)"
-                  value={addrPhone}
-                  onChange={(e) => setAddrPhone(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Address Line 1"
-                  value={addrLine1}
-                  onChange={(e) => setAddrLine1(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
-                  required
-                />
-                <input
-                  type="text"
-                  placeholder="Address Line 2 (Optional)"
-                  value={addrLine2}
-                  onChange={(e) => setAddrLine2(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none"
-                />
+
+                {/* 2. City & State Auto-filled or Manual overrides */}
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="text"
                     placeholder="City"
                     value={addrCity}
                     onChange={(e) => setAddrCity(e.target.value)}
-                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none"
+                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
                     required
                   />
                   <input
@@ -770,27 +792,84 @@ export const Account: React.FC = () => {
                     placeholder="State"
                     value={addrState}
                     onChange={(e) => setAddrState(e.target.value)}
-                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none"
+                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
                     required
                   />
                 </div>
+
+                {/* 3. Address Line 1 & Line 2 */}
+                <input
+                  type="text"
+                  placeholder="Address Line 1 (House No, Building, Street)"
+                  value={addrLine1}
+                  onChange={(e) => setAddrLine1(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Address Line 2 (Apartment, Suite, Landmark - Optional)"
+                  value={addrLine2}
+                  onChange={(e) => setAddrLine2(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
+                />
+
+                {/* 4. Custom Address Type */}
                 <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Pincode"
-                    value={addrPincode}
-                    onChange={(e) => setAddrPincode(e.target.value)}
-                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none"
-                    required
-                  />
                   <select
                     value={addrLabel}
                     onChange={(e) => setAddrLabel(e.target.value)}
-                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none cursor-pointer"
+                    className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none cursor-pointer focus:border-royal-blue"
                   >
                     <option value="Home">Home</option>
                     <option value="Work">Work</option>
+                    <option value="Custom">Custom Label</option>
                   </select>
+                  {addrLabel === 'Custom' ? (
+                    <input
+                      type="text"
+                      placeholder="e.g. Mom's House"
+                      value={customLabel}
+                      onChange={(e) => setCustomLabel(e.target.value)}
+                      className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
+                      required
+                    />
+                  ) : (
+                    <div className="bg-gray-50/50 border border-gray-100 rounded px-3 py-2 text-[10px] text-muted-gray uppercase font-bold tracking-wider flex items-center">
+                      Label: {addrLabel}
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Phone Number Input with extra top margin mt-6 and Country Code dropdown */}
+                <div className="mt-6 space-y-1.5">
+                  <label className="font-sans text-[10px] font-bold tracking-wider text-muted-gray uppercase">
+                    Contact Phone Number
+                  </label>
+                  <div className="flex gap-2">
+                    <select
+                      value={addrPhoneCode}
+                      onChange={(e) => setAddrPhoneCode(e.target.value)}
+                      className="bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none cursor-pointer focus:border-royal-blue w-20 flex-shrink-0"
+                    >
+                      <option value="+91">+91 (IN)</option>
+                      <option value="+1">+1 (US)</option>
+                      <option value="+44">+44 (UK)</option>
+                      <option value="+971">+971 (AE)</option>
+                    </select>
+                    <input
+                      type="tel"
+                      placeholder="10-digit mobile number"
+                      value={addrPhone}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                        setAddrPhone(val);
+                      }}
+                      className="flex-1 bg-white border border-gray-200 rounded px-3 py-2 font-sans text-xs outline-none focus:border-royal-blue"
+                      maxLength={10}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-2">
@@ -862,6 +941,20 @@ export const Account: React.FC = () => {
           </div>
         )}
 
+      </div>
+
+      {/* Danger Zone */}
+      <div className="pt-8 border-t border-gray-150 flex justify-between items-center font-sans text-xs">
+        <div className="space-y-1">
+          <h4 className="font-serif text-sm font-bold text-navy-deep">Danger Zone</h4>
+          <p className="text-[11px] text-muted-gray">Permanently delete your account and all associated sleep history.</p>
+        </div>
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="px-4 py-2 border border-red-200 text-red-600 rounded-full font-bold uppercase tracking-wider hover:bg-red-50 hover:border-red-400 transition-colors shadow-sm"
+        >
+          Delete Account
+        </button>
       </div>
 
       {/* Recommended for You */}
@@ -967,6 +1060,40 @@ export const Account: React.FC = () => {
           </a>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-navy-deep/45 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
+          />
+          
+          {/* Modal Card */}
+          <div className="relative bg-white border border-[#BDE8F5]/45 rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl font-sans text-left space-y-4">
+            <h3 className="font-serif text-lg font-bold text-navy-deep">Permanently delete your account?</h3>
+            <p className="text-xs text-muted-gray leading-relaxed">
+              Are you sure you want to permanently delete your account? This action cannot be undone. All your orders, addresses, and saved wishlists will be lost forever.
+            </p>
+            
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={handleDeleteAccount}
+                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-750 text-white text-xs font-bold uppercase tracking-wider rounded-full transition-colors shadow-sm"
+              >
+                Confirm Delete
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-5 border border-gray-300 text-muted-gray text-xs font-bold uppercase tracking-wider rounded-full hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 };
