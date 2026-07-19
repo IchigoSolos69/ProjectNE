@@ -44,6 +44,7 @@ model Product {
   description  String
   images       String[]       // shared gallery
   isTrending   Boolean        @default(false)
+  showOnLandingPage Boolean   @default(false)
   isActive     Boolean        @default(true)
   category     Category       @relation(fields: [categoryId], references: [id])
   categoryId   String
@@ -69,6 +70,7 @@ model ProductVariant {
   price         Decimal     @db.Decimal(10, 2)
   discountPrice Decimal?    @db.Decimal(10, 2)
   stock         Int         @default(0)
+  imageUrl      String?
   images        String[]    // optional variant overrides
   cartItems     CartItem[]
   orderItems    OrderItem[]

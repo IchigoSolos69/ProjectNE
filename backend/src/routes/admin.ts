@@ -205,6 +205,7 @@ router.post('/products', async (req, res) => {
       description,
       images = [],
       isTrending = false,
+      showOnLandingPage = false,
       isActive = true,
       categoryId,
       variants = [], // array of { size, color, price, stock, discountPrice }
@@ -246,6 +247,7 @@ router.post('/products', async (req, res) => {
           description,
           images,
           isTrending: Boolean(isTrending),
+          showOnLandingPage: Boolean(showOnLandingPage),
           isActive: Boolean(isActive),
           categoryId,
           material: material || null,
@@ -268,6 +270,7 @@ router.post('/products', async (req, res) => {
             price: Number(v.price),
             discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
             stock: parseInt(v.stock, 10) || 0,
+            imageUrl: v.imageUrl || null,
             images: v.images || [],
           },
         });
@@ -303,6 +306,7 @@ router.patch('/products/:id', async (req, res) => {
       description,
       images,
       isTrending,
+      showOnLandingPage,
       isActive,
       categoryId,
       variants,
@@ -325,6 +329,7 @@ router.patch('/products/:id', async (req, res) => {
     if (description !== undefined) updateData.description = description;
     if (images !== undefined) updateData.images = images;
     if (isTrending !== undefined) updateData.isTrending = Boolean(isTrending);
+    if (showOnLandingPage !== undefined) updateData.showOnLandingPage = Boolean(showOnLandingPage);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
     if (categoryId !== undefined) updateData.categoryId = categoryId;
     if (material !== undefined) updateData.material = material || null;
@@ -362,6 +367,7 @@ router.patch('/products/:id', async (req, res) => {
             price: Number(v.price),
             discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
             stock: parseInt(v.stock, 10) || 0,
+            imageUrl: v.imageUrl || null,
             images: v.images || [],
           };
 

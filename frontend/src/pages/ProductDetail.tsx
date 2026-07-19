@@ -146,7 +146,7 @@ export const ProductDetail: React.FC = () => {
   const isOutOfStock = !activeVariant || activeVariant.stock <= 0;
 
   // Resolve image overrides
-  const variantImages = activeVariant && activeVariant.images.length > 0 ? activeVariant.images : [];
+  const variantImages = activeVariant && activeVariant.imageUrl ? [activeVariant.imageUrl] : (activeVariant && activeVariant.images.length > 0 ? activeVariant.images : []);
   const displayImages = variantImages.length > 0 ? variantImages : (product?.images || []);
 
   const handleAddToCart = async () => {

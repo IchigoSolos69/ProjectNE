@@ -37,7 +37,7 @@ router.get('/products', async (req, res) => {
       return res.status(200).json(cached.data);
     }
 
-    const { category, trending, sort, page = '1', limit = '12' } = req.query;
+    const { category, trending, landing, sort, page = '1', limit = '12' } = req.query;
 
     const pageNum = parseInt(page as string, 10) || 1;
     const limitNum = parseInt(limit as string, 10) || 12;
@@ -53,6 +53,10 @@ router.get('/products', async (req, res) => {
 
     if (trending === 'true') {
       whereClause.isTrending = true;
+    }
+
+    if (landing === 'true') {
+      whereClause.showOnLandingPage = true;
     }
 
     // Fetch all matching products with variants and categories

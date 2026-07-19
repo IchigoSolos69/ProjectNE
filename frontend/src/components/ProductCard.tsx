@@ -14,6 +14,7 @@ export interface Variant {
   price: number;
   discountPrice: number | null;
   stock: number;
+  imageUrl?: string | null;
   images: string[];
 }
 
@@ -24,6 +25,7 @@ export interface Product {
   description: string;
   images: string[];
   isTrending: boolean;
+  showOnLandingPage?: boolean;
   isActive: boolean;
   categoryId: string;
   category?: { name: string; slug: string };
@@ -299,12 +301,22 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
           
           {/* Modal Card */}
           <div className="relative bg-white border border-[#BDE8F5]/45 rounded-2xl p-6 max-w-sm w-full shadow-2xl font-sans text-left space-y-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[9px] font-bold text-sky-blue uppercase tracking-widest block">Quick Add</span>
-                <h3 className="font-serif text-base font-bold text-navy-deep mt-0.5 leading-snug">
-                  {product.name}
-                </h3>
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex gap-3 items-center">
+                {/* Variant Dynamic Thumbnail */}
+                <div className="w-12 h-16 bg-gray-50 border border-gray-150 rounded overflow-hidden flex-shrink-0">
+                  <img
+                    src={getOptimizedImageUrl(selectedVariant?.imageUrl || selectedVariant?.images?.[0] || product.images?.[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=100', 80)}
+                    className="w-full h-full object-cover"
+                    alt={product.name}
+                  />
+                </div>
+                <div>
+                  <span className="text-[9px] font-bold text-sky-blue uppercase tracking-widest block">Quick Add</span>
+                  <h3 className="font-serif text-base font-bold text-navy-deep mt-0.5 leading-snug">
+                    {product.name}
+                  </h3>
+                </div>
               </div>
               <button 
                 onClick={() => setShowQuickAddModal(false)}

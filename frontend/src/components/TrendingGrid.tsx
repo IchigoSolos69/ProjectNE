@@ -17,7 +17,7 @@ export const TrendingGrid: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await apiRequest<{ products: Product[] }>('/api/products?trending=true');
+        const data = await apiRequest<{ products: Product[] }>('/api/products?landing=true');
         if (data && data.products && data.products.length > 0) {
           setProducts(data.products.slice(0, 4)); // Show top 4 trending products
         } else {

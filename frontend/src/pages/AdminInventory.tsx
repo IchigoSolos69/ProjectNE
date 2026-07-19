@@ -12,6 +12,7 @@ interface VariantInput {
   price: string;
   discountPrice: string;
   stock: string;
+  imageUrl?: string;
   images: string[];
 }
 
@@ -158,6 +159,7 @@ export const AdminInventory: React.FC = () => {
   const [packageIncludes, setPackageIncludes] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isTrending, setIsTrending] = useState(false);
+  const [showOnLandingPage, setShowOnLandingPage] = useState(false);
   const [isActive, setIsActive] = useState(true);
 
   // Variants Input List
@@ -243,6 +245,7 @@ export const AdminInventory: React.FC = () => {
     setPackageIncludes('');
     setImages([]);
     setIsTrending(false);
+    setShowOnLandingPage(false);
     setIsActive(true);
 
     const defaultSku = generateClientSku('', defaultCatId, 'Queen', 'Ivory Cream');
@@ -264,6 +267,7 @@ export const AdminInventory: React.FC = () => {
     setPackageIncludes(prod.packageIncludes ? prod.packageIncludes.join(', ') : '');
     setImages(prod.images);
     setIsTrending(prod.isTrending);
+    setShowOnLandingPage(prod.showOnLandingPage || false);
     setIsActive(prod.isActive);
 
     if (prod.variants && prod.variants.length > 0) {
@@ -282,6 +286,7 @@ export const AdminInventory: React.FC = () => {
             price: v.price.toString(),
             discountPrice: discountPercent,
             stock: v.stock.toString(),
+            imageUrl: v.imageUrl || '',
             images: v.images || [],
           };
         })
@@ -297,10 +302,11 @@ export const AdminInventory: React.FC = () => {
 
   // Handle dynamic variant changes
   const handleAddVariantRow = () => {
-    const tempSku = generateClientSku(name, categoryId, '', '');
+    const defaultSize = hideSizeField ? 'Standard' : '';
+    const tempSku = generateClientSku(name, categoryId, defaultSize, '');
     setVariants((prev) => [
       ...prev,
-      { size: '', color: '', sku: tempSku, price: '', discountPrice: '', stock: '10', images: [] },
+      { size: defaultSize, color: '', sku: tempSku, price: '', discountPrice: '', stock: '10', images: [] },
     ]);
   };
 
@@ -360,6 +366,48 @@ export const AdminInventory: React.FC = () => {
       console.error('Image upload failed', err);
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleVariantImageUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      const file = files[0];
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const API_URL = import.meta.env.VITE_API_URL || 'https://projectne.onrender.com/api';
+      const token = localStorage.getItem('rc_session_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_URL}/admin/upload`, {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Image upload failed.');
+      }
+
+      const resJson = await response.json();
+      setVariants((prev) => {
+        const copy = [...prev];
+        copy[index] = {
+          ...copy[index],
+          imageUrl: resJson.secure_url,
+          images: [resJson.secure_url],
+        };
+        return copy;
+      });
+    } catch (err: any) {
+      alert('Variant image upload failed.');
     }
   };
 
@@ -443,6 +491,12 @@ export const AdminInventory: React.FC = () => {
       .map((item) => item.trim())
       .filter(Boolean);
 
+    const selectedCategoryObj = categories.find((c) => c.id === categoryId);
+    const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : '';
+    const hideSizeField = ['Towels', 'Door Mats', 'Cushion Covers'].some(
+      (name) => name.toLowerCase() === selectedCategoryName.toLowerCase()
+    );
+
     const payload = {
       name,
       description,
@@ -452,6 +506,7 @@ export const AdminInventory: React.FC = () => {
       packageIncludes: packageIncludesArray,
       images,
       isTrending,
+      showOnLandingPage,
       isActive,
       categoryId,
       variants: variants.map((v) => {
@@ -460,13 +515,17 @@ export const AdminInventory: React.FC = () => {
         const calculatedDiscountPrice = (discountPercent > 0 && basePrice > 0)
           ? Math.round(basePrice - (basePrice * (discountPercent / 100)))
           : null;
+        
+        const finalSize = hideSizeField ? 'Standard' : (v.size || 'Standard');
+
         return {
-          size: v.size || null,
+          size: finalSize,
           color: v.color || null,
           sku: v.sku.toUpperCase().trim(),
           price: basePrice,
           discountPrice: calculatedDiscountPrice,
           stock: parseInt(v.stock, 10) || 0,
+          imageUrl: v.imageUrl || null,
           images: v.images,
         };
       }),
@@ -560,6 +619,12 @@ export const AdminInventory: React.FC = () => {
       setBulkImportLoading(false);
     }
   };
+
+  const selectedCategoryObj = categories.find((c) => c.id === categoryId);
+  const selectedCategoryName = selectedCategoryObj ? selectedCategoryObj.name : '';
+  const hideSizeField = ['Towels', 'Door Mats', 'Cushion Covers'].some(
+    (name) => name.toLowerCase() === selectedCategoryName.toLowerCase()
+  );
 
   // Filtered Products computation
   const filteredProducts = useMemo(() => {
@@ -841,16 +906,37 @@ export const AdminInventory: React.FC = () => {
                   {variants.map((v, idx) => (
                     <div
                       key={idx}
-                      className="grid grid-cols-2 sm:grid-cols-6 gap-3 bg-gray-50/50 p-3 border border-gray-100 rounded-md relative items-end"
+                      className="grid grid-cols-2 sm:grid-cols-7 gap-3 bg-gray-50/50 p-3 border border-gray-100 rounded-md relative items-end"
                     >
+                      <div className="flex flex-col items-center justify-center">
+                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Image</label>
+                        <div className="relative w-10 h-10 bg-white border border-gray-250 rounded overflow-hidden flex items-center justify-center group cursor-pointer hover:border-royal-blue transition-colors">
+                          {v.imageUrl ? (
+                            <img src={v.imageUrl} className="w-full h-full object-cover" alt="Variant preview" />
+                          ) : (
+                            <Upload className="w-3.5 h-3.5 text-muted-gray" />
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleVariantImageUpload(idx, e)}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </div>
+                      </div>
                       <div>
                         <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Size</label>
                         <input
                           type="text"
                           placeholder="Queen"
-                          value={v.size}
+                          value={hideSizeField ? 'Standard' : v.size}
                           onChange={(e) => handleVariantChange(idx, 'size', e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
+                          disabled={hideSizeField}
+                          className={`w-full border rounded p-1.5 text-xs outline-none focus:border-royal-blue ${
+                            hideSizeField
+                              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed font-medium font-sans'
+                              : 'bg-white border-gray-200 text-navy-deep font-sans'
+                          }`}
                         />
                       </div>
                       <div>
@@ -924,7 +1010,7 @@ export const AdminInventory: React.FC = () => {
               </div>
 
               {/* Toggles row */}
-              <div className="flex gap-8 items-center bg-[#F5FAFD]/20 border border-[#BDE8F5]/20 p-4 rounded-lg">
+              <div className="flex flex-wrap gap-6 items-center bg-[#F5FAFD]/20 border border-[#BDE8F5]/20 p-4 rounded-lg">
                 <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
                   <input
                      type="checkbox"
@@ -937,10 +1023,20 @@ export const AdminInventory: React.FC = () => {
 
                 <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
                   <input
-                    type="checkbox"
-                    checked={isActive}
-                    onChange={(e) => setIsActive(e.target.checked)}
-                    className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
+                     type="checkbox"
+                     checked={showOnLandingPage}
+                     onChange={(e) => setShowOnLandingPage(e.target.checked)}
+                     className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
+                  />
+                  Display on Landing Page
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
+                  <input
+                     type="checkbox"
+                     checked={isActive}
+                     onChange={(e) => setIsActive(e.target.checked)}
+                     className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
                   />
                   Publish / Active Showroom display
                 </label>
