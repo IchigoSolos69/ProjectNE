@@ -180,36 +180,45 @@ router.patch('/products/:id', async (req, res) => {
           where: { productId: id },
         });
 
-        const incomingIds = variants.map((v: any) => v.id).filter(Boolean);
+        const incomingSkus = variants.map((v: any) => v.sku);
 
         // Update existing or create new variants
         for (const v of variants) {
           const variantData = {
-            productId: id,
             size: v.size || null,
             color: v.color || null,
-            sku: v.sku,
             price: Number(v.price),
             discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
             stock: parseInt(v.stock, 10) || 0,
             images: v.images || [],
           };
 
-          if (v.id) {
+          const existingBySku = await tx.productVariant.findUnique({
+            where: { sku: v.sku },
+          });
+
+          if (existingBySku) {
             await tx.productVariant.update({
-              where: { id: v.id },
-              data: variantData,
+              where: { sku: v.sku },
+              data: {
+                ...variantData,
+                productId: id, // ensure it is linked to this product
+              },
             });
           } else {
             await tx.productVariant.create({
-              data: variantData,
+              data: {
+                ...variantData,
+                sku: v.sku,
+                productId: id,
+              },
             });
           }
         }
 
         // Clean up removed variants safely
         const removedVariants = existingVariants.filter(
-          (ev) => !incomingIds.includes(ev.id)
+          (ev) => !incomingSkus.includes(ev.sku)
         );
 
         for (const rv of removedVariants) {
