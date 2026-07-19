@@ -174,6 +174,7 @@ export const AdminInventory: React.FC = () => {
       const response = await fetch(`${API_URL}/admin/upload`, {
         method: 'POST',
         headers,
+        credentials: 'include',
         body: formData,
       });
 
