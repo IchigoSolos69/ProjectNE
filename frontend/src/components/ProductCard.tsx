@@ -125,7 +125,7 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
           {/* Product Image */}
           <img
             src={getOptimizedImageUrl(displayImage, 600)}
-            srcSet={`${getOptimizedImageUrl(displayImage, 300)} 300w, ${getOptimizedImageUrl(displayImage, 600)} 600w, ${getOptimizedImageUrl(displayImage, 900)} 900w`}
+            srcSet={`${getOptimizedImageUrl(displayImage, 300)} 300w, ${getOptimizedImageUrl(displayImage, 400)} 400w, ${getOptimizedImageUrl(displayImage, 600)} 600w, ${getOptimizedImageUrl(displayImage, 900)} 900w`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             width="300"
             height="400"

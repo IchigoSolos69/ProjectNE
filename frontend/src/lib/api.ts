@@ -41,20 +41,12 @@ export function getOptimizedImageUrl(url: string, width?: number): string {
     return url.replace('/upload/', `/upload/${transform}/`);
   }
 
-  // 2. Handle Unsplash URLs
+  // 2. Handle Unsplash URLs via Cloudinary fetch proxy
   if (url.includes('images.unsplash.com')) {
-    const baseUrl = url.split('?')[0];
-    const params = new URLSearchParams(url.split('?')[1] || '');
-    params.set('auto', 'format,compress');
-    if (width) {
-      params.set('w', width.toString());
-      // Adjust dimensions dynamically
-      params.set('fit', 'crop');
-    }
-    if (!params.has('q')) {
-      params.set('q', '80');
-    }
-    return `${baseUrl}?${params.toString()}`;
+    const cloudName = 'mjkvnu4a';
+    const cleanUrl = url.trim();
+    const transformations = `f_auto,q_auto${width ? `,w_${width}` : ''}`;
+    return `https://res.cloudinary.com/${cloudName}/image/fetch/${transformations}/${encodeURIComponent(cleanUrl)}`;
   }
 
   return url;

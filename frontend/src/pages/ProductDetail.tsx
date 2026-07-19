@@ -313,7 +313,7 @@ export const ProductDetail: React.FC = () => {
         <div className="space-y-6">
           <div className="space-y-2">
             {product.category && (
-              <span className="font-sans text-xs font-bold tracking-widest text-sky-blue uppercase">
+              <span className="font-sans text-xs font-bold tracking-widest text-royal-blue uppercase">
                 {product.category.name}
               </span>
             )}

@@ -63,11 +63,21 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
   useEffect(() => {
     mountedRef.current = true;
 
+    // Dynamically load Google GSI Client Script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
       console.warn('[Google Auth] VITE_GOOGLE_CLIENT_ID is not configured.');
       return () => {
         mountedRef.current = false;
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
       };
     }
 
@@ -132,6 +142,14 @@ export function GoogleSignInButton({ onError }: GoogleSignInButtonProps) {
 
       if (pollId) {
         clearInterval(pollId);
+      }
+
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
+
+      if (window.google) {
+        delete (window as any).google;
       }
     };
   }, []);

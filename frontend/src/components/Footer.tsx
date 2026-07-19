@@ -16,7 +16,7 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-navy-deep text-[#BDE8F5]/80 py-16 border-t border-[#1C4D8D]/40 font-sans">
+    <footer className="bg-navy-deep text-[#E2F5FC] py-16 border-t border-[#1C4D8D]/40 font-sans">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
         
         {/* Brand Blurb */}
@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
           <h3 className="font-serif text-2xl font-semibold text-white tracking-wide">
             RareComforts
           </h3>
-          <p className="text-sm leading-relaxed max-w-xs text-[#BDE8F5]/75">
+          <p className="text-sm leading-relaxed max-w-xs text-[#E2F5FC]">
             Woven for stillness. Reimagining the standard of rest with premium, sustainably sourced Egyptian cotton and liquid-smooth satin sateen.
           </p>
           <div className="flex gap-4 pt-2">
@@ -99,7 +99,7 @@ export const Footer: React.FC = () => {
         {/* Newsletter Email Capture */}
         <div className="space-y-4">
           <h4 className="text-white text-xs font-bold tracking-widest uppercase">Newsletter</h4>
-          <p className="text-sm leading-relaxed text-[#BDE8F5]/75">
+          <p className="text-sm leading-relaxed text-[#E2F5FC]">
             Subscribe to receive private sales, registry access, and bedding care secrets.
           </p>
           
@@ -133,10 +133,10 @@ export const Footer: React.FC = () => {
 
       {/* Copyright bottom bar */}
       <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-[#1C4D8D]/20 text-center lg:text-left flex flex-col lg:flex-row justify-between items-center gap-4">
-        <p className="text-xs text-[#BDE8F5]/50">
+        <p className="text-xs text-[#C2EBF7]">
           &copy; 2026 RareComforts Inc. All rights reserved. Crafted for tranquility.
         </p>
-        <div className="flex gap-6 text-xs text-[#BDE8F5]/50">
+        <div className="flex gap-6 text-xs text-[#C2EBF7]">
           <Link to="/legal/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
           <Link to="/legal/terms-and-conditions" className="hover:text-white transition-colors">Terms of Service</Link>
         </div>

@@ -58,17 +58,28 @@ export const TrendingGrid: React.FC = () => {
     );
   }, [loading, products]);
 
-  // Shimmer keyframes style tag
   const shimmerStyles = (
     <style>{`
-      @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
-      }
       .skeleton-shimmer {
-        background: linear-gradient(90deg, #BDE8F5 25%, #fff 50%, #BDE8F5 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s infinite linear;
+        position: relative;
+        overflow: hidden;
+        background-color: #FAF9F6;
+      }
+      .skeleton-shimmer::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.5),
+          transparent
+        );
+        animation: shimmer-sweep 1.6s ease-in-out infinite;
+      }
+      @keyframes shimmer-sweep {
+        100% { transform: translateX(100%); }
       }
     `}</style>
   );

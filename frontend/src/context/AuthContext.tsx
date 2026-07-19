@@ -42,6 +42,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Initialize and check current user status
   useEffect(() => {
     const fetchMe = async () => {
+      const token = localStorage.getItem('rc_session_token');
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
         const data: any = await apiRequest('/api/auth/me');
         if (data && data.user) {

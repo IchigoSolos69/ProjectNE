@@ -172,22 +172,29 @@ export const HeroCarousel: React.FC = () => {
         <div className="w-full md:w-[42%] h-auto md:h-full flex flex-col justify-center p-8 sm:p-12 md:p-16 bg-white relative z-10 overflow-y-auto">
           
           {/* Carousel Slide Indicators */}
-          <div className="flex gap-2.5 mb-8 justify-start">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleDotClick(idx)}
-                className={`h-1 rounded-full transition-all duration-300 ${
-                  idx === activeIndex ? 'w-8 bg-royal-blue' : 'w-2 bg-[#BDE8F5]'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
+          <div className="flex gap-1 mb-6 justify-start items-center">
+            {slides.map((_, idx) => {
+              const isActive = idx === activeIndex;
+              return (
+                <button
+                  key={idx}
+                  aria-label={`Go to slide ${idx + 1}`}
+                  className="flex items-center justify-center min-w-[44px] min-h-[44px]"
+                  onClick={() => handleDotClick(idx)}
+                >
+                  <span
+                    className={`h-1 rounded-full transition-all duration-300 ${
+                      isActive ? 'w-6 bg-royal-blue' : 'w-2 bg-[#BDE8F5]'
+                    }`}
+                  />
+                </button>
+              );
+            })}
           </div>
 
           {/* Content Ref container */}
           <div ref={textContainerRef} className="space-y-4 max-w-md my-auto">
-            <p className="font-sans text-xs font-bold tracking-widest text-sky-blue uppercase">
+            <p className="font-sans text-xs font-bold tracking-widest text-royal-blue uppercase">
               {slides[activeIndex].tagline}
             </p>
             <h2 className="font-serif text-3xl sm:text-4xl text-navy-deep font-bold leading-tight">
