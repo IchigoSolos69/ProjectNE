@@ -262,15 +262,23 @@ export const AdminInventory: React.FC = () => {
 
     if (prod.variants && prod.variants.length > 0) {
       setVariants(
-        prod.variants.map((v) => ({
-          size: v.size || '',
-          color: v.color || '',
-          sku: v.sku,
-          price: v.price.toString(),
-          discountPrice: v.discountPrice ? v.discountPrice.toString() : '',
-          stock: v.stock.toString(),
-          images: v.images || [],
-        }))
+        prod.variants.map((v) => {
+          let discountPercent = '';
+          if (v.discountPrice && Number(v.price) > 0) {
+            discountPercent = Math.round(
+              ((Number(v.price) - Number(v.discountPrice)) / Number(v.price)) * 100
+            ).toString();
+          }
+          return {
+            size: v.size || '',
+            color: v.color || '',
+            sku: v.sku,
+            price: v.price.toString(),
+            discountPrice: discountPercent,
+            stock: v.stock.toString(),
+            images: v.images || [],
+          };
+        })
       );
     } else {
       const defaultSku = generateClientSku(prod.name, prod.categoryId, 'Queen', 'Ivory Cream');
@@ -434,15 +442,22 @@ export const AdminInventory: React.FC = () => {
       isTrending,
       isActive,
       categoryId,
-      variants: variants.map((v) => ({
-        size: v.size || null,
-        color: v.color || null,
-        sku: v.sku.toUpperCase().trim(),
-        price: parseFloat(v.price),
-        discountPrice: v.discountPrice ? parseFloat(v.discountPrice) : null,
-        stock: parseInt(v.stock, 10) || 0,
-        images: v.images,
-      })),
+      variants: variants.map((v) => {
+        const basePrice = parseFloat(v.price) || 0;
+        const discountPercent = parseFloat(v.discountPrice) || 0;
+        const calculatedDiscountPrice = (discountPercent > 0 && basePrice > 0)
+          ? Math.round(basePrice - (basePrice * (discountPercent / 100)))
+          : null;
+        return {
+          size: v.size || null,
+          color: v.color || null,
+          sku: v.sku.toUpperCase().trim(),
+          price: basePrice,
+          discountPrice: calculatedDiscountPrice,
+          stock: parseInt(v.stock, 10) || 0,
+          images: v.images,
+        };
+      }),
     };
 
     try {
@@ -465,17 +480,24 @@ export const AdminInventory: React.FC = () => {
           isActive,
           categoryId,
           category: categoryObj ? { name: categoryObj.name, slug: categoryObj.slug } : editingProduct.category,
-          variants: variants.map((v) => ({
-            id: (editingProduct.variants || []).find((ev) => ev.sku === v.sku)?.id || '',
-            productId: editingProduct.id,
-            size: v.size || null,
-            color: v.color || null,
-            sku: v.sku.toUpperCase().trim(),
-            price: Number(v.price),
-            discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
-            stock: parseInt(v.stock, 10) || 0,
-            images: v.images,
-          })) as any,
+          variants: variants.map((v) => {
+            const basePrice = Number(v.price) || 0;
+            const discountPercent = Number(v.discountPrice) || 0;
+            const calculatedDiscountPrice = (discountPercent > 0 && basePrice > 0)
+              ? Math.round(basePrice - (basePrice * (discountPercent / 100)))
+              : null;
+            return {
+              id: (editingProduct.variants || []).find((ev) => ev.sku === v.sku)?.id || '',
+              productId: editingProduct.id,
+              size: v.size || null,
+              color: v.color || null,
+              sku: v.sku.toUpperCase().trim(),
+              price: basePrice,
+              discountPrice: calculatedDiscountPrice,
+              stock: parseInt(v.stock, 10) || 0,
+              images: v.images,
+            };
+          }) as any,
         };
 
         setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? updated : p)));
@@ -801,13 +823,15 @@ export const AdminInventory: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Discount</label>
+                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Discount (%)</label>
                         <input
                           type="number"
-                          placeholder="optional"
+                          placeholder="e.g. 28"
                           value={v.discountPrice}
                           onChange={(e) => handleVariantChange(idx, 'discountPrice', e.target.value)}
                           className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
+                          min="0"
+                          max="100"
                         />
                       </div>
                       <div>
