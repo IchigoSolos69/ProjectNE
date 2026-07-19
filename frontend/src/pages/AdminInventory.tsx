@@ -144,6 +144,9 @@ export const AdminInventory: React.FC = () => {
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [bulkFile, setBulkFile] = useState<File | null>(null);
+  const [bulkImportLoading, setBulkImportLoading] = useState(false);
 
   // Form Fields
   const [name, setName] = useState('');
@@ -531,6 +534,33 @@ export const AdminInventory: React.FC = () => {
     }
   };
 
+  const handleBulkImportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bulkFile) {
+      alert('Please select a CSV file first.');
+      return;
+    }
+
+    setBulkImportLoading(true);
+    const formData = new FormData();
+    formData.append('file', bulkFile);
+
+    try {
+      const response = await apiRequest<{ count: number }>('/api/admin/products/bulk', {
+        method: 'POST',
+        body: formData,
+      });
+      alert(`Successfully imported ${response.count} products!`);
+      setIsBulkModalOpen(false);
+      setBulkFile(null);
+      loadData(); // Reload inventory table
+    } catch (err: any) {
+      alert(err.message || 'An error occurred during bulk import.');
+    } finally {
+      setBulkImportLoading(false);
+    }
+  };
+
   // Filtered Products computation
   const filteredProducts = useMemo(() => {
     return products.filter((prod) => {
@@ -561,12 +591,20 @@ export const AdminInventory: React.FC = () => {
           </p>
         </div>
         
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center gap-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-bold px-6 py-3 rounded-full hover:bg-royal-blue transition-colors shadow-md"
-        >
-          <Plus className="w-4 h-4" /> ADD NEW SHOWCASE
-        </button>
+        <div className="flex flex-wrap gap-3">
+          <button
+            onClick={() => setIsBulkModalOpen(true)}
+            className="flex items-center gap-2 border border-navy-deep text-navy-deep bg-white font-sans text-xs uppercase tracking-wide font-bold px-6 py-3 rounded-full hover:bg-gray-50 transition-colors shadow-sm"
+          >
+            <Upload className="w-4 h-4" /> Bulk Import (CSV)
+          </button>
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center gap-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-bold px-6 py-3 rounded-full hover:bg-royal-blue transition-colors shadow-md"
+          >
+            <Plus className="w-4 h-4" /> ADD NEW SHOWCASE
+          </button>
+        </div>
       </div>
 
       {/* Filter toolbar */}
@@ -992,6 +1030,98 @@ export const AdminInventory: React.FC = () => {
 
             </form>
           </div>
+        </div>
+      )}
+      {/* Bulk Import CSV Modal */}
+      {isBulkModalOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-none">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-[#0F2854]/45 backdrop-blur-sm animate-none"
+            onClick={() => {
+              if (!bulkImportLoading) {
+                setIsBulkModalOpen(false);
+                setBulkFile(null);
+              }
+            }}
+          />
+
+          {/* Modal Card */}
+          <form 
+            onSubmit={handleBulkImportSubmit}
+            className="relative bg-white border border-[#BDE8F5]/45 rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl font-sans text-left space-y-4 animate-none"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-[9px] font-bold text-sky-blue uppercase tracking-widest block">Bulk Upload</span>
+                <h3 className="font-serif text-lg font-bold text-navy-deep mt-0.5">
+                  Import Showcase CSV
+                </h3>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  setIsBulkModalOpen(false);
+                  setBulkFile(null);
+                }}
+                disabled={bulkImportLoading}
+                className="text-muted-gray hover:text-navy-deep p-1 text-sm font-sans"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-gray leading-relaxed">
+              Upload a `.csv` file containing product inventory listings. The file should contain column headers: <code>name</code>, <code>description</code>, <code>price</code>, <code>stock</code>, <code>sku</code>, and <code>category</code>.
+            </p>
+
+            <div className="border-2 border-dashed border-[#BDE8F5]/40 rounded-xl p-6 text-center space-y-2 bg-[#F5FAFD]/20">
+              <Upload className="w-8 h-8 text-sky-blue mx-auto animate-none" />
+              <input
+                type="file"
+                accept=".csv"
+                id="bulk-csv-upload"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setBulkFile(file);
+                }}
+                required
+              />
+              <label 
+                htmlFor="bulk-csv-upload"
+                className="block text-xs font-bold text-navy-deep hover:text-royal-blue uppercase tracking-wider cursor-pointer decoration-dotted underline"
+              >
+                {bulkFile ? bulkFile.name : 'Choose CSV File'}
+              </label>
+              {bulkFile && (
+                <p className="text-[10px] text-green-600 font-semibold">
+                  File Selected ({(bulkFile.size / 1024).toFixed(1)} KB)
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button
+                type="submit"
+                disabled={!bulkFile || bulkImportLoading}
+                className="flex-1 px-4 py-2.5 bg-navy-deep hover:bg-royal-blue text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-sm disabled:opacity-40"
+              >
+                {bulkImportLoading ? 'Importing...' : 'Start Import'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsBulkModalOpen(false);
+                  setBulkFile(null);
+                }}
+                disabled={bulkImportLoading}
+                className="px-5 border border-gray-300 text-muted-gray text-xs font-bold uppercase tracking-widest rounded-full hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </main>

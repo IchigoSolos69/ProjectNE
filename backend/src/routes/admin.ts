@@ -89,6 +89,114 @@ router.get('/products', async (req, res) => {
   }
 });
 
+// POST /api/admin/products/bulk - Parse and import products in bulk
+router.post('/products/bulk', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No CSV file was uploaded.' });
+    }
+
+    const fileContent = req.file.buffer.toString('utf-8');
+    const lines = fileContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length <= 1) {
+      return res.status(400).json({ error: 'CSV file is empty or missing data rows.' });
+    }
+
+    // Parse CSV headers and rows
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line) continue;
+      const values = line.split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+      const row: any = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      rows.push(row);
+    }
+
+    let successCount = 0;
+
+    // Process each row
+    for (const row of rows) {
+      const { name, description, price, stock, sku, category: categoryName } = row;
+      if (!name || !categoryName) continue;
+
+      const priceVal = parseFloat(price) || 0;
+      const stockVal = parseInt(stock, 10) || 0;
+
+      // Find or create category
+      let category = await prisma.category.findFirst({
+        where: { name: { equals: categoryName, mode: 'insensitive' } },
+      });
+      if (!category) {
+        const catSlug = slugify(categoryName);
+        category = await prisma.category.create({
+          data: {
+            name: categoryName,
+            slug: catSlug,
+          },
+        });
+      }
+
+      const prodSlug = slugify(name);
+      let product = await prisma.product.findUnique({
+        where: { slug: prodSlug },
+      });
+
+      // Generate SKU if missing
+      const resolvedSku = sku ? sku.toUpperCase().trim() : generateSku(category.name, name, 'Standard', 'Default');
+
+      if (!product) {
+        // Create product with default variant
+        await prisma.product.create({
+          data: {
+            name,
+            slug: prodSlug,
+            description: description || '',
+            images: ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=600'],
+            isActive: true,
+            categoryId: category.id,
+            variants: {
+              create: {
+                size: 'Standard',
+                color: 'Default',
+                sku: resolvedSku,
+                price: priceVal,
+                stock: stockVal,
+                images: ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=600'],
+              },
+            },
+          },
+        });
+      } else {
+        // Product already exists, add variant to it
+        await prisma.productVariant.create({
+          data: {
+            productId: product.id,
+            size: 'Standard',
+            color: 'Default',
+            sku: resolvedSku,
+            price: priceVal,
+            stock: stockVal,
+            images: ['https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=600'],
+          },
+        });
+      }
+      successCount++;
+    }
+
+    // Clear backend products cache to show new data immediately
+    clearProductsCache();
+
+    return res.status(200).json({ success: true, count: successCount });
+  } catch (error: any) {
+    console.error('Error processing bulk product import:', error);
+    return res.status(500).json({ error: error.message || 'Failed to parse and import inventory CSV.' });
+  }
+});
+
 // POST /api/admin/products - Add product with variants
 router.post('/products', async (req, res) => {
   try {

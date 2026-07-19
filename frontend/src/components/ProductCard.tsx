@@ -4,6 +4,7 @@ import { ShoppingCart, Eye, Heart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { getOptimizedImageUrl } from '../lib/api';
+import { useToast } from '../context/ToastContext';
 
 export interface Variant {
   id: string;
@@ -46,7 +47,11 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
   const { user, wishlistIds, toggleWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [selectedSize, setSelectedSize] = useState<string>('');
+  const [selectedColor, setSelectedColor] = useState<string>('');
 
   // Wishlist check
   const isWishlisted = wishlistIds.includes(product.id);
@@ -88,6 +93,18 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
     }
   }
 
+  // Resolve unique sizes and colors
+  const uniqueSizes = Array.from(new Set(variantsList.filter((v) => v.stock > 0).map((v) => v.size).filter(Boolean))) as string[];
+  const uniqueColors = Array.from(new Set(variantsList.filter((v) => v.stock > 0).map((v) => v.color).filter(Boolean))) as string[];
+
+  // Find exact matched variant
+  const selectedVariant = variantsList.find(
+    (v) =>
+      v.stock > 0 &&
+      (!uniqueSizes.length || v.size === selectedSize) &&
+      (!uniqueColors.length || v.color === selectedColor)
+  );
+
   const hasMultiplePrices = variantsList.length > 1;
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
@@ -95,15 +112,30 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
     e.stopPropagation();
 
     if (!user) {
-      // Redirect to login with return path
       navigate(`/auth?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
 
     try {
       await toggleWishlist(product.id);
+      toast.success('Wishlist Updated', `Successfully updated wishlist for ${product.name}`);
     } catch (err: any) {
-      alert(err.message || 'Failed to update wishlist.');
+      toast.error('Wishlist Error', err.message || 'Failed to update wishlist.');
+    }
+  };
+
+  const performQuickAdd = async (variantId: string) => {
+    setLoading(true);
+    try {
+      await addToCart(variantId, 1);
+      toast.success('Added to Cart', `${product.name} has been added to your cart.`);
+      if (onQuickAddSuccess) {
+        onQuickAddSuccess();
+      }
+    } catch (err: any) {
+      toast.error('Add to Cart Failed', err.message || 'Failed to add item to cart.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,18 +148,12 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
       return;
     }
 
-    if (isOutOfStock || !firstAvailableVariant) return;
+    if (isOutOfStock) return;
 
-    setLoading(true);
-    try {
-      await addToCart(firstAvailableVariant.id, 1);
-      if (onQuickAddSuccess) {
-        onQuickAddSuccess();
-      }
-    } catch (err: any) {
-      alert(err.message || 'Failed to add item to cart.');
-    } finally {
-      setLoading(false);
+    if (variantsList.length === 1 && firstAvailableVariant) {
+      performQuickAdd(firstAvailableVariant.id);
+    } else {
+      setShowQuickAddModal(true);
     }
   };
 
@@ -205,28 +231,14 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
           </Link>
           
           {/* Reviews Aggregate score summary */}
-          {product.ratingInfo && product.ratingInfo.count > 0 ? (
+          {product.reviewCount !== undefined && product.reviewCount > 0 && (
             <div className="flex items-center gap-1.5 py-0.5">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 animate-none" />
               <span className="font-sans text-xs font-semibold text-navy-deep">
-                {product.ratingInfo.average}
+                {product.averageRating?.toFixed(1) || '0.0'}
               </span>
               <span className="font-sans text-[10px] text-muted-gray">
-                ({product.ratingInfo.count})
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 py-0.5">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                 ))}
-              </div>
-              <span className="font-sans text-[11px] font-semibold text-navy-deep ml-1">
-                4.9
-              </span>
-              <span className="font-sans text-[10px] text-muted-gray">
-                (124 reviews)
+                ({product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'})
               </span>
             </div>
           )}
@@ -276,6 +288,137 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
           </div>
         </div>
       </div>
+      {/* Quick Add Variant Modal */}
+      {showQuickAddModal && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-[#0F2854]/45 backdrop-blur-sm"
+            onClick={() => setShowQuickAddModal(false)}
+          />
+          
+          {/* Modal Card */}
+          <div className="relative bg-white border border-[#BDE8F5]/45 rounded-2xl p-6 max-w-sm w-full shadow-2xl font-sans text-left space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-[9px] font-bold text-sky-blue uppercase tracking-widest block">Quick Add</span>
+                <h3 className="font-serif text-base font-bold text-navy-deep mt-0.5 leading-snug">
+                  {product.name}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setShowQuickAddModal(false)}
+                className="text-muted-gray hover:text-navy-deep p-1 text-sm font-sans"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Sizes Selector */}
+              {uniqueSizes.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-muted-gray uppercase tracking-wider">
+                    Select Size
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {uniqueSizes.map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSize(size);
+                          // Check if currently selected color is valid for this size
+                          const colorsForSize = variantsList
+                            .filter((v) => v.size === size && v.stock > 0)
+                            .map((v) => v.color);
+                          if (selectedColor && !colorsForSize.includes(selectedColor)) {
+                            setSelectedColor('');
+                          }
+                        }}
+                        className={`px-3 py-1.5 border text-xs font-semibold rounded-full transition-all ${
+                          selectedSize === size
+                            ? 'border-navy-deep bg-navy-deep text-white font-bold'
+                            : 'border-gray-250 bg-white text-navy-deep hover:bg-gray-50'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Colors Selector */}
+              {uniqueColors.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-muted-gray uppercase tracking-wider">
+                    Select Color
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {uniqueColors.map((color) => {
+                      const isAvailable = !selectedSize || variantsList.some(
+                        (v) => v.size === selectedSize && v.color === color && v.stock > 0
+                      );
+                      return (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => setSelectedColor(color)}
+                          disabled={!isAvailable}
+                          className={`px-3 py-1.5 border text-xs font-semibold rounded-full transition-all ${
+                            selectedColor === color
+                              ? 'border-navy-deep bg-navy-deep text-white font-bold'
+                              : 'border-gray-250 bg-white text-navy-deep hover:bg-gray-50 disabled:opacity-30'
+                          }`}
+                        >
+                          {color}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Selected Option Summary */}
+            {selectedVariant && (
+              <div className="bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 rounded-lg p-3 text-xs flex justify-between items-center">
+                <div>
+                  <p className="text-[10px] font-bold text-muted-gray uppercase tracking-wider">Selected Option</p>
+                  <p className="font-semibold text-navy-deep mt-0.5">
+                    {selectedVariant.size || 'Standard'} / {selectedVariant.color || 'Default'}
+                  </p>
+                </div>
+                <p className="font-bold text-navy-deep text-sm">
+                  ₹{(selectedVariant.discountPrice || selectedVariant.price).toLocaleString('en-IN')}
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => {
+                  if (selectedVariant) {
+                    performQuickAdd(selectedVariant.id);
+                    setShowQuickAddModal(false);
+                  }
+                }}
+                disabled={!selectedVariant || loading}
+                className="flex-1 px-4 py-2.5 bg-navy-deep hover:bg-royal-blue text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-sm disabled:opacity-40"
+              >
+                {loading ? 'Adding...' : 'Add to Cart'}
+              </button>
+              <button
+                onClick={() => setShowQuickAddModal(false)}
+                className="px-5 border border-gray-300 text-muted-gray text-xs font-bold uppercase tracking-widest rounded-full hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
