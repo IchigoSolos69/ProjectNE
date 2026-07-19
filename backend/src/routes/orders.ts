@@ -34,6 +34,9 @@ router.get('/', async (req: AuthenticatedRequest, res) => {
                     name: true,
                     slug: true,
                     images: true,
+                    category: {
+                      select: { name: true }
+                    }
                   },
                 },
               },
@@ -58,6 +61,7 @@ router.get('/', async (req: AuthenticatedRequest, res) => {
           name: item.variant.product.name,
           slug: item.variant.product.slug,
           images: item.variant.images.length > 0 ? item.variant.images : item.variant.product.images,
+          category: item.variant.product.category ? { name: item.variant.product.category.name } : undefined,
         },
       })),
     }));

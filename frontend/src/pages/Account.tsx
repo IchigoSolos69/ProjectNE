@@ -4,7 +4,7 @@ import { apiRequest } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Product } from '../components/ProductCard';
-import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Eye, Truck, Heart } from 'lucide-react';
+import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Truck, Heart } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -17,6 +17,7 @@ interface OrderItem {
     name: string;
     slug: string;
     images: string[];
+    category?: { name: string };
   };
 }
 
@@ -140,11 +141,11 @@ export const Account: React.FC = () => {
 
   useEffect(() => {
     if (user) {
-      if (activeTab === 'orders') fetchOrders();
-      if (activeTab === 'wishlist') fetchWishlist();
-      if (activeTab === 'addresses') fetchAddresses();
+      fetchOrders();
+      fetchWishlist();
+      fetchAddresses();
     }
-  }, [user, activeTab]);
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -285,6 +286,48 @@ export const Account: React.FC = () => {
         </button>
       </div>
 
+      {/* Dashboard Statistics Cards */}
+      <div className="grid grid-cols-3 gap-4 font-sans text-xs">
+        <button
+          onClick={() => setActiveTab('orders')}
+          className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all ${
+            activeTab === 'orders'
+              ? 'border-royal-blue bg-[#BDE8F5]/10 shadow-sm animate-none'
+              : 'border-[#BDE8F5]/30 bg-white hover:bg-gray-50/50'
+          }`}
+        >
+          <span className="text-xl">📦</span>
+          <span className="text-lg font-bold text-navy-deep mt-1.5">{orders.length}</span>
+          <span className="text-[10px] font-bold text-muted-gray uppercase tracking-wider mt-0.5">Orders</span>
+        </button>
+        
+        <button
+          onClick={() => setActiveTab('wishlist')}
+          className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all ${
+            activeTab === 'wishlist'
+              ? 'border-royal-blue bg-[#BDE8F5]/10 shadow-sm animate-none'
+              : 'border-[#BDE8F5]/30 bg-white hover:bg-gray-50/50'
+          }`}
+        >
+          <span className="text-xl">❤️</span>
+          <span className="text-lg font-bold text-navy-deep mt-1.5">{wishlistItems.length}</span>
+          <span className="text-[10px] font-bold text-muted-gray uppercase tracking-wider mt-0.5">Wishlist</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('addresses')}
+          className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all ${
+            activeTab === 'addresses'
+              ? 'border-royal-blue bg-[#BDE8F5]/10 shadow-sm animate-none'
+              : 'border-[#BDE8F5]/30 bg-white hover:bg-gray-50/50'
+          }`}
+        >
+          <span className="text-xl">📍</span>
+          <span className="text-lg font-bold text-navy-deep mt-1.5">{addresses.length}</span>
+          <span className="text-[10px] font-bold text-muted-gray uppercase tracking-wider mt-0.5">Addresses</span>
+        </button>
+      </div>
+
       {/* Tabs list */}
       <div className="flex border-b border-gray-200 font-sans text-xs font-bold uppercase tracking-wider">
         <button
@@ -363,38 +406,130 @@ export const Account: React.FC = () => {
                           </span>
                           <button
                             onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                            className="p-1 hover:bg-[#BDE8F5]/30 rounded text-royal-blue flex items-center gap-1 font-bold text-[10px]"
+                            className="px-4 py-2 bg-navy-deep hover:bg-royal-blue text-white rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors shadow-sm"
                           >
-                            <Eye className="w-3.5 h-3.5" /> {isExpanded ? 'HIDE' : 'TRACK'}
+                            {isExpanded ? 'Hide Details' : 'Track Order →'}
                           </button>
                         </div>
                       </div>
 
                       {/* Items Row */}
                       <div className="p-6 divide-y divide-gray-100">
-                        {order.items.map((item) => (
-                          <div key={item.id} className="flex gap-4 py-3 first:pt-0 last:pb-0">
-                            <div className="w-12 h-14 bg-gray-50 rounded overflow-hidden flex-shrink-0 border">
-                              <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="flex-1 flex justify-between items-center">
-                              <div>
-                                <h4 className="font-serif text-xs font-semibold text-navy-deep">{item.product.name}</h4>
-                                <p className="text-[10px] text-muted-gray mt-0.5">
-                                  {item.size ? `Size: ${item.size}` : ''} {item.color ? `| Color: ${item.color}` : ''} &bull; Qty: {item.quantity}
-                                </p>
+                        {order.items.map((item) => {
+                          let paymentStatus = 'Paid';
+                          if (order.status === 'PENDING') paymentStatus = 'Pending';
+                          else if (order.status === 'CANCELLED') paymentStatus = 'Cancelled';
+                          else if (order.status === 'REFUNDED') paymentStatus = 'Refunded';
+
+                          const orderDate = new Date(order.createdAt);
+                          const estDeliveryDate = new Date(orderDate.setDate(orderDate.getDate() + 5));
+                          const estDeliveryString = estDeliveryDate.toLocaleDateString('en-IN', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          });
+
+                          return (
+                            <div key={item.id} className="flex gap-6 py-4 first:pt-0 last:pb-0 items-start">
+                              {/* Larger Image Thumbnail */}
+                              <div className="w-20 h-24 bg-gray-50 rounded overflow-hidden flex-shrink-0 border border-gray-150 shadow-sm">
+                                <img src={item.product.images[0]} alt="" className="w-full h-full object-cover" />
                               </div>
-                              <p className="text-xs font-bold text-navy-deep font-sans">
-                                ₹{Number(item.priceAtPurchase).toLocaleString('en-IN')}
-                              </p>
+                              <div className="flex-1 flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+                                <div className="space-y-1">
+                                  <span className="text-[9px] font-sans font-bold text-sky-blue uppercase tracking-widest block">
+                                    {item.product.category?.name || 'Bedding'}
+                                  </span>
+                                  <h4 className="font-serif text-sm font-semibold text-navy-deep">{item.product.name}</h4>
+                                  <p className="text-[11px] text-muted-gray font-sans">
+                                    {item.size ? `Size: ${item.size}` : ''} {item.color ? `| Color: ${item.color}` : ''}
+                                  </p>
+                                  <div className="flex flex-wrap gap-2 items-center text-[10px] pt-1">
+                                    <span className="bg-gray-100 text-muted-gray px-2 py-0.5 rounded font-sans font-semibold">
+                                      Qty: {item.quantity}
+                                    </span>
+                                    <span className={`px-2 py-0.5 rounded font-sans font-semibold border ${
+                                      paymentStatus === 'Paid'
+                                        ? 'bg-green-50 text-green-700 border-green-200'
+                                        : paymentStatus === 'Pending'
+                                        ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                        : 'bg-red-50 text-red-700 border-red-200'
+                                    }`}>
+                                      Payment: {paymentStatus}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-left md:text-right font-sans space-y-1">
+                                  <p className="text-xs font-bold text-navy-deep">
+                                    ₹{(Number(item.priceAtPurchase) * item.quantity).toLocaleString('en-IN')}
+                                  </p>
+                                  {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (
+                                    <p className="text-[10px] text-royal-blue font-semibold">
+                                      Est. Delivery: {estDeliveryString}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       {/* Expanded timelines / details tracker */}
                       {isExpanded && (
-                        <div className="bg-[#BDE8F5]/10 border-t border-gray-100 p-6 space-y-4">
+                        <div className="bg-[#BDE8F5]/10 border-t border-gray-100 p-6 space-y-6">
+                          
+                          {/* Visual Order Status Timeline */}
+                          {order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (() => {
+                            const steps = ['Ordered', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered'];
+                            let activeStepIndex = 0;
+                            if (order.status === 'PACKED') activeStepIndex = 1;
+                            else if (order.status === 'SHIPPED') activeStepIndex = 2;
+                            else if (order.status === 'DELIVERED') activeStepIndex = 4;
+                            
+                            return (
+                              <div className="bg-white border border-gray-100 rounded-xl p-6 font-sans text-xs space-y-6 shadow-sm">
+                                <h5 className="font-bold text-navy-deep uppercase text-[10px] tracking-wider">
+                                  Order Status Timeline
+                                </h5>
+                                <div className="flex items-center justify-between relative pt-2 pb-6 max-w-lg mx-auto">
+                                  {/* Connecting line */}
+                                  <div className="absolute top-[11px] left-2 right-2 h-0.5 bg-gray-200 -z-0" />
+                                  <div 
+                                    className="absolute top-[11px] left-2 h-0.5 bg-navy-deep transition-all duration-500 -z-0"
+                                    style={{ width: `${(activeStepIndex / (steps.length - 1)) * 96}%` }}
+                                  />
+
+                                  {steps.map((step, idx) => {
+                                    const isCompleted = idx <= activeStepIndex;
+                                    return (
+                                      <div key={step} className="flex flex-col items-center relative z-10">
+                                        {/* Node */}
+                                        <div
+                                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                                            isCompleted
+                                              ? 'bg-navy-deep text-white shadow-sm'
+                                              : 'border-2 border-sky-blue bg-white text-gray-400'
+                                          }`}
+                                        >
+                                          {isCompleted ? '✓' : idx + 1}
+                                        </div>
+                                        {/* Step Label */}
+                                        <span
+                                          className={`absolute top-7 whitespace-nowrap text-[9px] font-bold tracking-wider uppercase ${
+                                            isCompleted ? 'text-navy-deep' : 'text-gray-400'
+                                          }`}
+                                        >
+                                          {step}
+                                        </span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })()}
+
                           {order.trackingNumber && (
                             <div className="bg-white border border-gray-100 rounded-lg p-4 font-sans text-xs flex items-center gap-3">
                               <Truck className="w-5 h-5 text-royal-blue flex-shrink-0" />
