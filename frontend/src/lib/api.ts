@@ -23,6 +23,43 @@ export function buildApiUrl(path: string): string {
   return `${API_URL}${normalized}`;
 }
 
+/**
+ * Optimizes an image URL from Cloudinary or Unsplash for auto format, auto quality, and width constraints.
+ */
+export function getOptimizedImageUrl(url: string, width?: number): string {
+  if (!url) return '';
+
+  // 1. Handle Cloudinary URLs
+  if (url.includes('cloudinary.com')) {
+    if (url.includes('f_auto') || url.includes('q_auto')) {
+      if (width && !url.includes(`w_${width}`)) {
+        return url.replace('/upload/', `/upload/w_${width}/`);
+      }
+      return url;
+    }
+    const transform = `f_auto,q_auto${width ? `,w_${width}` : ''}`;
+    return url.replace('/upload/', `/upload/${transform}/`);
+  }
+
+  // 2. Handle Unsplash URLs
+  if (url.includes('images.unsplash.com')) {
+    const baseUrl = url.split('?')[0];
+    const params = new URLSearchParams(url.split('?')[1] || '');
+    params.set('auto', 'format,compress');
+    if (width) {
+      params.set('w', width.toString());
+      // Adjust dimensions dynamically
+      params.set('fit', 'crop');
+    }
+    if (!params.has('q')) {
+      params.set('q', '80');
+    }
+    return `${baseUrl}?${params.toString()}`;
+  }
+
+  return url;
+}
+
 export async function apiRequest<T = unknown>(
   path: string,
   options: RequestInit = {}

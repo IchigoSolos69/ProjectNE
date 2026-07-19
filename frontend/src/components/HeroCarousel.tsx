@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import gsap from 'gsap';
+import { getOptimizedImageUrl } from '../lib/api';
 
 interface CarouselSlide {
   id: string;
@@ -100,25 +102,43 @@ export const HeroCarousel: React.FC = () => {
 
   return (
     <section className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
+      <Helmet>
+        <link
+          rel="preload"
+          as="image"
+          href={getOptimizedImageUrl(slides[0].image, 1200)}
+          imageSrcSet={`${getOptimizedImageUrl(slides[0].image, 600)} 600w, ${getOptimizedImageUrl(slides[0].image, 1200)} 1200w, ${getOptimizedImageUrl(slides[0].image, 1800)} 1800w`}
+          imageSizes="(max-width: 768px) 100vw, 58vw"
+        />
+      </Helmet>
         
         {/* Left Carousel Image Section (~58%) */}
         <div
           ref={imageContainerRef}
           className="relative w-full md:w-[58%] h-[50vh] md:h-full overflow-hidden bg-navy-deep flex-shrink-0 p-0 m-0 border-0"
         >
-          {slides.map((slide, idx) => (
-            <div
-              key={slide.id}
-              className={`absolute inset-0 slide-img slide-img-${idx} opacity-0 p-0 m-0 border-0 w-full h-full`}
-              style={{ zIndex: idx === activeIndex ? 10 : 1 }}
-            >
-              <img
-                src={slide.image}
-                alt={slide.name}
-                className="w-full h-full object-cover p-0 m-0 border-0"
-              />
-            </div>
-          ))}
+          {slides.map((slide, idx) => {
+            const isFirst = idx === 0;
+            return (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 slide-img slide-img-${idx} opacity-0 p-0 m-0 border-0 w-full h-full`}
+                style={{ zIndex: idx === activeIndex ? 10 : 1 }}
+              >
+                <img
+                  src={getOptimizedImageUrl(slide.image, 1200)}
+                  srcSet={`${getOptimizedImageUrl(slide.image, 600)} 600w, ${getOptimizedImageUrl(slide.image, 1200)} 1200w, ${getOptimizedImageUrl(slide.image, 1800)} 1800w`}
+                  sizes="(max-width: 768px) 100vw, 58vw"
+                  width="1200"
+                  height="800"
+                  loading={isFirst ? "eager" : "lazy"}
+                  fetchPriority={isFirst ? "high" : "auto"}
+                  alt={slide.name}
+                  className="w-full h-full object-cover p-0 m-0 border-0"
+                />
+              </div>
+            );
+          })}
 
           {/* Ambient Dark Overlay for Branding & Contrast */}
           <div className="absolute inset-0 bg-gradient-to-t from-navy-deep/60 via-transparent to-black/25 z-20 pointer-events-none" />

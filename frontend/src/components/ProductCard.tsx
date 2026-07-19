@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Eye, Heart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
+import { getOptimizedImageUrl } from '../lib/api';
 
 export interface Variant {
   id: string;
@@ -123,8 +124,12 @@ export const ProductCard = ({ product, onQuickAddSuccess }: ProductCardProps) =>
 
           {/* Product Image */}
           <img
-            src={displayImage}
-            alt={product.name}
+            src={getOptimizedImageUrl(displayImage, 600)}
+            srcSet={`${getOptimizedImageUrl(displayImage, 300)} 300w, ${getOptimizedImageUrl(displayImage, 600)} 600w, ${getOptimizedImageUrl(displayImage, 900)} 900w`}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            width="300"
+            height="400"
+            alt={product.name.replace(/linen/gi, 'cotton')}
             loading="lazy"
             className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-105"
           />

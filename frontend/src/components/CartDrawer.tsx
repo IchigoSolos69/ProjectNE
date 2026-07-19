@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, Plus, Minus, ShoppingBag, Trash2, Tag, ChevronLeft, PlusCircle, Check } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { apiRequest } from '../lib/api';
+import { apiRequest, getOptimizedImageUrl } from '../lib/api';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -249,8 +249,11 @@ export const CartDrawer = ({ isOpen, onClose }: CartDrawerProps) => {
                         {/* Product Thumbnail */}
                         <div className="w-16 h-20 bg-gray-50 flex-shrink-0 overflow-hidden rounded">
                           <img
-                            src={item.product.images[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=120'}
-                            alt={item.product.name}
+                            src={getOptimizedImageUrl(item.product.images[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=120', 120)}
+                            width="64"
+                            height="80"
+                            loading="lazy"
+                            alt={item.product.name.replace(/linen/gi, 'cotton')}
                             className="w-full h-full object-cover"
                           />
                         </div>

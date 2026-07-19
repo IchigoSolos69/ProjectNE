@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { apiRequest } from '../lib/api';
+import { apiRequest, getOptimizedImageUrl } from '../lib/api';
 import { Product, ProductCard } from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -238,6 +238,13 @@ export const ProductDetail: React.FC = () => {
         <meta property="product:price:amount" content={activePrice.toString()} />
         <meta property="product:price:currency" content="INR" />
         <meta name="twitter:card" content="summary_large_image" />
+        <link
+          rel="preload"
+          as="image"
+          href={getOptimizedImageUrl(displayImages[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 800)}
+          imageSrcSet={`${getOptimizedImageUrl(displayImages[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 400)} 400w, ${getOptimizedImageUrl(displayImages[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 800)} 800w, ${getOptimizedImageUrl(displayImages[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 1200)} 1200w`}
+          imageSizes="(max-width: 1024px) 100vw, 50vw"
+        />
       </Helmet>
 
       {/* Structured Schema Script */}
@@ -254,8 +261,14 @@ export const ProductDetail: React.FC = () => {
         <div className="space-y-4">
           <div className="aspect-[4/5] bg-gray-50 overflow-hidden rounded-lg border border-gray-100 shadow-sm relative">
             <img
-              src={displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200'}
-              alt={product.name}
+              src={getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 800)}
+              srcSet={`${getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 400)} 400w, ${getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 800)} 800w, ${getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 1200)} 1200w`}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              width="800"
+              height="1000"
+              alt={product.name.replace(/linen/gi, 'cotton')}
+              loading="eager"
+              fetchPriority="high"
               className="w-full h-full object-cover transition-all duration-500"
             />
 
@@ -282,7 +295,14 @@ export const ProductDetail: React.FC = () => {
                       : 'border-gray-200 opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={getOptimizedImageUrl(img, 100)}
+                    width="80"
+                    height="100"
+                    loading="lazy"
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>

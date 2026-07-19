@@ -4,6 +4,7 @@ import { Mail, Lock, User as UserIcon } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { getOptimizedImageUrl } from '../lib/api';
 
 export const Auth: React.FC = () => {
   const { user, login, register } = useAuth();
@@ -62,8 +63,13 @@ export const Auth: React.FC = () => {
       </Helmet>
       <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative flex-shrink-0 bg-navy-deep overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200"
+          src={getOptimizedImageUrl('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 1000)}
+          srcSet={`${getOptimizedImageUrl('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 500)} 500w, ${getOptimizedImageUrl('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 1000)} 1000w`}
+          sizes="(max-width: 768px) 100vw, 50vw"
+          width="1000"
+          height="1000"
           alt="Bedding Detail"
+          loading="lazy"
           className="absolute inset-0 w-full h-full object-cover opacity-80"
         />
         <div className="absolute inset-0 bg-gradient-to-tr from-[#0F2854] via-[#0F2854]/45 to-transparent z-10" />
