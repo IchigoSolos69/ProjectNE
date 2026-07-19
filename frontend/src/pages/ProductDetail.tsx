@@ -228,15 +228,16 @@ export const ProductDetail: React.FC = () => {
   return (
     <main className="flex-1 mt-[80px] bg-white min-h-screen py-12 px-6 max-w-7xl mx-auto">
       <Helmet>
-        <title>{`${product.name} | RareComforts Bedding`}</title>
-        <meta name="description" content={product.description.substring(0, 155)} />
+        <title>{`${product.name.replace(/linen/gi, 'cotton')} | RareComforts Bedding`}</title>
+        <meta name="description" content={product.description.replace(/linen/gi, 'cotton').substring(0, 155)} />
         <link rel="canonical" href={`${window.location.origin}/products/${product.slug}`} />
-        <meta property="og:title" content={product.name} />
-        <meta property="og:description" content={product.description.substring(0, 150)} />
+        <meta property="og:title" content={product.name.replace(/linen/gi, 'cotton')} />
+        <meta property="og:description" content={product.description.replace(/linen/gi, 'cotton').substring(0, 150)} />
         <meta property="og:image" content={displayImages[0] || product.images[0]} />
         <meta property="og:type" content="product" />
         <meta property="product:price:amount" content={activePrice.toString()} />
         <meta property="product:price:currency" content="INR" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Helmet>
 
       {/* Structured Schema Script */}

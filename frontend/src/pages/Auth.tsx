@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { Mail, Lock, User as UserIcon } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '../context/AuthContext';
 import GoogleSignInButton from '../components/GoogleSignInButton';
 
@@ -52,6 +53,13 @@ export const Auth: React.FC = () => {
 
   return (
     <main className="w-full min-h-screen flex flex-col md:flex-row bg-white relative z-10 overflow-x-hidden">
+      <Helmet>
+        <title>Sign In | RareComforts Bedding</title>
+        <meta name="description" content="Sign in to your RareComforts account to access your orders, saved registries, and custom bedding selections." />
+        <meta property="og:title" content="Sign In | RareComforts Bedding" />
+        <meta property="og:description" content="Sign in to your RareComforts account." />
+        <meta property="og:type" content="website" />
+      </Helmet>
       <div className="w-full md:w-1/2 h-[50vh] md:h-screen relative flex-shrink-0 bg-navy-deep overflow-hidden">
         <img
           src="https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200"

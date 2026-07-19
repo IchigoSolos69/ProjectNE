@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { apiRequest } from '../lib/api';
 import { ProductCard, Product } from '../components/ProductCard';
 import { SlidersHorizontal, ArrowUpDown } from 'lucide-react';
@@ -109,8 +110,18 @@ export const ProductListing: React.FC = () => {
     setSearchParams({});
   };
 
+  const activeCategoryObj = categories.find((c) => c.slug === currentCategory);
+  const categoryTitle = activeCategoryObj ? activeCategoryObj.name : 'Pure Cotton Bedding';
+
   return (
     <main className="flex-1 mt-[80px] bg-[#FAF9F6] min-h-screen py-16 px-8 md:px-12 max-w-7xl mx-auto transition-colors duration-500">
+      <Helmet>
+        <title>{`${categoryTitle} | RareComforts Bedding`}</title>
+        <meta name="description" content={`Explore our curated ${categoryTitle.toLowerCase()} collection. Shop premium Egyptian cotton and satin sheets, covers, and towels designed for quiet morning luxury.`} />
+        <meta property="og:title" content={`${categoryTitle} | RareComforts Bedding`} />
+        <meta property="og:description" content={`Explore our curated ${categoryTitle.toLowerCase()} collection. Shop premium Egyptian cotton and satin sheets, covers, and towels.`} />
+        <meta property="og:type" content="website" />
+      </Helmet>
       {/* Page Header */}
       <div className="border-b border-[#0F2854]/10 pb-8 mb-16 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
