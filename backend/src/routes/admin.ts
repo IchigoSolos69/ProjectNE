@@ -1,8 +1,12 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { prisma } from '../lib/prisma';
 import { requireAdmin } from '../middleware/requireAuth';
-import { generateUploadSignature } from '../lib/cloudinary';
+import { generateUploadSignature, cloudinary } from '../lib/cloudinary';
 import { emailService } from '../lib/emails';
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 const router = Router();
 
@@ -586,19 +590,28 @@ router.delete('/coupons/:id', async (req, res) => {
   }
 });
 
-// POST /api/admin/upload - Generate signed parameters for direct Cloudinary upload
-router.post('/upload', async (req, res) => {
+// POST /api/admin/upload - Receive file and upload to Cloudinary securely on the server
+router.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { folder = 'rarecomforts' } = req.body;
-    const params = {
-      folder,
-      timestamp: Math.round(new Date().getTime() / 1000),
-    };
-    const signatureDetails = generateUploadSignature(params);
-    return res.status(200).json(signatureDetails);
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded.' });
+    }
+
+    const uploadStream = cloudinary.uploader.upload_stream(
+      { folder: 'rarecomforts' },
+      (error, result) => {
+        if (error) {
+          console.error('Cloudinary server-side upload error:', error);
+          return res.status(500).json({ error: 'Cloudinary upload failed.' });
+        }
+        return res.status(200).json({ secure_url: result?.secure_url });
+      }
+    );
+
+    uploadStream.end(req.file.buffer);
   } catch (error: any) {
-    console.error('Cloudinary upload authorization error:', error);
-    return res.status(500).json({ error: 'Cloudinary credentials missing or config error.' });
+    console.error('Upload route error:', error);
+    return res.status(500).json({ error: 'Server error during image upload.' });
   }
 });
 

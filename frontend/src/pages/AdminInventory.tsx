@@ -153,7 +153,7 @@ export const AdminInventory: React.FC = () => {
     });
   };
 
-  // Handle image upload direct to Cloudinary
+  // Handle image upload direct to the secure backend upload route
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -161,35 +161,30 @@ export const AdminInventory: React.FC = () => {
     setUploading(true);
     try {
       const file = files[0];
-
-      // 1. Get Signed details from backend
-      const { signature, timestamp, apiKey, cloudName }: any = await apiRequest('/api/admin/upload', {
-        method: 'POST',
-        body: JSON.stringify({ folder: 'rarecomforts' }),
-      });
-
-      // 2. Upload directly to Cloudinary
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('api_key', apiKey);
-      formData.append('timestamp', timestamp.toString());
-      formData.append('signature', signature);
-      formData.append('folder', 'rarecomforts');
 
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'https://projectne.onrender.com/api';
+      const token = localStorage.getItem('rc_session_token');
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_URL}/admin/upload`, {
         method: 'POST',
+        headers,
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error('Cloudinary response failed.');
+        throw new Error('Image upload failed on the server.');
       }
 
       const resJson = await response.json();
       setImages((prev) => [...prev, resJson.secure_url]);
     } catch (err: any) {
       console.error('Image upload failed', err);
-      alert('Cloudinary upload credentials are not configured on the server. Please paste a direct image URL in the fallback input box below.');
     } finally {
       setUploading(false);
     }
