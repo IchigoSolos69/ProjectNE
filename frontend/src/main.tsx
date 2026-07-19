@@ -8,6 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { ToastProvider } from './context/ToastContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 
@@ -129,7 +130,8 @@ ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <HelmetProvider>
       <AuthProvider>
-        <CartProvider>
+        <ToastProvider>
+          <CartProvider>
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<AppLayout />}>
@@ -170,6 +172,7 @@ ReactDOM.createRoot(rootElement).render(
             </Routes>
           </BrowserRouter>
         </CartProvider>
+        </ToastProvider>
       </AuthProvider>
     </HelmetProvider>
   </React.StrictMode>

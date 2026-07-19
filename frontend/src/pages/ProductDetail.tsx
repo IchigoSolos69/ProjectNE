@@ -7,6 +7,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ShoppingBag, ArrowLeft, Sparkles, RefreshCw, Star, Heart, CheckCircle2, Truck, Lock } from 'lucide-react';
 import { CartDrawer } from '../components/CartDrawer';
+import { useToast } from '../context/ToastContext';
 
 interface Review {
   id: string;
@@ -23,6 +24,7 @@ export const ProductDetail: React.FC = () => {
   const { user, wishlistIds, toggleWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -126,8 +128,9 @@ export const ProductDetail: React.FC = () => {
     if (!product) return;
     try {
       await toggleWishlist(product.id);
+      toast.success('Wishlist Updated', `Successfully updated wishlist for ${product.name}`);
     } catch (err: any) {
-      alert(err.message || 'Failed to update wishlist.');
+      toast.error('Wishlist Error', err.message || 'Failed to update wishlist.');
     }
   };
 
@@ -157,8 +160,9 @@ export const ProductDetail: React.FC = () => {
     try {
       await addToCart(activeVariant.id, quantity);
       setShowDrawer(true);
+      toast.success('Added to Cart', `${product?.name} has been added to your cart.`);
     } catch (err: any) {
-      alert(err.message || 'Failed to add item to cart.');
+      toast.error('Add to Cart Failed', err.message || 'Failed to add item to cart.');
     } finally {
       setAddingToCart(false);
     }

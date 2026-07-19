@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Product } from '../components/ProductCard';
 import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Truck, Heart, MapPin, CreditCard, Camera, MessageSquare, HelpCircle, RefreshCw, Mail, ChevronRight } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 interface OrderItem {
   id: string;
@@ -88,6 +89,7 @@ export const Account: React.FC = () => {
   const { user, logout, loading: authLoading, toggleWishlist } = useAuth();
   const { addToCart } = useCart();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<'orders' | 'wishlist' | 'addresses'>('orders');
   
@@ -182,7 +184,7 @@ export const Account: React.FC = () => {
   const handleCreateAddress = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!addrName || !addrPhone || !addrLine1 || !addrCity || !addrState || !addrPincode) {
-      alert('Required address fields are blank.');
+      toast.error('Blank Fields', 'Required address fields are blank.');
       return;
     }
     setAddrLoading(true);
@@ -214,7 +216,7 @@ export const Account: React.FC = () => {
       setAddrPincode('');
       setAddrLabel('Home');
     } catch (err: any) {
-      alert(err.message || 'Failed to save address.');
+      toast.error('Error Saving Address', err.message || 'Failed to save address.');
     } finally {
       setAddrLoading(false);
     }
@@ -227,7 +229,7 @@ export const Account: React.FC = () => {
       await apiRequest(`/api/addresses/${id}`, { method: 'DELETE' });
       fetchAddresses();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete address.');
+      toast.error('Error Deleting Address', err.message || 'Failed to delete address.');
     }
   };
 
@@ -237,9 +239,9 @@ export const Account: React.FC = () => {
       for (const item of order.items) {
         await addToCart(item.variantId, item.quantity);
       }
-      alert('All items from this order have been added to your cart.');
+      toast.success('Added to Cart', 'All items from this order have been added to your cart.');
     } catch (err: any) {
-      alert(err.message || 'Failed to add items to cart.');
+      toast.error('Failed to Add', err.message || 'Failed to add items to cart.');
     } finally {
       setLoadingOrders(false);
     }
@@ -252,9 +254,9 @@ export const Account: React.FC = () => {
       setLoadingOrders(true);
       await apiRequest(`/api/orders/${orderId}/cancel`, { method: 'PATCH' });
       fetchOrders();
-      alert('Order cancelled successfully.');
+      toast.success('Order Cancelled', 'Your order has been cancelled successfully.');
     } catch (err: any) {
-      alert(err.message || 'Failed to cancel order.');
+      toast.error('Failed to Cancel', err.message || 'Failed to cancel order.');
     } finally {
       setLoadingOrders(false);
     }
@@ -263,7 +265,7 @@ export const Account: React.FC = () => {
   const handleWishlistMoveToCart = async (prod: Product) => {
     const variant = prod.variants?.find((v) => v.stock > 0) || prod.variants?.[0];
     if (!variant) {
-      alert('This product has no active variants currently.');
+      toast.error('Unavailable', 'This product has no active variants currently.');
       return;
     }
     try {
@@ -273,9 +275,9 @@ export const Account: React.FC = () => {
       await toggleWishlist(prod.id);
       // Refresh local list
       fetchWishlist();
-      alert(`Moved "${prod.name}" to cart.`);
+      toast.success('Moved to Cart', `"${prod.name}" has been moved to your cart.`);
     } catch (err: any) {
-      alert(err.message || 'Failed to move to cart.');
+      toast.error('Error Moving Item', err.message || 'Failed to move to cart.');
     }
   };
 
@@ -284,7 +286,7 @@ export const Account: React.FC = () => {
       await toggleWishlist(productId);
       fetchWishlist();
     } catch (err: any) {
-      alert(err.message || 'Failed to remove item.');
+      toast.error('Error Removing Item', err.message || 'Failed to remove item.');
     }
   };
 
@@ -335,7 +337,7 @@ export const Account: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => alert('Profile editing is coming soon.')}
+            onClick={() => toast.info('Coming Soon', 'Profile editing is coming soon.')}
             className="flex items-center gap-1.5 px-4 py-2 border border-navy-deep text-navy-deep rounded-full text-xs font-bold uppercase tracking-wider hover:bg-navy-deep hover:text-white transition-all bg-white shadow-sm font-sans"
           >
             ✏ Edit Profile
@@ -606,7 +608,7 @@ export const Account: React.FC = () => {
                         <div className="flex flex-wrap gap-4 text-gray-500 font-bold">
                           <button
                             type="button"
-                            onClick={() => alert('Invoice download is being prepared and will be available shortly.')}
+                            onClick={() => toast.info('Invoice Processing', 'Invoice download is being prepared and will be available shortly.')}
                             className="hover:text-royal-blue transition-colors uppercase tracking-wider text-[10px]"
                           >
                             View Invoice
@@ -940,7 +942,7 @@ export const Account: React.FC = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <button
-            onClick={() => alert('Live Chat Support is online from 9 AM - 9 PM IST. Connecting now...')}
+            onClick={() => toast.info('Connecting Chat', 'Live Chat Support is online from 9 AM - 9 PM IST. Connecting now...')}
             className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
           >
             <MessageSquare className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
@@ -948,7 +950,7 @@ export const Account: React.FC = () => {
           </button>
           
           <button
-            onClick={() => alert('FAQ section is under updates. Feel free to contact our Concierge!')}
+            onClick={() => toast.info('Coming Soon', 'FAQ section is under updates. Feel free to contact our Concierge!')}
             className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
           >
             <HelpCircle className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
@@ -956,7 +958,7 @@ export const Account: React.FC = () => {
           </button>
 
           <button
-            onClick={() => alert('Returns can be scheduled within 10 days of delivery. Click Contact Support to begin.')}
+            onClick={() => toast.info('Returns Info', 'Returns can be scheduled within 10 days of delivery. Click Contact Support to begin.')}
             className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
           >
             <RefreshCw className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
