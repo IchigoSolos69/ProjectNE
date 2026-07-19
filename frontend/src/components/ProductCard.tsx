@@ -30,6 +30,9 @@ export interface Product {
   material?: string | null;
   careInstructions?: string | null;
   manufacturingDetails?: string | null;
+  packageIncludes?: string[];
+  averageRating?: number;
+  reviewCount?: number;
   lowestPrice?: number;
   ratingInfo?: { average: number; count: number };
 }

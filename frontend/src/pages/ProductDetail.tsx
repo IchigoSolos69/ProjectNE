@@ -5,7 +5,7 @@ import { apiRequest, getOptimizedImageUrl } from '../lib/api';
 import { Product, ProductCard } from '../components/ProductCard';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingBag, ArrowLeft, Shield, Sparkles, RefreshCw, Star, Heart, CheckCircle2 } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Sparkles, RefreshCw, Star, Heart, CheckCircle2, Truck, Lock } from 'lucide-react';
 import { CartDrawer } from '../components/CartDrawer';
 
 interface Review {
@@ -45,6 +45,24 @@ export const ProductDetail: React.FC = () => {
   const [reviewSubmitLoading, setReviewSubmitLoading] = useState(false);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState('');
   const [reviewErrorMsg, setReviewErrorMsg] = useState('');
+
+  // Image Hover Zoom States & Events
+  const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({});
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomStyle({
+      transformOrigin: `${x}% ${y}%`,
+      transform: 'scale(1.5)',
+    });
+  };
+  const handleMouseLeave = () => {
+    setZoomStyle({
+      transformOrigin: 'center center',
+      transform: 'scale(1)',
+    });
+  };
 
   // Wishlist check
   const isWishlisted = product ? wishlistIds.includes(product.id) : false;
@@ -259,7 +277,11 @@ export const ProductDetail: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Left: Image Gallery */}
         <div className="space-y-4">
-          <div className="aspect-[4/5] bg-gray-50 overflow-hidden rounded-lg border border-gray-100 shadow-sm relative">
+          <div
+            className="aspect-[4/5] bg-gray-50 overflow-hidden rounded-lg border border-gray-100 shadow-sm relative cursor-zoom-in"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
             <img
               src={getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 800)}
               srcSet={`${getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 400)} 400w, ${getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 800)} 800w, ${getOptimizedImageUrl(displayImages[activeImageIndex] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200', 1200)} 1200w`}
@@ -269,7 +291,11 @@ export const ProductDetail: React.FC = () => {
               alt={product.name.replace(/linen/gi, 'cotton')}
               loading="eager"
               fetchPriority="high"
-              className="w-full h-full object-cover transition-all duration-500"
+              style={{
+                transition: 'transform 0.1s ease-out',
+                ...zoomStyle,
+              }}
+              className="w-full h-full object-cover"
             />
 
             {/* Wishlist toggle */}
@@ -322,40 +348,26 @@ export const ProductDetail: React.FC = () => {
             </h1>
             
             {/* Reviews aggregate score */}
-            {product.ratingInfo && product.ratingInfo.count > 0 ? (
+            {product.reviewCount && product.reviewCount > 0 ? (
               <div className="flex items-center gap-1.5 py-0.5">
                 <div className="flex text-amber-400">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
                       className={`w-4 h-4 ${
-                        i < Math.round(product.ratingInfo!.average) ? 'fill-amber-400' : 'text-gray-300'
+                        i < Math.round(product.averageRating || 0) ? 'fill-amber-400 text-amber-400' : 'text-gray-300'
                       }`}
                     />
                   ))}
                 </div>
                 <span className="font-sans text-xs font-bold text-navy-deep">
-                  {product.ratingInfo.average}
+                  {product.averageRating}
                 </span>
                 <span className="font-sans text-xs text-muted-gray">
-                  ({product.ratingInfo.count} verified reviews)
+                  ({product.reviewCount} reviews)
                 </span>
               </div>
-            ) : (
-              <div className="flex items-center gap-1 py-0.5">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <span className="font-sans text-[11px] font-semibold text-navy-deep ml-1">
-                  4.9
-                </span>
-                <span className="font-sans text-xs text-muted-gray">
-                  (124 verified reviews)
-                </span>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Price breakdown */}
@@ -382,6 +394,20 @@ export const ProductDetail: React.FC = () => {
           <p className="text-sm text-muted-gray leading-relaxed font-sans">
             {product.description.replace(/linen/gi, 'cotton')}
           </p>
+
+          {/* "What's Included" Section */}
+          {product.packageIncludes && product.packageIncludes.length > 0 && (
+            <div className="pt-4 border-t border-gray-100 space-y-2">
+              <span className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                What's Included
+              </span>
+              <ul className="list-disc pl-4 text-xs text-muted-gray space-y-1 font-sans">
+                {product.packageIncludes.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* Variant Selection Filters */}
           <div className="space-y-5 pt-4">
@@ -440,15 +466,17 @@ export const ProductDetail: React.FC = () => {
             )}
 
             {/* Stock indicator */}
-            <div className="text-xs font-sans">
+            <div className="text-xs font-sans font-semibold">
               {activeVariant ? (
-                activeVariant.stock > 0 ? (
-                  <span className="text-[#3AA757] font-semibold">In Stock ({activeVariant.stock} units available)</span>
+                activeVariant.stock > 10 ? (
+                  <span className="text-green-600">🟢 In Stock | Ships within 24 Hours</span>
+                ) : activeVariant.stock > 0 ? (
+                  <span className="text-amber-600">🟠 Only {activeVariant.stock} Left - Order Soon</span>
                 ) : (
-                  <span className="text-red-500 font-semibold">Out of Stock</span>
+                  <span className="text-red-600">🔴 Out of Stock</span>
                 )
               ) : (
-                <span className="text-red-500 font-semibold">Configuration Unavailable</span>
+                <span className="text-red-600">🔴 Out of Stock</span>
               )}
             </div>
 
@@ -483,10 +511,10 @@ export const ProductDetail: React.FC = () => {
                 {isOutOfStock ? (
                   'OUT OF STOCK'
                 ) : addingToCart ? (
-                  'ADDING TO CLOSET...'
+                  'ADDING TO CART...'
                 ) : (
                   <>
-                    <ShoppingBag className="w-4 h-4" /> ADD TO BEDDING CLOSET
+                    <ShoppingBag className="w-4 h-4" /> ADD TO CART
                   </>
                 )}
               </button>
@@ -494,21 +522,26 @@ export const ProductDetail: React.FC = () => {
           </div>
 
           {/* Trust badges */}
-          <div className="grid grid-cols-3 gap-4 pt-8 border-t border-[#BDE8F5]/30 text-center">
-            <div className="space-y-1">
-              <Shield className="w-5 h-5 text-sky-blue mx-auto" />
-              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-wider">Premium Safe</p>
-              <p className="text-[9px] text-muted-gray font-medium">100% Oeko-Tex Cert</p>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-8 border-t border-[#BDE8F5]/30 text-center">
+            <div className="flex flex-col items-center space-y-1">
+              <Truck className="w-5 h-5 text-muted-gray" />
+              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-widest">Free Shipping</p>
+              <p className="text-[9px] text-muted-gray font-medium">Pan-India delivery</p>
             </div>
-            <div className="space-y-1">
-              <Sparkles className="w-5 h-5 text-sky-blue mx-auto" />
-              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-wider">Royal Standard</p>
-              <p className="text-[9px] text-muted-gray font-medium">Finest cotton crops</p>
+            <div className="flex flex-col items-center space-y-1">
+              <Lock className="w-5 h-5 text-muted-gray" />
+              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-widest">Secure Payment</p>
+              <p className="text-[9px] text-muted-gray font-medium">100% Encrypted</p>
             </div>
-            <div className="space-y-1">
-              <RefreshCw className="w-5 h-5 text-sky-blue mx-auto" />
-              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-wider">Concierge Care</p>
-              <p className="text-[9px] text-muted-gray font-medium">India white glove delivery</p>
+            <div className="flex flex-col items-center space-y-1">
+              <RefreshCw className="w-5 h-5 text-muted-gray animate-none" />
+              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-widest">Easy Returns</p>
+              <p className="text-[9px] text-muted-gray font-medium">10-day exchange</p>
+            </div>
+            <div className="flex flex-col items-center space-y-1">
+              <Sparkles className="w-5 h-5 text-muted-gray" />
+              <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-widest">Made in India</p>
+              <p className="text-[9px] text-muted-gray font-medium">Artisanal heritage</p>
             </div>
           </div>
         </div>

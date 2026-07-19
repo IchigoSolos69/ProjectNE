@@ -50,6 +50,9 @@ model Product {
   material             String?
   careInstructions     String?
   manufacturingDetails String?
+  packageIncludes      String[]
+  averageRating        Float          @default(0)
+  reviewCount          Int            @default(0)
   createdAt    DateTime       @default(now())
   variants     ProductVariant[]
   wishlistedBy WishlistItem[]

@@ -103,6 +103,7 @@ router.post('/products', async (req, res) => {
       material,
       careInstructions,
       manufacturingDetails,
+      packageIncludes = [],
     } = req.body;
 
     if (!name || !description || !categoryId) {
@@ -142,6 +143,7 @@ router.post('/products', async (req, res) => {
           material: material || null,
           careInstructions: careInstructions || null,
           manufacturingDetails: manufacturingDetails || null,
+          packageIncludes: packageIncludes || [],
         },
       });
 
@@ -199,6 +201,7 @@ router.patch('/products/:id', async (req, res) => {
       material,
       careInstructions,
       manufacturingDetails,
+      packageIncludes,
     } = req.body;
 
     const existingProduct = await prisma.product.findUnique({ where: { id } });
@@ -219,6 +222,7 @@ router.patch('/products/:id', async (req, res) => {
     if (material !== undefined) updateData.material = material || null;
     if (careInstructions !== undefined) updateData.careInstructions = careInstructions || null;
     if (manufacturingDetails !== undefined) updateData.manufacturingDetails = manufacturingDetails || null;
+    if (packageIncludes !== undefined) updateData.packageIncludes = packageIncludes || [];
 
     await prisma.$transaction(async (tx) => {
       // Update core details

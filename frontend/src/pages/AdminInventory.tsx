@@ -152,6 +152,7 @@ export const AdminInventory: React.FC = () => {
   const [material, setMaterial] = useState('');
   const [careInstructions, setCareInstructions] = useState('');
   const [manufacturingDetails, setManufacturingDetails] = useState('');
+  const [packageIncludes, setPackageIncludes] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isTrending, setIsTrending] = useState(false);
   const [isActive, setIsActive] = useState(true);
@@ -236,6 +237,7 @@ export const AdminInventory: React.FC = () => {
     setMaterial('');
     setCareInstructions('');
     setManufacturingDetails('');
+    setPackageIncludes('');
     setImages([]);
     setIsTrending(false);
     setIsActive(true);
@@ -256,6 +258,7 @@ export const AdminInventory: React.FC = () => {
     setMaterial(prod.material || '');
     setCareInstructions(prod.careInstructions || '');
     setManufacturingDetails(prod.manufacturingDetails || '');
+    setPackageIncludes(prod.packageIncludes ? prod.packageIncludes.join(', ') : '');
     setImages(prod.images);
     setIsTrending(prod.isTrending);
     setIsActive(prod.isActive);
@@ -432,12 +435,18 @@ export const AdminInventory: React.FC = () => {
       return;
     }
 
+    const packageIncludesArray = packageIncludes
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
     const payload = {
       name,
       description,
       material,
       careInstructions,
       manufacturingDetails,
+      packageIncludes: packageIncludesArray,
       images,
       isTrending,
       isActive,
@@ -475,6 +484,7 @@ export const AdminInventory: React.FC = () => {
           material,
           careInstructions,
           manufacturingDetails,
+          packageIncludes: packageIncludesArray,
           images,
           isTrending,
           isActive,
@@ -758,6 +768,20 @@ export const AdminInventory: React.FC = () => {
                     className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
                   />
                 </div>
+              </div>
+
+              {/* What's Included Input */}
+              <div className="space-y-1">
+                <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                  What's Included (Package Contents - Comma-Separated)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. 1 Queen Bedsheet, 2 Pillow Covers"
+                  value={packageIncludes}
+                  onChange={(e) => setPackageIncludes(e.target.value)}
+                  className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
+                />
               </div>
 
               {/* DYNAMIC VARIANTS rows */}

@@ -87,6 +87,8 @@ router.get('/products', async (req, res) => {
       return {
         ...prod,
         lowestPrice,
+        averageRating: avgRating,
+        reviewCount: totalReviews,
         ratingInfo: {
           average: avgRating,
           count: totalReviews,
@@ -159,6 +161,8 @@ router.get('/products/:slug', async (req, res) => {
 
     return res.status(200).json({
       ...product,
+      averageRating: avgRating,
+      reviewCount: totalReviews,
       ratingInfo: {
         average: avgRating,
         count: totalReviews,
