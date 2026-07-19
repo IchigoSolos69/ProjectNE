@@ -77,7 +77,12 @@ app.use('/api/wishlist', wishlistRouter);
 
 // Health Check
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  const isPooled = process.env.DATABASE_URL?.includes('-pooler') || false;
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    databaseConnection: isPooled ? 'pooled' : 'direct',
+  });
 });
 
 // Error handling middleware
