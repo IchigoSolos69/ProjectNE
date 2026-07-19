@@ -10,6 +10,7 @@ export const ProductListing: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [isSortOpen, setIsSortOpen] = useState(false);
   
   // Local Filter States
   const currentCategory = searchParams.get('category') || '';
@@ -146,18 +147,52 @@ export const ProductListing: React.FC = () => {
             FILTERS
           </button>
           
-          <div className="relative flex-1 md:flex-none">
-            <select
-              value={currentSort}
-              onChange={(e) => handleSortSelect(e.target.value)}
-              className="appearance-none bg-[#FAF9F6] border border-[#0F2854]/20 rounded-full px-6 py-3 pr-12 text-xs font-semibold text-navy-deep focus:outline-none focus:border-navy-deep cursor-pointer w-full tracking-wider"
+          <div className="relative flex-1 md:flex-none font-sans">
+            <button
+              onClick={() => setIsSortOpen(!isSortOpen)}
+              className="flex items-center justify-between gap-6 bg-[#FAF9F6] border border-[var(--color-navy-deep)] rounded-full px-6 py-3 text-xs font-semibold text-[var(--color-navy-deep)] focus:outline-none cursor-pointer w-full tracking-wider min-w-[200px]"
             >
-              <option value="newest">Newest First</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="trending">Most Popular</option>
-            </select>
-            <ArrowUpDown className="w-3.5 h-3.5 text-navy-deep absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <span>
+                {currentSort === 'newest' && 'Newest First'}
+                {currentSort === 'price_asc' && 'Price: Low to High'}
+                {currentSort === 'price_desc' && 'Price: High to Low'}
+                {currentSort === 'trending' && 'Most Popular'}
+              </span>
+              <ArrowUpDown className="w-3.5 h-3.5 text-[var(--color-navy-deep)]" />
+            </button>
+
+            {isSortOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-30" 
+                  onClick={() => setIsSortOpen(false)} 
+                />
+                <ul className="absolute right-0 mt-2 w-full min-w-[200px] bg-white border border-[#0F2854]/10 rounded-lg shadow-lg py-1.5 z-40 font-sans text-xs text-[var(--color-navy-deep)]">
+                  {[
+                    { value: 'newest', label: 'Newest First' },
+                    { value: 'price_asc', label: 'Price: Low to High' },
+                    { value: 'price_desc', label: 'Price: High to Low' },
+                    { value: 'trending', label: 'Most Popular' }
+                  ].map((opt) => (
+                    <li key={opt.value}>
+                      <button
+                        onClick={() => {
+                          handleSortSelect(opt.value);
+                          setIsSortOpen(false);
+                        }}
+                        className={`w-full text-left px-4 py-2.5 transition-colors duration-150 font-sans ${
+                          currentSort === opt.value
+                            ? 'bg-[var(--color-ice-blue)] font-bold text-[var(--color-navy-deep)]'
+                            : 'hover:bg-[var(--color-ice-blue)] hover:text-[var(--color-navy-deep)]'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </div>
         </div>
       </div>

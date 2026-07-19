@@ -45,6 +45,11 @@ export const ProductDetail: React.FC = () => {
   const [reviewSubmitLoading, setReviewSubmitLoading] = useState(false);
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState('');
   const [reviewErrorMsg, setReviewErrorMsg] = useState('');
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [activeAccordion, setActiveAccordion] = useState<string | null>(null);
+  const toggleAccordion = (section: string) => {
+    setActiveAccordion(activeAccordion === section ? null : section);
+  };
 
   // Image Hover Zoom States & Events
   const [zoomStyle, setZoomStyle] = useState<React.CSSProperties>({});
@@ -391,9 +396,18 @@ export const ProductDetail: React.FC = () => {
             )}
           </div>
 
-          <p className="text-sm text-muted-gray leading-relaxed font-sans">
-            {product.description.replace(/linen/gi, 'cotton')}
-          </p>
+          <div className="space-y-2">
+            <p className={`text-sm text-muted-gray leading-relaxed font-sans ${!isDescExpanded ? 'line-clamp-3' : ''}`}>
+              {product.description.replace(/linen/gi, 'cotton')}
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsDescExpanded(!isDescExpanded)}
+              className="text-[10px] font-sans font-bold tracking-widest text-[var(--color-royal-blue)] hover:underline uppercase block"
+            >
+              {isDescExpanded ? 'Read Less' : 'Read More'}
+            </button>
+          </div>
 
           {/* "What's Included" Section */}
           {product.packageIncludes && product.packageIncludes.length > 0 && (
@@ -543,6 +557,61 @@ export const ProductDetail: React.FC = () => {
               <p className="font-sans text-[10px] font-bold text-navy-deep uppercase tracking-widest">Made in India</p>
               <p className="text-[9px] text-muted-gray font-medium">Artisanal heritage</p>
             </div>
+          </div>
+
+          {/* Collapsible Details Accordion */}
+          <div className="space-y-2 pt-6 border-t border-[#BDE8F5]/30">
+            {product.material && (
+              <div className="border-b border-gray-100 pb-3">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('material')}
+                  className="w-full flex justify-between items-center text-xs font-semibold text-navy-deep font-sans uppercase tracking-wider py-2"
+                >
+                  <span>Material & Build</span>
+                  <span className="text-muted-gray text-sm">{activeAccordion === 'material' ? '−' : '+'}</span>
+                </button>
+                {activeAccordion === 'material' && (
+                  <p className="text-xs text-muted-gray leading-relaxed font-sans pt-2">
+                    {product.material}
+                  </p>
+                )}
+              </div>
+            )}
+            {product.careInstructions && (
+              <div className="border-b border-gray-100 pb-3">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('care')}
+                  className="w-full flex justify-between items-center text-xs font-semibold text-navy-deep font-sans uppercase tracking-wider py-2"
+                >
+                  <span>Care Instructions</span>
+                  <span className="text-muted-gray text-sm">{activeAccordion === 'care' ? '−' : '+'}</span>
+                </button>
+                {activeAccordion === 'care' && (
+                  <p className="text-xs text-muted-gray leading-relaxed font-sans pt-2">
+                    {product.careInstructions}
+                  </p>
+                )}
+              </div>
+            )}
+            {product.manufacturingDetails && (
+              <div className="border-b border-gray-100 pb-3">
+                <button
+                  type="button"
+                  onClick={() => toggleAccordion('manufacturing')}
+                  className="w-full flex justify-between items-center text-xs font-semibold text-navy-deep font-sans uppercase tracking-wider py-2"
+                >
+                  <span>Manufacturing & Origin Details</span>
+                  <span className="text-muted-gray text-sm">{activeAccordion === 'manufacturing' ? '−' : '+'}</span>
+                </button>
+                {activeAccordion === 'manufacturing' && (
+                  <p className="text-xs text-muted-gray leading-relaxed font-sans pt-2">
+                    {product.manufacturingDetails}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
