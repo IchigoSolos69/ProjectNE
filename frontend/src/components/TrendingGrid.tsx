@@ -53,6 +53,7 @@ export const TrendingGrid: React.FC = () => {
           trigger: gridRef.current,
           start: 'top 85%',
           once: true, // Fire once so re-scroll does not trigger re-play
+          invalidateOnRefresh: true,
         },
       }
     );

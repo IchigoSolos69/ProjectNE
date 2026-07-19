@@ -29,27 +29,38 @@ export function buildApiUrl(path: string): string {
 export function getOptimizedImageUrl(url: string, width?: number): string {
   if (!url) return '';
 
-  // 1. Handle Cloudinary URLs
-  if (url.includes('cloudinary.com')) {
-    if (url.includes('f_auto') || url.includes('q_auto')) {
-      if (width && !url.includes(`w_${width}`)) {
-        return url.replace('/upload/', `/upload/w_${width}/`);
-      }
-      return url;
-    }
-    const transform = `f_auto,q_auto${width ? `,w_${width}` : ''}`;
-    return url.replace('/upload/', `/upload/${transform}/`);
-  }
+  let cleanUrl = url.trim();
+  const isUnsplash = cleanUrl.includes('images.unsplash.com');
 
-  // 2. Handle Unsplash URLs via Cloudinary fetch proxy
-  if (url.includes('images.unsplash.com')) {
+  // 1. Handle Unsplash URLs via Cloudinary fetch proxy
+  if (isUnsplash) {
+    if (cleanUrl.includes('?')) {
+      cleanUrl = cleanUrl.split('?')[0];
+    }
     const cloudName = 'mjkvnu4a';
-    const cleanUrl = url.trim();
-    const transformations = `f_auto,q_auto${width ? `,w_${width}` : ''}`;
+    const transformations = `f_webp,q_auto${width ? `,w_${width}` : ''}`;
     return `https://res.cloudinary.com/${cloudName}/image/fetch/${transformations}/${encodeURIComponent(cleanUrl)}`;
   }
 
-  return url;
+  // 2. Handle Cloudinary URLs
+  if (cleanUrl.includes('cloudinary.com')) {
+    const transform = `f_webp,q_auto${width ? `,w_${width}` : ''}`;
+    if (cleanUrl.includes('/upload/')) {
+      const parts = cleanUrl.split('/upload/');
+      const postUpload = parts[1];
+      const nextSegment = postUpload.split('/')[0];
+      const isVersion = /^v\d+$/.test(nextSegment);
+      
+      if (isVersion) {
+        return `${parts[0]}/upload/${transform}/${postUpload}`;
+      } else {
+        const remaining = postUpload.slice(nextSegment.length);
+        return `${parts[0]}/upload/${transform}${remaining}`;
+      }
+    }
+  }
+
+  return cleanUrl;
 }
 
 export async function apiRequest<T = unknown>(

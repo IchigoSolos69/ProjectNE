@@ -47,6 +47,9 @@ model Product {
   isActive     Boolean        @default(true)
   category     Category       @relation(fields: [categoryId], references: [id])
   categoryId   String
+  material             String?
+  careInstructions     String?
+  manufacturingDetails String?
   createdAt    DateTime       @default(now())
   variants     ProductVariant[]
   wishlistedBy WishlistItem[]

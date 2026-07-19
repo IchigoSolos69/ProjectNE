@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { apiRequest } from '../lib/api';
+import { apiRequest, getOptimizedImageUrl } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { Product } from '../components/ProductCard';
 import { Plus, Pencil, Trash2, X, Search, Upload, Check } from 'lucide-react';
@@ -15,6 +15,119 @@ interface VariantInput {
   images: string[];
 }
 
+// 1. Memoized Table Row Component to optimize rendering performance
+interface InventoryRowProps {
+  prod: Product;
+  onEdit: (prod: Product) => void;
+  onDelete: (id: string) => void;
+  onToggleTrending: (prod: Product) => void;
+  onToggleActive: (prod: Product) => void;
+}
+
+const InventoryRow = React.memo<InventoryRowProps>(({ prod, onEdit, onDelete, onToggleTrending, onToggleActive }) => {
+  const totalStock = prod.variants ? prod.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
+  let lowestPrice = 0;
+  if (prod.variants && prod.variants.length > 0) {
+    lowestPrice = Math.min(
+      ...prod.variants.map((v) => (v.discountPrice ? Number(v.discountPrice) : Number(v.price)))
+    );
+  }
+
+  // Request highly optimized w_80 transform from Cloudinary
+  const thumbnailUrl = getOptimizedImageUrl(
+    prod.images[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=120',
+    80
+  );
+
+  return (
+    <tr className="hover:bg-gray-50/50 transition-colors">
+      <td className="p-4">
+        <div className="w-12 h-14 bg-gray-50 rounded overflow-hidden border border-gray-200">
+          <img
+            src={thumbnailUrl}
+            alt={prod.name}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      </td>
+      <td className="p-4 font-semibold text-navy-deep">
+        <div className="max-w-[200px] truncate" title={prod.name}>
+          {prod.name}
+        </div>
+        <span className="text-[10px] text-muted-gray font-normal block font-sans">
+          {prod.variants ? `${prod.variants.length} Variants` : 'No Variants'}
+        </span>
+      </td>
+      <td className="p-4 text-muted-gray uppercase font-semibold">
+        {prod.category?.name || 'Unassigned'}
+      </td>
+      <td className="p-4 font-sans font-bold text-navy-deep">
+        ₹{lowestPrice.toLocaleString('en-IN')}
+      </td>
+      <td className="p-4 font-sans">
+        <span className={`font-semibold ${totalStock <= 5 ? 'text-red-500 font-bold' : 'text-muted-gray'}`}>
+          {totalStock} units
+        </span>
+      </td>
+      <td className="p-4">
+        <div className="flex gap-2">
+          <button
+            onClick={() => onToggleTrending(prod)}
+            className="hover:scale-105 transition-transform"
+            title="Click to toggle Trending status"
+          >
+            {prod.isTrending ? (
+              <span className="bg-sky-blue/15 text-sky-blue px-2 py-0.5 rounded text-[9px] font-bold">
+                TRENDING
+              </span>
+            ) : (
+              <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold">
+                PROMO
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => onToggleActive(prod)}
+            className="hover:scale-105 transition-transform"
+            title="Click to toggle Showroom publish status"
+          >
+            {prod.isActive ? (
+              <span className="bg-[#3AA757]/15 text-[#3AA757] px-2 py-0.5 rounded text-[9px] font-bold">
+                ACTIVE
+              </span>
+            ) : (
+              <span className="bg-red-50 text-red-500 px-2 py-0.5 rounded text-[9px] font-bold">
+                DRAFT
+              </span>
+            )}
+          </button>
+        </div>
+      </td>
+      <td className="p-4 text-center">
+        <div className="flex justify-center gap-2">
+          <button
+            onClick={() => onEdit(prod)}
+            className="p-2 border border-[#BDE8F5] hover:bg-royal-blue hover:text-white rounded-full text-navy-deep transition-all"
+            title="Edit Product"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={() => onDelete(prod.id)}
+            className="p-2 border border-red-200 hover:bg-red-500 hover:text-white rounded-full text-red-600 transition-all"
+            title="Delete Product"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+});
+
+InventoryRow.displayName = 'InventoryRow';
+
 export const AdminInventory: React.FC = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -23,8 +136,9 @@ export const AdminInventory: React.FC = () => {
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter states
+  // Filter & Search Debounce states
   const [search, setSearch] = useState('');
+  const [searchText, setSearchText] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
 
   // Modal States
@@ -36,6 +150,8 @@ export const AdminInventory: React.FC = () => {
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [material, setMaterial] = useState('');
+  const [careInstructions, setCareInstructions] = useState('');
+  const [manufacturingDetails, setManufacturingDetails] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isTrending, setIsTrending] = useState(false);
   const [isActive, setIsActive] = useState(true);
@@ -48,6 +164,14 @@ export const AdminInventory: React.FC = () => {
   // Upload state
   const [uploading, setUploading] = useState(false);
   const [fallbackImageUrl, setFallbackImageUrl] = useState('');
+
+  // Search input debouncer (300ms)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchText);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchText]);
 
   // Guard routing
   useEffect(() => {
@@ -79,34 +203,64 @@ export const AdminInventory: React.FC = () => {
     }
   }, [user, isAdmin]);
 
+  // Client-side auto SKU generation matching backend algorithm
+  const generateClientSku = useCallback((prodName: string, catId: string, size: string, color: string) => {
+    const categoryObj = categories.find((c) => c.id === catId);
+    const catName = categoryObj ? categoryObj.name : 'GEN';
+    const categoryAbbreviations: Record<string, string> = {
+      'Bedsheets': 'BED',
+      'Comforters': 'COM',
+      'Cushion Covers': 'CUS',
+      'Towels': 'TOW',
+      'Door Mats': 'DMT',
+    };
+    const catCode = categoryAbbreviations[catName] || catName.slice(0, 3).toUpperCase();
+    const prodCode = prodName
+      .split(' ')
+      .filter((w) => w.length > 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 4);
+    const sizeCode = size ? size.slice(0, 2).toUpperCase() : 'OS';
+    const colorCode = color ? color.slice(0, 3).toUpperCase() : '';
+    return [catCode, prodCode, sizeCode, colorCode].filter(Boolean).join('-');
+  }, [categories]);
+
   // Open Add Product Modal
   const handleOpenAdd = () => {
     setEditingProduct(null);
     setName('');
     setDescription('');
-    setCategoryId(categories.length > 0 ? categories[0].id : '');
+    const defaultCatId = categories.length > 0 ? categories[0].id : '';
+    setCategoryId(defaultCatId);
     setMaterial('');
+    setCareInstructions('');
+    setManufacturingDetails('');
     setImages([]);
     setIsTrending(false);
     setIsActive(true);
+
+    const defaultSku = generateClientSku('', defaultCatId, 'Queen', 'Ivory Cream');
     setVariants([
-      { size: 'Queen', color: 'Ivory Cream', sku: '', price: '', discountPrice: '', stock: '30', images: [] },
+      { size: 'Queen', color: 'Ivory Cream', sku: defaultSku, price: '', discountPrice: '', stock: '30', images: [] },
     ]);
     setIsModalOpen(true);
   };
 
   // Open Edit Product Modal
-  const handleOpenEdit = (prod: Product) => {
+  const handleOpenEdit = useCallback((prod: Product) => {
     setEditingProduct(prod);
     setName(prod.name);
     setDescription(prod.description);
     setCategoryId(prod.categoryId);
     setMaterial(prod.material || '');
+    setCareInstructions(prod.careInstructions || '');
+    setManufacturingDetails(prod.manufacturingDetails || '');
     setImages(prod.images);
     setIsTrending(prod.isTrending);
     setIsActive(prod.isActive);
 
-    // Map DB variants to inputs
     if (prod.variants && prod.variants.length > 0) {
       setVariants(
         prod.variants.map((v) => ({
@@ -120,18 +274,17 @@ export const AdminInventory: React.FC = () => {
         }))
       );
     } else {
+      const defaultSku = generateClientSku(prod.name, prod.categoryId, 'Queen', 'Ivory Cream');
       setVariants([
-        { size: 'Queen', color: 'Ivory Cream', sku: '', price: '', discountPrice: '', stock: '0', images: [] },
+        { size: 'Queen', color: 'Ivory Cream', sku: defaultSku, price: '', discountPrice: '', stock: '0', images: [] },
       ]);
     }
     setIsModalOpen(true);
-  };
+  }, [generateClientSku]);
 
   // Handle dynamic variant changes
   const handleAddVariantRow = () => {
-    // Propose auto-computed SKU to help admin speed up
-    const skuIndex = variants.length + 1;
-    const tempSku = `RC-${name.substring(0, 3).toUpperCase()}-${skuIndex}`;
+    const tempSku = generateClientSku(name, categoryId, '', '');
     setVariants((prev) => [
       ...prev,
       { size: '', color: '', sku: tempSku, price: '', discountPrice: '', stock: '10', images: [] },
@@ -149,11 +302,17 @@ export const AdminInventory: React.FC = () => {
         ...copy[index],
         [field]: value,
       };
+
+      // Auto-update generated SKU preview for visual feedback
+      const sizeVal = field === 'size' ? value : copy[index].size;
+      const colorVal = field === 'color' ? value : copy[index].color;
+      copy[index].sku = generateClientSku(name, categoryId, sizeVal, colorVal);
+
       return copy;
     });
   };
 
-  // Handle image upload direct to the secure backend upload route
+  // Image Upload handler
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -198,22 +357,66 @@ export const AdminInventory: React.FC = () => {
     }
   };
 
-  // Delete product action
-  const handleDelete = async (id: string) => {
+  // 2. Optimistic UI Updates: Immediate local delete update
+  const handleDelete = useCallback(async (id: string) => {
     const confirm = window.confirm('Are you sure you want to delete this product and its variants permanently?');
     if (!confirm) return;
+
+    const previousProducts = [...products];
+    // Immediate state update
+    setProducts((prev) => prev.filter((p) => p.id !== id));
 
     try {
       await apiRequest(`/api/admin/products/${id}`, {
         method: 'DELETE',
       });
-      loadData();
     } catch (err: any) {
       alert(err.message || 'Failed to delete product.');
+      // Roll back
+      setProducts(previousProducts);
     }
-  };
+  }, [products]);
 
-  // Submit product creation/update
+  // 3. Optimistic UI Updates: Immediate status toggles
+  const handleToggleTrending = useCallback(async (prod: Product) => {
+    const newVal = !prod.isTrending;
+    const previousProducts = [...products];
+
+    setProducts((prev) =>
+      prev.map((p) => (p.id === prod.id ? { ...p, isTrending: newVal } : p))
+    );
+
+    try {
+      await apiRequest(`/api/admin/products/${prod.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isTrending: newVal }),
+      });
+    } catch (err: any) {
+      alert(err.message || 'Failed to update trending status.');
+      setProducts(previousProducts);
+    }
+  }, [products]);
+
+  const handleToggleActive = useCallback(async (prod: Product) => {
+    const newVal = !prod.isActive;
+    const previousProducts = [...products];
+
+    setProducts((prev) =>
+      prev.map((p) => (p.id === prod.id ? { ...p, isActive: newVal } : p))
+    );
+
+    try {
+      await apiRequest(`/api/admin/products/${prod.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isActive: newVal }),
+      });
+    } catch (err: any) {
+      alert(err.message || 'Failed to update active status.');
+      setProducts(previousProducts);
+    }
+  }, [products]);
+
+  // 4. In-Place State Patching on addition/edits
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -222,15 +425,12 @@ export const AdminInventory: React.FC = () => {
       return;
     }
 
-    if (variants.some((v) => !v.sku || !v.price || Number(v.price) <= 0)) {
-      alert('Each variant must have a valid SKU and a positive price.');
-      return;
-    }
-
     const payload = {
       name,
       description,
       material,
+      careInstructions,
+      manufacturingDetails,
       images,
       isTrending,
       isActive,
@@ -252,25 +452,62 @@ export const AdminInventory: React.FC = () => {
           method: 'PATCH',
           body: JSON.stringify(payload),
         });
+
+        const categoryObj = categories.find((c) => c.id === categoryId);
+        const updated: Product = {
+          ...editingProduct,
+          name,
+          description,
+          material,
+          careInstructions,
+          manufacturingDetails,
+          images,
+          isTrending,
+          isActive,
+          categoryId,
+          category: categoryObj ? { name: categoryObj.name, slug: categoryObj.slug } : editingProduct.category,
+          variants: variants.map((v) => ({
+            id: editingProduct.variants.find((ev) => ev.sku === v.sku)?.id || '',
+            productId: editingProduct.id,
+            size: v.size || null,
+            color: v.color || null,
+            sku: v.sku.toUpperCase().trim(),
+            price: Number(v.price),
+            discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
+            stock: parseInt(v.stock, 10) || 0,
+            images: v.images,
+          })) as any,
+        };
+
+        setProducts((prev) => prev.map((p) => (p.id === editingProduct.id ? updated : p)));
       } else {
-        await apiRequest('/api/admin/products', {
+        const newProduct = await apiRequest<any>('/api/admin/products', {
           method: 'POST',
           body: JSON.stringify(payload),
         });
+
+        const categoryObj = categories.find((c) => c.id === categoryId);
+        const newProdWithCat: Product = {
+          ...newProduct,
+          category: categoryObj ? { name: categoryObj.name, slug: categoryObj.slug } : undefined,
+        };
+
+        setProducts((prev) => [newProdWithCat, ...prev]);
       }
       setIsModalOpen(false);
-      loadData();
     } catch (err: any) {
       alert(err.message || 'Failed to save product details.');
     }
   };
 
-  // Filtered Products list
-  const filteredProducts = products.filter((prod) => {
-    const matchesSearch = prod.name.toLowerCase().includes(search.toLowerCase());
-    const matchesCat = filterCategory ? prod.categoryId === filterCategory : true;
-    return matchesSearch && matchesCat;
-  });
+  // Filtered Products computation
+  const filteredProducts = useMemo(() => {
+    return products.filter((prod) => {
+      const matchesSearch = prod.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCat = filterCategory ? prod.categoryId === filterCategory : true;
+      return matchesSearch && matchesCat;
+    });
+  }, [products, search, filterCategory]);
 
   if (authLoading || !user || !isAdmin) {
     return (
@@ -283,19 +520,19 @@ export const AdminInventory: React.FC = () => {
   }
 
   return (
-    <main className="flex-1 mt-[80px] bg-[#F5FAFD]/40 min-h-screen py-10 px-6 max-w-7xl mx-auto space-y-8">
+    <main className="flex-1 mt-[80px] bg-[#F5FAFD]/40 min-h-screen py-10 px-6 max-w-7xl mx-auto space-y-8 animate-none">
       {/* Dashboard header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#BDE8F5]/30 pb-6">
         <div>
           <h1 className="font-serif text-3xl font-bold text-navy-deep">Showroom Inventory Dashboard</h1>
           <p className="text-xs text-muted-gray mt-1 uppercase tracking-wide">
-            Manage your digital showroom showroom variants, stocks, and coupons configs
+            Manage your digital showroom variants, stocks, and coupons configs
           </p>
         </div>
         
         <button
           onClick={handleOpenAdd}
-          className="flex items-center gap-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-bold px-6 py-3 rounded-full hover:bg-royal-blue transition-luxury shadow-md"
+          className="flex items-center gap-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-bold px-6 py-3 rounded-full hover:bg-royal-blue transition-colors shadow-md"
         >
           <Plus className="w-4 h-4" /> ADD NEW SHOWCASE
         </button>
@@ -308,8 +545,8 @@ export const AdminInventory: React.FC = () => {
           <input
             type="text"
             placeholder="Search items by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-full py-2.5 pl-11 pr-5 font-sans text-xs text-navy-deep outline-none"
           />
         </div>
@@ -359,84 +596,16 @@ export const AdminInventory: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-xs">
-              {filteredProducts.map((prod) => {
-                const totalStock = prod.variants ? prod.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
-                let lowestPrice = 0;
-                if (prod.variants && prod.variants.length > 0) {
-                  lowestPrice = Math.min(
-                    ...prod.variants.map((v) => (v.discountPrice ? Number(v.discountPrice) : Number(v.price)))
-                  );
-                }
-
-                return (
-                  <tr key={prod.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="p-4">
-                      <div className="w-12 h-14 bg-gray-50 rounded overflow-hidden border border-gray-200">
-                        <img
-                          src={prod.images[0] || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=120'}
-                          alt={prod.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </td>
-                    <td className="p-4 font-semibold text-navy-deep">
-                      <div className="max-w-[200px] truncate" title={prod.name}>
-                        {prod.name}
-                      </div>
-                      <span className="text-[10px] text-muted-gray font-normal block font-sans">
-                        {prod.variants ? `${prod.variants.length} Variants` : 'No Variants'}
-                      </span>
-                    </td>
-                    <td className="p-4 text-muted-gray uppercase font-semibold">
-                      {prod.category?.name || 'Unassigned'}
-                    </td>
-                    <td className="p-4 font-sans font-bold text-navy-deep">
-                      ₹{lowestPrice.toLocaleString('en-IN')}
-                    </td>
-                    <td className="p-4 font-sans">
-                      <span className={`font-semibold ${totalStock <= 5 ? 'text-red-500 font-bold' : 'text-muted-gray'}`}>
-                        {totalStock} units
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex gap-2">
-                        {prod.isTrending && (
-                          <span className="bg-sky-blue/15 text-sky-blue px-2 py-0.5 rounded text-[9px] font-bold">
-                            TRENDING
-                          </span>
-                        )}
-                        {prod.isActive ? (
-                          <span className="bg-[#3AA757]/15 text-[#3AA757] px-2 py-0.5 rounded text-[9px] font-bold">
-                            ACTIVE
-                          </span>
-                        ) : (
-                          <span className="bg-red-15 text-red-500 px-2 py-0.5 rounded text-[9px] font-bold">
-                            DRAFT
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-4 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleOpenEdit(prod)}
-                          className="p-2 border border-[#BDE8F5] hover:bg-royal-blue hover:text-white rounded-full text-navy-deep transition-all"
-                          title="Edit Product"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(prod.id)}
-                          className="p-2 border border-red-200 hover:bg-red-500 hover:text-white rounded-full text-red-600 transition-all"
-                          title="Delete Product"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {filteredProducts.map((prod) => (
+                <InventoryRow
+                  key={prod.id}
+                  prod={prod}
+                  onEdit={handleOpenEdit}
+                  onDelete={handleDelete}
+                  onToggleTrending={handleToggleTrending}
+                  onToggleActive={handleToggleActive}
+                />
+              ))}
             </tbody>
           </table>
         </div>
@@ -445,7 +614,7 @@ export const AdminInventory: React.FC = () => {
       {/* CREATE / EDIT OVERLAY MODAL FORM */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-navy-deep/45 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-scaleIn">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             
             {/* Modal Header */}
             <div className="p-5 border-b border-[#BDE8F5]/30 flex justify-between items-center bg-[#F5FAFD]/45">
@@ -472,7 +641,14 @@ export const AdminInventory: React.FC = () => {
                   type="text"
                   placeholder="e.g. Royal Egyptian Cotton Sheet Set"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setName(val);
+                    setVariants(prev => prev.map(v => ({
+                      ...v,
+                      sku: generateClientSku(val, categoryId, v.size, v.color)
+                    })));
+                  }}
                   className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
                   required
                 />
@@ -501,7 +677,14 @@ export const AdminInventory: React.FC = () => {
                   </label>
                   <select
                     value={categoryId}
-                    onChange={(e) => setCategoryId(e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setCategoryId(val);
+                      setVariants(prev => prev.map(v => ({
+                        ...v,
+                        sku: generateClientSku(name, val, v.size, v.color)
+                      })));
+                    }}
                     className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none cursor-pointer"
                     required
                   >
@@ -523,6 +706,35 @@ export const AdminInventory: React.FC = () => {
                     value={material}
                     onChange={(e) => setMaterial(e.target.value)}
                     className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Care Instructions & Manufacturing Details Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                    Care Instructions
+                  </label>
+                  <textarea
+                    placeholder="e.g. Machine wash cold, tumble dry low..."
+                    value={careInstructions}
+                    onChange={(e) => setCareInstructions(e.target.value)}
+                    rows={2}
+                    className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                    Manufacturing Details
+                  </label>
+                  <textarea
+                    placeholder="e.g. Handcrafted in Rajasthan, India..."
+                    value={manufacturingDetails}
+                    onChange={(e) => setManufacturingDetails(e.target.value)}
+                    rows={2}
+                    className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
                   />
                 </div>
               </div>
@@ -569,14 +781,13 @@ export const AdminInventory: React.FC = () => {
                         />
                       </div>
                       <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">SKU *</label>
+                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">SKU (Auto)</label>
                         <input
                           type="text"
-                          placeholder="RC-SKU-1"
                           value={v.sku}
-                          onChange={(e) => handleVariantChange(idx, 'sku', e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs font-mono uppercase outline-none focus:border-royal-blue"
-                          required
+                          readOnly
+                          className="w-full bg-gray-100 border border-gray-200 rounded p-1.5 text-xs font-mono uppercase outline-none text-gray-500 cursor-not-allowed"
+                          title="SKUs are automatically generated by the server based on product attributes"
                         />
                       </div>
                       <div>
@@ -631,10 +842,10 @@ export const AdminInventory: React.FC = () => {
               <div className="flex gap-8 items-center bg-[#F5FAFD]/20 border border-[#BDE8F5]/20 p-4 rounded-lg">
                 <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
                   <input
-                    type="checkbox"
-                    checked={isTrending}
-                    onChange={(e) => setIsTrending(e.target.checked)}
-                    className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
+                     type="checkbox"
+                     checked={isTrending}
+                     onChange={(e) => setIsTrending(e.target.checked)}
+                     className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
                   />
                   Mark as Trending / Signature Item
                 </label>
@@ -725,7 +936,7 @@ export const AdminInventory: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-navy-deep text-white hover:bg-royal-blue rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-luxury"
+                  className="px-6 py-2.5 bg-navy-deep text-white hover:bg-royal-blue rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-colors"
                 >
                   <Check className="w-4 h-4" />
                   {editingProduct ? 'SAVE CHANGES' : 'CREATE PRODUCT'}
@@ -739,4 +950,5 @@ export const AdminInventory: React.FC = () => {
     </main>
   );
 };
+
 export default AdminInventory;

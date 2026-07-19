@@ -27,6 +27,45 @@ function slugify(text: string): string {
     .replace(/-+$/, '');
 }
 
+function generateSku(categoryName: string, productName: string, size?: string | null, color?: string | null): string {
+  const categoryAbbreviations: Record<string, string> = {
+    'Bedsheets': 'BED',
+    'Comforters': 'COM',
+    'Cushion Covers': 'CUS',
+    'Towels': 'TOW',
+    'Door Mats': 'DMT',
+  };
+  const catCode = categoryAbbreviations[categoryName] || categoryName.slice(0, 3).toUpperCase();
+  const prodCode = productName
+    .split(' ')
+    .filter(w => w.length > 2) // skip small words like "of", "the"
+    .map(w => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 4);
+  const sizeCode = size ? size.slice(0, 2).toUpperCase() : 'OS'; // OS = one size
+  const colorCode = color ? color.slice(0, 3).toUpperCase() : '';
+  return [catCode, prodCode, sizeCode, colorCode].filter(Boolean).join('-');
+}
+
+async function generateUniqueSku(tx: any, categoryName: string, productName: string, size?: string | null, color?: string | null): Promise<string> {
+  const baseSku = generateSku(categoryName, productName, size, color);
+  let uniqueSku = baseSku;
+  let exists = await tx.productVariant.findUnique({
+    where: { sku: uniqueSku },
+  });
+  let counter = 1;
+  while (exists) {
+    const suffix = `-${counter.toString().padStart(2, '0')}`;
+    uniqueSku = `${baseSku}${suffix}`;
+    exists = await tx.productVariant.findUnique({
+      where: { sku: uniqueSku },
+    });
+    counter++;
+  }
+  return uniqueSku;
+}
+
 // ==========================================
 // 1. PRODUCTS & VARIANTS CRUD
 // ==========================================
@@ -60,7 +99,10 @@ router.post('/products', async (req, res) => {
       isTrending = false,
       isActive = true,
       categoryId,
-      variants = [], // array of { size, color, sku, price, stock, discountPrice }
+      variants = [], // array of { size, color, price, stock, discountPrice }
+      material,
+      careInstructions,
+      manufacturingDetails,
     } = req.body;
 
     if (!name || !description || !categoryId) {
@@ -81,14 +123,11 @@ router.post('/products', async (req, res) => {
       counter++;
     }
 
-    // Check unique SKUs
-    const skus = variants.map((v: any) => v.sku);
-    const existingSku = await prisma.productVariant.findFirst({
-      where: { sku: { in: skus } },
+    // Fetch category for SKU generation prefix
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
     });
-    if (existingSku) {
-      return res.status(400).json({ error: `SKU "${existingSku.sku}" is already in use by another product variant.` });
-    }
+    const categoryName = category ? category.name : 'GEN';
 
     const product = await prisma.$transaction(async (tx) => {
       const newProduct = await tx.product.create({
@@ -100,24 +139,29 @@ router.post('/products', async (req, res) => {
           isTrending: Boolean(isTrending),
           isActive: Boolean(isActive),
           categoryId,
+          material: material || null,
+          careInstructions: careInstructions || null,
+          manufacturingDetails: manufacturingDetails || null,
         },
       });
 
-      // Insert variants
-      const variantsData = variants.map((v: any) => ({
-        productId: newProduct.id,
-        size: v.size || null,
-        color: v.color || null,
-        sku: v.sku,
-        price: Number(v.price),
-        discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
-        stock: parseInt(v.stock, 10) || 0,
-        images: v.images || [],
-      }));
+      // Insert variants one by one to ensure unique SKU checks
+      for (const v of variants) {
+        const generatedSku = await generateUniqueSku(tx, categoryName, name, v.size, v.color);
 
-      await tx.productVariant.createMany({
-        data: variantsData,
-      });
+        await tx.productVariant.create({
+          data: {
+            productId: newProduct.id,
+            size: v.size || null,
+            color: v.color || null,
+            sku: generatedSku,
+            price: Number(v.price),
+            discountPrice: v.discountPrice ? Number(v.discountPrice) : null,
+            stock: parseInt(v.stock, 10) || 0,
+            images: v.images || [],
+          },
+        });
+      }
 
       return newProduct;
     });
@@ -142,6 +186,9 @@ router.patch('/products/:id', async (req, res) => {
       isActive,
       categoryId,
       variants,
+      material,
+      careInstructions,
+      manufacturingDetails,
     } = req.body;
 
     const existingProduct = await prisma.product.findUnique({ where: { id } });
@@ -159,6 +206,9 @@ router.patch('/products/:id', async (req, res) => {
     if (isTrending !== undefined) updateData.isTrending = Boolean(isTrending);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
     if (categoryId !== undefined) updateData.categoryId = categoryId;
+    if (material !== undefined) updateData.material = material || null;
+    if (careInstructions !== undefined) updateData.careInstructions = careInstructions || null;
+    if (manufacturingDetails !== undefined) updateData.manufacturingDetails = manufacturingDetails || null;
 
     await prisma.$transaction(async (tx) => {
       // Update core details
@@ -167,26 +217,20 @@ router.patch('/products/:id', async (req, res) => {
         data: updateData,
       });
 
-      // If variants are supplied, overwrite variants lists
+      // If variants are supplied, overwrite/update variants list
       if (variants !== undefined) {
-        // Double check SKU clashes on other products
-        const skus = variants.map((v: any) => v.sku);
-        const skuClash = await tx.productVariant.findFirst({
-          where: {
-            sku: { in: skus },
-            productId: { not: id },
-          },
-        });
-        if (skuClash) {
-          throw new Error(`SKU "${skuClash.sku}" is already in use by another product variant.`);
-        }
-
         // Get existing variants for this product
         const existingVariants = await tx.productVariant.findMany({
           where: { productId: id },
         });
+        const existingSkus = existingVariants.map(ev => ev.sku);
 
-        const incomingSkus = variants.map((v: any) => v.sku);
+        const incomingSkus: string[] = [];
+
+        const prodName = name !== undefined ? name : existingProduct.name;
+        const catId = categoryId !== undefined ? categoryId : existingProduct.categoryId;
+        const category = await tx.category.findUnique({ where: { id: catId } });
+        const catName = category ? category.name : 'GEN';
 
         // Update existing or create new variants
         for (const v of variants) {
@@ -199,23 +243,24 @@ router.patch('/products/:id', async (req, res) => {
             images: v.images || [],
           };
 
-          const existingBySku = await tx.productVariant.findUnique({
-            where: { sku: v.sku },
-          });
-
-          if (existingBySku) {
+          // If incoming variant has an existing SKU for this product, update it
+          if (v.sku && existingSkus.includes(v.sku)) {
+            incomingSkus.push(v.sku);
             await tx.productVariant.update({
               where: { sku: v.sku },
               data: {
                 ...variantData,
-                productId: id, // ensure it is linked to this product
+                productId: id,
               },
             });
           } else {
+            // It's a new variant, generate a unique SKU!
+            const generatedSku = await generateUniqueSku(tx, catName, prodName, v.size, v.color);
+            incomingSkus.push(generatedSku);
             await tx.productVariant.create({
               data: {
                 ...variantData,
-                sku: v.sku,
+                sku: generatedSku,
                 productId: id,
               },
             });

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
@@ -16,14 +16,24 @@ import { Landing } from './pages/Landing';
 import { ProductListing } from './pages/ProductListing';
 import { ProductDetail } from './pages/ProductDetail';
 import { Auth } from './pages/Auth';
-import { Account } from './pages/Account';
-import { AdminInventory } from './pages/AdminInventory';
 import { AuthForgotPassword } from './pages/AuthForgotPassword';
 import { AuthResetPassword } from './pages/AuthResetPassword';
-import { AdminOrders } from './pages/AdminOrders';
-import { AdminReviews } from './pages/AdminReviews';
-import { AdminCoupons } from './pages/AdminCoupons';
 import { LegalPage } from './pages/LegalPage';
+
+// Lazy loaded page components
+const Account = React.lazy(() => import('./pages/Account').then(m => ({ default: m.Account })));
+const AdminInventory = React.lazy(() => import('./pages/AdminInventory').then(m => ({ default: m.AdminInventory })));
+const AdminOrders = React.lazy(() => import('./pages/AdminOrders').then(m => ({ default: m.AdminOrders })));
+const AdminReviews = React.lazy(() => import('./pages/AdminReviews').then(m => ({ default: m.AdminReviews })));
+const AdminCoupons = React.lazy(() => import('./pages/AdminCoupons').then(m => ({ default: m.AdminCoupons })));
+
+const LazyFallback: React.FC = () => (
+  <div className="max-w-7xl mx-auto px-6 py-24 mt-[80px] text-center">
+    <p className="font-sans text-xs font-bold tracking-widest text-muted-gray uppercase animate-pulse">
+      LOADING PAGE...
+    </p>
+  </div>
+);
 
 // Import self-hosted @fontsource typography files (only active weights and families)
 import '@fontsource/inter/400.css';
@@ -129,11 +139,31 @@ ReactDOM.createRoot(rootElement).render(
                 <Route path="auth" element={<Auth />} />
                 <Route path="auth/forgot-password" element={<AuthForgotPassword />} />
                 <Route path="auth/reset-password" element={<AuthResetPassword />} />
-                <Route path="account" element={<Account />} />
-                <Route path="admin/inventory" element={<AdminInventory />} />
-                <Route path="admin/orders" element={<AdminOrders />} />
-                <Route path="admin/reviews" element={<AdminReviews />} />
-                <Route path="admin/coupons" element={<AdminCoupons />} />
+                <Route path="account" element={
+                  <Suspense fallback={<LazyFallback />}>
+                    <Account />
+                  </Suspense>
+                } />
+                <Route path="admin/inventory" element={
+                  <Suspense fallback={<LazyFallback />}>
+                    <AdminInventory />
+                  </Suspense>
+                } />
+                <Route path="admin/orders" element={
+                  <Suspense fallback={<LazyFallback />}>
+                    <AdminOrders />
+                  </Suspense>
+                } />
+                <Route path="admin/reviews" element={
+                  <Suspense fallback={<LazyFallback />}>
+                    <AdminReviews />
+                  </Suspense>
+                } />
+                <Route path="admin/coupons" element={
+                  <Suspense fallback={<LazyFallback />}>
+                    <AdminCoupons />
+                  </Suspense>
+                } />
                 <Route path="legal/:policyName" element={<LegalPage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>

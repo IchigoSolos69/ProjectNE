@@ -40,6 +40,7 @@ export const HeroBlanket: React.FC<HeroBlanketProps> = React.memo(({ heroNode })
         start: 'bottom bottom',   // begins right as the hero's bottom edge reaches the viewport's bottom edge
         end: '+=100%',            // exactly one viewport height of scroll
         scrub: true,
+        invalidateOnRefresh: true,
       },
     });
 

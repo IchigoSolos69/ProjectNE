@@ -28,6 +28,8 @@ export interface Product {
   category?: { name: string; slug: string };
   variants: Variant[];
   material?: string | null;
+  careInstructions?: string | null;
+  manufacturingDetails?: string | null;
   lowestPrice?: number;
   ratingInfo?: { average: number; count: number };
 }
