@@ -162,7 +162,7 @@ export const AdminInventory: React.FC = () => {
     try {
       const file = files[0];
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('image', file);
 
       const API_URL = import.meta.env.VITE_API_URL || 'https://projectne.onrender.com/api';
       const token = localStorage.getItem('rc_session_token');

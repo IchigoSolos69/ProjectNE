@@ -591,27 +591,30 @@ router.delete('/coupons/:id', async (req, res) => {
 });
 
 // POST /api/admin/upload - Receive file and upload to Cloudinary securely on the server
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded.' });
+      return res.status(400).json({ error: 'No image file provided in the request.' });
     }
 
-    const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'rarecomforts' },
-      (error, result) => {
-        if (error) {
-          console.error('Cloudinary server-side upload error:', error);
-          return res.status(500).json({ error: 'Cloudinary upload failed.' });
+    const result = await new Promise<any>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: 'rarecomforts' },
+        (error, uploadResult) => {
+          if (error) reject(error);
+          else resolve(uploadResult);
         }
-        return res.status(200).json({ secure_url: result?.secure_url });
-      }
-    );
+      );
+      uploadStream.end(req.file!.buffer);
+    });
 
-    uploadStream.end(req.file.buffer);
+    return res.status(200).json({ secure_url: result.secure_url });
   } catch (error: any) {
-    console.error('Upload route error:', error);
-    return res.status(500).json({ error: 'Server error during image upload.' });
+    console.error("🚨 CLOUDINARY UPLOAD CRASH:", error);
+    return res.status(500).json({
+      error: "Image upload failed on the server",
+      details: error.message || "Unknown Cloudinary Error"
+    });
   }
 });
 
