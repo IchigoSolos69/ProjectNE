@@ -4,7 +4,7 @@ import { apiRequest } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Product } from '../components/ProductCard';
-import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Truck } from 'lucide-react';
+import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Truck, Heart, MapPin, CreditCard, Camera, MessageSquare, HelpCircle, RefreshCw, Mail, ChevronRight } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -63,16 +63,16 @@ interface Address {
 }
 
 interface EmptyStateProps {
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
   message: string;
   ctaText: string;
   onCtaClick: () => void;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ icon, message, ctaText, onCtaClick }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ icon: Icon, message, ctaText, onCtaClick }) => {
   return (
     <div className="py-16 text-center border border-dashed border-[#BDE8F5]/30 rounded-xl space-y-4 bg-gray-50/30 font-sans shadow-sm">
-      <span className="text-4xl block leading-none">{icon}</span>
+      <Icon className="w-10 h-10 text-[var(--color-sky-blue)] mx-auto" />
       <h3 className="font-serif text-lg font-semibold text-navy-deep">{message}</h3>
       <button
         onClick={onCtaClick}
@@ -318,13 +318,16 @@ export const Account: React.FC = () => {
       
       {/* Profile Header Ribbon */}
       <div className="border-b border-[#BDE8F5]/30 pb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 bg-gradient-to-r from-white to-[#BDE8F5]/10 p-6 rounded-xl border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#BDE8F5]/40 rounded-full flex items-center justify-center text-navy-deep shadow-inner border border-[#BDE8F5]/20">
-            <UserIcon className="w-6 h-6" />
+        <div className="flex items-center gap-5">
+          <div className="relative group w-20 h-20 bg-[#BDE8F5]/40 rounded-full flex items-center justify-center text-navy-deep shadow-inner border border-[#BDE8F5]/20 cursor-pointer overflow-hidden flex-shrink-0">
+            <UserIcon className="w-8 h-8 group-hover:scale-95 transition-transform duration-300" />
+            <div className="absolute inset-0 bg-navy-deep/60 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <Camera className="w-5 h-5" />
+            </div>
           </div>
-          <div className="space-y-1">
-            <h1 className="font-serif text-2xl text-navy-deep font-bold leading-none">{user.name}</h1>
-            <p className="text-xs text-muted-gray uppercase font-semibold tracking-wide font-sans">
+          <div className="space-y-1.5">
+            <h1 className="font-serif text-3xl text-navy-deep font-bold leading-none">{user.name}</h1>
+            <p className="text-xs text-muted-gray uppercase font-semibold tracking-wider font-sans">
               {user.email} &bull; {user.role} profile
             </p>
           </div>
@@ -346,73 +349,51 @@ export const Account: React.FC = () => {
         </div>
       </div>
 
-      {/* Dashboard Statistics Cards */}
-      <div className="grid grid-cols-3 gap-4 font-sans text-xs">
+      {/* Redesigned Tab Navigation with Integrated Statistics & Iconography */}
+      <div className="flex flex-col sm:flex-row border-b border-gray-200 font-sans text-xs font-bold uppercase tracking-wider gap-2 sm:gap-0">
         <button
           onClick={() => setActiveTab('orders')}
-          className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all ${
+          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${
             activeTab === 'orders'
-              ? 'border-royal-blue bg-[#BDE8F5]/10 shadow-sm animate-none'
-              : 'border-[#BDE8F5]/30 bg-white hover:bg-gray-50/50'
+              ? 'border-navy-deep text-navy-deep font-black'
+              : 'border-transparent text-muted-gray hover:text-navy-deep'
           }`}
         >
-          <span className="text-xl">📦</span>
-          <span className="text-lg font-bold text-navy-deep mt-1.5">{orders.length}</span>
-          <span className="text-[10px] font-bold text-muted-gray uppercase tracking-wider mt-0.5">Orders</span>
+          <Package className="w-5 h-5 text-sky-blue flex-shrink-0" />
+          <div className="flex flex-col">
+            <span className="text-[11px] tracking-wider">Sleep Registry</span>
+            <span className="text-[9px] text-muted-gray font-semibold lowercase tracking-normal">My Orders ({orders.length})</span>
+          </div>
         </button>
-        
+
         <button
           onClick={() => setActiveTab('wishlist')}
-          className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all ${
+          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${
             activeTab === 'wishlist'
-              ? 'border-royal-blue bg-[#BDE8F5]/10 shadow-sm animate-none'
-              : 'border-[#BDE8F5]/30 bg-white hover:bg-gray-50/50'
+              ? 'border-navy-deep text-navy-deep font-black'
+              : 'border-transparent text-muted-gray hover:text-navy-deep'
           }`}
         >
-          <span className="text-xl">❤️</span>
-          <span className="text-lg font-bold text-navy-deep mt-1.5">{wishlistItems.length}</span>
-          <span className="text-[10px] font-bold text-muted-gray uppercase tracking-wider mt-0.5">Wishlist</span>
+          <Heart className="w-5 h-5 text-sky-blue flex-shrink-0" />
+          <div className="flex flex-col">
+            <span className="text-[11px] tracking-wider">Saved Sanctuary</span>
+            <span className="text-[9px] text-muted-gray font-semibold lowercase tracking-normal">Wishlist ({wishlistItems.length})</span>
+          </div>
         </button>
 
         <button
           onClick={() => setActiveTab('addresses')}
-          className={`border rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all ${
+          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${
             activeTab === 'addresses'
-              ? 'border-royal-blue bg-[#BDE8F5]/10 shadow-sm animate-none'
-              : 'border-[#BDE8F5]/30 bg-white hover:bg-gray-50/50'
+              ? 'border-navy-deep text-navy-deep font-black'
+              : 'border-transparent text-muted-gray hover:text-navy-deep'
           }`}
         >
-          <span className="text-xl">📍</span>
-          <span className="text-lg font-bold text-navy-deep mt-1.5">{addresses.length}</span>
-          <span className="text-[10px] font-bold text-muted-gray uppercase tracking-wider mt-0.5">Addresses</span>
-        </button>
-      </div>
-
-      {/* Tabs list */}
-      <div className="flex border-b border-gray-200 font-sans text-xs font-bold uppercase tracking-wider">
-        <button
-          onClick={() => setActiveTab('orders')}
-          className={`pb-3 px-4 border-b-2 transition-all ${
-            activeTab === 'orders' ? 'border-royal-blue text-royal-blue' : 'border-transparent text-muted-gray hover:text-navy-deep'
-          }`}
-        >
-          Sleep Registry
-        </button>
-        <button
-          onClick={() => setActiveTab('wishlist')}
-          className={`pb-3 px-4 border-b-2 transition-all ${
-            activeTab === 'wishlist' ? 'border-royal-blue text-royal-blue' : 'border-transparent text-muted-gray hover:text-navy-deep'
-          }`}
-        >
-          Saved Sanctuary
-        </button>
-        <button
-          onClick={() => setActiveTab('addresses')}
-          className={`pb-3 px-4 border-b-2 transition-all ${
-            activeTab === 'addresses' ? 'border-royal-blue text-royal-blue' : 'border-transparent text-muted-gray hover:text-navy-deep'
-          }`}
-        >
-          Address Registry
+          <MapPin className="w-5 h-5 text-sky-blue flex-shrink-0" />
+          <div className="flex flex-col">
+            <span className="text-[11px] tracking-wider">Address Registry</span>
+            <span className="text-[9px] text-muted-gray font-semibold lowercase tracking-normal">Addresses ({addresses.length})</span>
+          </div>
         </button>
       </div>
 
@@ -449,7 +430,7 @@ export const Account: React.FC = () => {
                   return (
                     <div
                       key={order.id}
-                      className="border border-gray-150 rounded-xl overflow-hidden bg-white shadow-sm"
+                      className="border border-gray-150 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
                     >
                       {/* Ribbon summary */}
                       <div className="bg-[#F5FAFD]/65 px-6 py-4 flex flex-wrap justify-between items-center gap-4 border-b border-[#BDE8F5]/25 text-xs text-navy-deep font-semibold">
@@ -524,8 +505,8 @@ export const Account: React.FC = () => {
                                     ₹{(Number(item.priceAtPurchase) * item.quantity).toLocaleString('en-IN')}
                                   </p>
                                   {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (
-                                    <p className="text-[10px] text-royal-blue font-semibold">
-                                      Est. Delivery: {estDeliveryString}
+                                    <p className="text-[10px] text-royal-blue font-semibold flex items-center md:justify-end gap-1 font-sans">
+                                      <Truck className="w-3.5 h-3.5" /> Est. Delivery: {estDeliveryString}
                                     </p>
                                   )}
                                 </div>
@@ -657,8 +638,9 @@ export const Account: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="text-right">
-                          <span className="text-muted-gray uppercase tracking-wider font-semibold mr-2">Total Paid</span>
+                        <div className="text-right flex items-center gap-1.5 font-sans">
+                          <CreditCard className="w-3.5 h-3.5 text-sky-blue" />
+                          <span className="text-muted-gray uppercase tracking-wider font-semibold mr-1">Total Paid</span>
                           <span className="font-sans text-sm font-bold text-navy-deep">
                             ₹{Number(order.total).toLocaleString('en-IN')}
                           </span>
@@ -682,7 +664,7 @@ export const Account: React.FC = () => {
               </div>
             ) : wishlistItems.length === 0 ? (
               <EmptyState
-                icon="🤍"
+                icon={Heart}
                 message="No saved products yet."
                 ctaText="Start exploring →"
                 onCtaClick={() => navigate('/products')}
@@ -838,7 +820,7 @@ export const Account: React.FC = () => {
               </div>
             ) : addresses.length === 0 ? (
               <EmptyState
-                icon="🏡"
+                icon={MapPin}
                 message="Your address book is empty."
                 ctaText="Add an Address"
                 onCtaClick={() => setShowAddressForm(true)}
@@ -885,6 +867,110 @@ export const Account: React.FC = () => {
           </div>
         )}
 
+      </div>
+
+      {/* Recommended for You */}
+      {orders.length <= 1 && (
+        <div className="pt-8 border-t border-gray-150 space-y-6">
+          <div className="flex justify-between items-center font-sans">
+            <h3 className="font-serif text-lg font-bold text-navy-deep">Recommended Bestsellers</h3>
+            <button
+              onClick={() => navigate('/products')}
+              className="text-xs font-bold text-sky-blue hover:text-royal-blue uppercase tracking-widest flex items-center gap-1 font-sans"
+            >
+              Shop All Collections <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {[
+              {
+                name: "Imperial Egyptian Cotton Sheet Set",
+                price: 14500,
+                image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=600",
+                slug: "imperial-egyptian-cotton-sheet-set",
+                category: "Bedsheets"
+              },
+              {
+                name: "Organic Waffle Weave Towel Set",
+                price: 4800,
+                image: "https://images.unsplash.com/photo-1616627561950-9f746e330187?q=80&w=600",
+                slug: "organic-waffle-weave-towel-set",
+                category: "Bath"
+              }
+            ].map((prod) => (
+              <div 
+                key={prod.slug}
+                onClick={() => navigate(`/product/${prod.slug}`)}
+                className="border border-gray-150 rounded-xl p-4 bg-[#FAF9F6]/40 flex gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+              >
+                <div className="w-20 h-24 bg-gray-50 rounded overflow-hidden border border-gray-200 flex-shrink-0">
+                  <img src={prod.image} alt="" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 flex flex-col justify-between font-sans text-xs">
+                  <div>
+                    <span className="text-[9px] font-bold text-sky-blue uppercase tracking-widest block">{prod.category}</span>
+                    <h4 className="font-serif text-sm font-semibold text-navy-deep mt-1 leading-snug">{prod.name}</h4>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="font-bold text-navy-deep">₹{prod.price.toLocaleString('en-IN')}</p>
+                    <span className="text-[10px] font-bold text-royal-blue uppercase tracking-wider">View Product</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Trust & Support Footer */}
+      <div className="pt-10 border-t border-gray-150 space-y-6 font-sans">
+        <div className="bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-1">
+            <h3 className="font-serif text-lg font-bold text-navy-deep">Need assistance with your sanctuary?</h3>
+            <p className="text-xs text-muted-gray">Our concierge white-glove team is available to assist you with order delivery tracking, returns, and comfort advice.</p>
+          </div>
+          <a
+            href="mailto:support@rarecomforts.com"
+            className="flex-shrink-0 px-6 py-3 bg-navy-deep hover:bg-royal-blue text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-sm font-sans text-center"
+          >
+            Contact Concierge
+          </a>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <button
+            onClick={() => alert('Live Chat Support is online from 9 AM - 9 PM IST. Connecting now...')}
+            className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
+          >
+            <MessageSquare className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
+            <span className="text-[10px] font-bold text-navy-deep uppercase tracking-wider">Chat Support</span>
+          </button>
+          
+          <button
+            onClick={() => alert('FAQ section is under updates. Feel free to contact our Concierge!')}
+            className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
+          >
+            <HelpCircle className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
+            <span className="text-[10px] font-bold text-navy-deep uppercase tracking-wider">FAQs</span>
+          </button>
+
+          <button
+            onClick={() => alert('Returns can be scheduled within 10 days of delivery. Click Contact Support to begin.')}
+            className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
+          >
+            <RefreshCw className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
+            <span className="text-[10px] font-bold text-navy-deep uppercase tracking-wider">Returns</span>
+          </button>
+
+          <a
+            href="mailto:concierge@rarecomforts.com"
+            className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"
+          >
+            <Mail className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
+            <span className="text-[10px] font-bold text-navy-deep uppercase tracking-wider">Contact Us</span>
+          </a>
+        </div>
       </div>
     </main>
   );
