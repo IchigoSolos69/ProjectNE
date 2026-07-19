@@ -166,8 +166,18 @@ router.post('/products', async (req, res) => {
       return newProduct;
     });
 
+    const completeProduct = await prisma.product.findUnique({
+      where: { id: product.id },
+      include: {
+        category: {
+          select: { name: true, slug: true },
+        },
+        variants: true,
+      },
+    });
+
     clearProductsCache();
-    return res.status(201).json(product);
+    return res.status(201).json(completeProduct);
   } catch (error) {
     console.error('Error creating product:', error);
     return res.status(500).json({ error: 'Failed to create new product.' });

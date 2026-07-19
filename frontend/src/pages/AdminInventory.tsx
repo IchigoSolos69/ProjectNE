@@ -203,9 +203,8 @@ export const AdminInventory: React.FC = () => {
     }
   }, [user, isAdmin]);
 
-  // Client-side auto SKU generation matching backend algorithm
   const generateClientSku = useCallback((prodName: string, catId: string, size: string, color: string) => {
-    const categoryObj = categories.find((c) => c.id === catId);
+    const categoryObj = categories?.find((c) => c.id === catId);
     const catName = categoryObj ? categoryObj.name : 'GEN';
     const categoryAbbreviations: Record<string, string> = {
       'Bedsheets': 'BED',
@@ -232,7 +231,7 @@ export const AdminInventory: React.FC = () => {
     setEditingProduct(null);
     setName('');
     setDescription('');
-    const defaultCatId = categories.length > 0 ? categories[0].id : '';
+    const defaultCatId = (categories || []).length > 0 ? categories[0].id : '';
     setCategoryId(defaultCatId);
     setMaterial('');
     setCareInstructions('');
@@ -453,7 +452,7 @@ export const AdminInventory: React.FC = () => {
           body: JSON.stringify(payload),
         });
 
-        const categoryObj = categories.find((c) => c.id === categoryId);
+        const categoryObj = categories?.find((c) => c.id === categoryId);
         const updated: Product = {
           ...editingProduct,
           name,
@@ -467,7 +466,7 @@ export const AdminInventory: React.FC = () => {
           categoryId,
           category: categoryObj ? { name: categoryObj.name, slug: categoryObj.slug } : editingProduct.category,
           variants: variants.map((v) => ({
-            id: editingProduct.variants.find((ev) => ev.sku === v.sku)?.id || '',
+            id: (editingProduct.variants || []).find((ev) => ev.sku === v.sku)?.id || '',
             productId: editingProduct.id,
             size: v.size || null,
             color: v.color || null,
@@ -486,7 +485,7 @@ export const AdminInventory: React.FC = () => {
           body: JSON.stringify(payload),
         });
 
-        const categoryObj = categories.find((c) => c.id === categoryId);
+        const categoryObj = categories?.find((c) => c.id === categoryId);
         const newProdWithCat: Product = {
           ...newProduct,
           category: categoryObj ? { name: categoryObj.name, slug: categoryObj.slug } : undefined,
