@@ -92,7 +92,7 @@ export const Account: React.FC = () => {
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState<'orders' | 'wishlist' | 'addresses'>('orders');
-  
+
   // Orders
   const [orders, setOrders] = useState<Order[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
@@ -205,7 +205,7 @@ export const Account: React.FC = () => {
       });
       fetchAddresses();
       setShowAddressForm(false);
-      
+
       // Clear form
       setAddrName('');
       setAddrPhone('');
@@ -317,7 +317,7 @@ export const Account: React.FC = () => {
 
   return (
     <main className="flex-1 mt-[80px] bg-white min-h-screen py-12 px-6 max-w-4xl mx-auto space-y-10">
-      
+
       {/* Profile Header Ribbon */}
       <div className="border-b border-[#BDE8F5]/30 pb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 bg-gradient-to-r from-white to-[#BDE8F5]/10 p-6 rounded-xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-5">
@@ -330,7 +330,7 @@ export const Account: React.FC = () => {
           <div className="space-y-1.5">
             <h1 className="font-serif text-3xl text-navy-deep font-bold leading-none">{user.name}</h1>
             <p className="text-xs text-muted-gray uppercase font-semibold tracking-wider font-sans">
-              {user.email} &bull; {user.role} profile
+              {user.email}
             </p>
           </div>
         </div>
@@ -355,53 +355,50 @@ export const Account: React.FC = () => {
       <div className="flex flex-col sm:flex-row border-b border-gray-200 font-sans text-xs font-bold uppercase tracking-wider gap-2 sm:gap-0">
         <button
           onClick={() => setActiveTab('orders')}
-          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${
-            activeTab === 'orders'
-              ? 'border-navy-deep text-navy-deep font-black'
-              : 'border-transparent text-muted-gray hover:text-navy-deep'
-          }`}
+          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${activeTab === 'orders'
+            ? 'border-navy-deep text-navy-deep font-black'
+            : 'border-transparent text-muted-gray hover:text-navy-deep'
+            }`}
         >
           <Package className="w-5 h-5 text-sky-blue flex-shrink-0" />
           <div className="flex flex-col">
-            <span className="text-[11px] tracking-wider">Sleep Registry</span>
-            <span className="text-[9px] text-muted-gray font-semibold lowercase tracking-normal">My Orders ({orders.length})</span>
+            <span className="text-[11px] tracking-wider">My Orders ({orders.length})</span>
+            <span className="text-[10px] text-muted-gray font-semibold uppercase tracking-normal">Sleep Registry</span>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('wishlist')}
-          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${
-            activeTab === 'wishlist'
-              ? 'border-navy-deep text-navy-deep font-black'
-              : 'border-transparent text-muted-gray hover:text-navy-deep'
-          }`}
+          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${activeTab === 'wishlist'
+            ? 'border-navy-deep text-navy-deep font-black'
+            : 'border-transparent text-muted-gray hover:text-navy-deep'
+            }`}
         >
           <Heart className="w-5 h-5 text-sky-blue flex-shrink-0" />
           <div className="flex flex-col">
-            <span className="text-[11px] tracking-wider">Saved Sanctuary</span>
-            <span className="text-[9px] text-muted-gray font-semibold lowercase tracking-normal">Wishlist ({wishlistItems.length})</span>
+            <span className="text-[11px] tracking-wider">Wishlist ({wishlistItems.length})</span>
+            <span className="text-[10px] text-muted-gray font-semibold uppercase tracking-normal">Saved Sanctuary</span>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('addresses')}
-          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${
-            activeTab === 'addresses'
-              ? 'border-navy-deep text-navy-deep font-black'
-              : 'border-transparent text-muted-gray hover:text-navy-deep'
-          }`}
+          className={`pb-4 px-6 border-b-4 transition-all duration-200 flex items-center gap-3 text-left ${activeTab === 'addresses'
+            ? 'border-navy-deep text-navy-deep font-black'
+            : 'border-transparent text-muted-gray hover:text-navy-deep'
+            }`}
         >
           <MapPin className="w-5 h-5 text-sky-blue flex-shrink-0" />
           <div className="flex flex-col">
-            <span className="text-[11px] tracking-wider">Address Registry</span>
-            <span className="text-[9px] text-muted-gray font-semibold lowercase tracking-normal">Addresses ({addresses.length})</span>
+            <span className="text-[11px] tracking-wider">Addresses ({addresses.length})</span>
+            <span className="text-[10px] text-muted-gray font-semibold uppercase tracking-normal">Address Registry</span>
           </div>
         </button>
       </div>
 
       {/* TAB CONTENT PANELS */}
       <div className="pt-2">
-        
+
         {/* TAB 1: ORDER LOGS */}
         {activeTab === 'orders' && (
           <div className="space-y-6">
@@ -491,13 +488,12 @@ export const Account: React.FC = () => {
                                     <span className="bg-gray-100 text-muted-gray px-2 py-0.5 rounded font-sans font-semibold">
                                       Qty: {item.quantity}
                                     </span>
-                                    <span className={`px-2 py-0.5 rounded font-sans font-semibold border ${
-                                      paymentStatus === 'Paid'
-                                        ? 'bg-green-50 text-green-700 border-green-200'
-                                        : paymentStatus === 'Pending'
+                                    <span className={`px-2 py-0.5 rounded font-sans font-semibold border ${paymentStatus === 'Paid'
+                                      ? 'bg-green-50 text-green-700 border-green-200'
+                                      : paymentStatus === 'Pending'
                                         ? 'bg-amber-50 text-amber-700 border-amber-200'
                                         : 'bg-red-50 text-red-700 border-red-200'
-                                    }`}>
+                                      }`}>
                                       Payment: {paymentStatus}
                                     </span>
                                   </div>
@@ -521,7 +517,7 @@ export const Account: React.FC = () => {
                       {/* Expanded timelines / details tracker */}
                       {isExpanded && (
                         <div className="bg-[#BDE8F5]/10 border-t border-gray-100 p-6 space-y-6">
-                          
+
                           {/* Visual Order Status Timeline */}
                           {order.status !== 'CANCELLED' && order.status !== 'REFUNDED' && (() => {
                             const steps = ['Ordered', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered'];
@@ -529,7 +525,7 @@ export const Account: React.FC = () => {
                             if (order.status === 'PACKED') activeStepIndex = 1;
                             else if (order.status === 'SHIPPED') activeStepIndex = 2;
                             else if (order.status === 'DELIVERED') activeStepIndex = 4;
-                            
+
                             return (
                               <div className="bg-white border border-gray-100 rounded-xl p-6 font-sans text-xs space-y-6 shadow-sm">
                                 <h5 className="font-bold text-navy-deep uppercase text-[10px] tracking-wider">
@@ -538,7 +534,7 @@ export const Account: React.FC = () => {
                                 <div className="flex items-center justify-between relative pt-2 pb-6 max-w-lg mx-auto">
                                   {/* Connecting line */}
                                   <div className="absolute top-[11px] left-2 right-2 h-0.5 bg-gray-200 -z-0" />
-                                  <div 
+                                  <div
                                     className="absolute top-[11px] left-2 h-0.5 bg-navy-deep transition-all duration-500 -z-0"
                                     style={{ width: `${(activeStepIndex / (steps.length - 1)) * 96}%` }}
                                   />
@@ -549,19 +545,17 @@ export const Account: React.FC = () => {
                                       <div key={step} className="flex flex-col items-center relative z-10">
                                         {/* Node */}
                                         <div
-                                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                                            isCompleted
-                                              ? 'bg-navy-deep text-white shadow-sm'
-                                              : 'border-2 border-sky-blue bg-white text-gray-400'
-                                          }`}
+                                          className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isCompleted
+                                            ? 'bg-navy-deep text-white shadow-sm'
+                                            : 'border-2 border-sky-blue bg-white text-gray-400'
+                                            }`}
                                         >
                                           {isCompleted ? '✓' : idx + 1}
                                         </div>
                                         {/* Step Label */}
                                         <span
-                                          className={`absolute top-7 whitespace-nowrap text-[9px] font-bold tracking-wider uppercase ${
-                                            isCompleted ? 'text-navy-deep' : 'text-gray-400'
-                                          }`}
+                                          className={`absolute top-7 whitespace-nowrap text-[9px] font-bold tracking-wider uppercase ${isCompleted ? 'text-navy-deep' : 'text-gray-400'
+                                            }`}
                                         >
                                           {step}
                                         </span>
@@ -613,7 +607,7 @@ export const Account: React.FC = () => {
                           >
                             View Invoice
                           </button>
-                          
+
                           <button
                             type="button"
                             onClick={() => handleBuyAgain(order)}
@@ -680,7 +674,7 @@ export const Account: React.FC = () => {
                       <div className="w-16 h-20 bg-gray-50 rounded overflow-hidden border flex-shrink-0">
                         <img src={prod.images[0]} alt="" className="w-full h-full object-cover" />
                       </div>
-                      
+
                       {/* Product details info */}
                       <div className="flex-1 font-sans text-xs">
                         <h4 className="font-serif text-sm font-semibold text-navy-deep">{prod.name}</h4>
@@ -832,9 +826,8 @@ export const Account: React.FC = () => {
                 {addresses.map((addr) => (
                   <div
                     key={addr.id}
-                    className={`border rounded-xl p-4 bg-white shadow-sm flex items-start gap-3 relative ${
-                      addr.isDefault ? 'border-royal-blue' : 'border-gray-150'
-                    }`}
+                    className={`border rounded-xl p-4 bg-white shadow-sm flex items-start gap-3 relative ${addr.isDefault ? 'border-royal-blue' : 'border-gray-150'
+                      }`}
                   >
                     <div className="flex-1 font-sans text-xs">
                       <div className="flex items-center gap-2">
@@ -883,7 +876,7 @@ export const Account: React.FC = () => {
               Shop All Collections <ChevronRight className="w-3 h-3" />
             </button>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {[
               {
@@ -901,7 +894,7 @@ export const Account: React.FC = () => {
                 category: "Bath"
               }
             ].map((prod) => (
-              <div 
+              <div
                 key={prod.slug}
                 onClick={() => navigate(`/product/${prod.slug}`)}
                 className="border border-gray-150 rounded-xl p-4 bg-[#FAF9F6]/40 flex gap-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
@@ -948,7 +941,7 @@ export const Account: React.FC = () => {
             <MessageSquare className="w-5 h-5 text-sky-blue group-hover:scale-105 transition-transform animate-none" />
             <span className="text-[10px] font-bold text-navy-deep uppercase tracking-wider">Chat Support</span>
           </button>
-          
+
           <button
             onClick={() => toast.info('Coming Soon', 'FAQ section is under updates. Feel free to contact our Concierge!')}
             className="border border-[#BDE8F5]/20 hover:border-royal-blue hover:bg-gray-50/50 rounded-xl p-4 transition-all flex flex-col items-center justify-center space-y-2 group"

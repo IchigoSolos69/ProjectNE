@@ -21,6 +21,12 @@ import { AuthForgotPassword } from './pages/AuthForgotPassword';
 import { AuthResetPassword } from './pages/AuthResetPassword';
 import { LegalPage } from './pages/LegalPage';
 
+// Catch dynamic import failures and reload the page automatically
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  window.location.reload();
+});
+
 // Lazy loaded page components
 const Account = React.lazy(() => import('./pages/Account').then(m => ({ default: m.Account })));
 const AdminInventory = React.lazy(() => import('./pages/AdminInventory').then(m => ({ default: m.AdminInventory })));
