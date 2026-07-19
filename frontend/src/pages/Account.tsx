@@ -4,7 +4,7 @@ import { apiRequest } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { Product } from '../components/ProductCard';
-import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Truck, Heart } from 'lucide-react';
+import { User as UserIcon, Calendar, Package, LogOut, Plus, Trash2, Truck } from 'lucide-react';
 
 interface OrderItem {
   id: string;
@@ -12,6 +12,7 @@ interface OrderItem {
   priceAtPurchase: number;
   size: string | null;
   color: string | null;
+  variantId: string;
   product: {
     id: string;
     name: string;
@@ -60,6 +61,28 @@ interface Address {
   pincode: string;
   isDefault: boolean;
 }
+
+interface EmptyStateProps {
+  icon: string;
+  message: string;
+  ctaText: string;
+  onCtaClick: () => void;
+}
+
+const EmptyState: React.FC<EmptyStateProps> = ({ icon, message, ctaText, onCtaClick }) => {
+  return (
+    <div className="py-16 text-center border border-dashed border-[#BDE8F5]/30 rounded-xl space-y-4 bg-gray-50/30 font-sans shadow-sm">
+      <span className="text-4xl block leading-none">{icon}</span>
+      <h3 className="font-serif text-lg font-semibold text-navy-deep">{message}</h3>
+      <button
+        onClick={onCtaClick}
+        className="px-6 py-2.5 bg-navy-deep hover:bg-royal-blue text-white font-sans text-xs uppercase tracking-wider font-bold rounded-full transition-colors shadow-sm"
+      >
+        {ctaText}
+      </button>
+    </div>
+  );
+};
 
 export const Account: React.FC = () => {
   const { user, logout, loading: authLoading, toggleWishlist } = useAuth();
@@ -208,6 +231,35 @@ export const Account: React.FC = () => {
     }
   };
 
+  const handleBuyAgain = async (order: Order) => {
+    try {
+      setLoadingOrders(true);
+      for (const item of order.items) {
+        await addToCart(item.variantId, item.quantity);
+      }
+      alert('All items from this order have been added to your cart.');
+    } catch (err: any) {
+      alert(err.message || 'Failed to add items to cart.');
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const handleCancelOrder = async (orderId: string) => {
+    const confirm = window.confirm('Are you sure you want to cancel this order? This action cannot be undone.');
+    if (!confirm) return;
+    try {
+      setLoadingOrders(true);
+      await apiRequest(`/api/orders/${orderId}/cancel`, { method: 'PATCH' });
+      fetchOrders();
+      alert('Order cancelled successfully.');
+    } catch (err: any) {
+      alert(err.message || 'Failed to cancel order.');
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
   const handleWishlistMoveToCart = async (prod: Product) => {
     const variant = prod.variants?.find((v) => v.stock > 0) || prod.variants?.[0];
     if (!variant) {
@@ -267,23 +319,31 @@ export const Account: React.FC = () => {
       {/* Profile Header Ribbon */}
       <div className="border-b border-[#BDE8F5]/30 pb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 bg-gradient-to-r from-white to-[#BDE8F5]/10 p-6 rounded-xl border border-gray-100 shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#BDE8F5]/40 rounded-full flex items-center justify-center text-navy-deep">
+          <div className="w-14 h-14 bg-[#BDE8F5]/40 rounded-full flex items-center justify-center text-navy-deep shadow-inner border border-[#BDE8F5]/20">
             <UserIcon className="w-6 h-6" />
           </div>
-          <div>
+          <div className="space-y-1">
             <h1 className="font-serif text-2xl text-navy-deep font-bold leading-none">{user.name}</h1>
-            <p className="text-xs text-muted-gray mt-1.5 uppercase font-semibold tracking-wide font-sans">
+            <p className="text-xs text-muted-gray uppercase font-semibold tracking-wide font-sans">
               {user.email} &bull; {user.role} profile
             </p>
           </div>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-1.5 px-4 py-2 border border-red-200 text-red-600 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-red-50 transition-colors bg-white shadow-sm"
-        >
-          <LogOut className="w-3.5 h-3.5" /> LOG OUT
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => alert('Profile editing is coming soon.')}
+            className="flex items-center gap-1.5 px-4 py-2 border border-navy-deep text-navy-deep rounded-full text-xs font-bold uppercase tracking-wider hover:bg-navy-deep hover:text-white transition-all bg-white shadow-sm font-sans"
+          >
+            ✏ Edit Profile
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 px-4 py-2 border border-red-200 text-red-600 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-red-50 transition-colors bg-white shadow-sm font-sans"
+          >
+            <LogOut className="w-3.5 h-3.5" /> LOG OUT
+          </button>
+        </div>
       </div>
 
       {/* Dashboard Statistics Cards */}
@@ -560,12 +620,49 @@ export const Account: React.FC = () => {
                         </div>
                       )}
 
-                      {/* Total */}
-                      <div className="bg-[#F5FAFD]/20 border-t border-gray-100 px-6 py-4 flex justify-between items-center text-xs">
-                        <span className="text-muted-gray uppercase tracking-wider font-semibold">Total Price Paid</span>
-                        <span className="font-sans text-sm font-bold text-navy-deep">
-                          ₹{Number(order.total).toLocaleString('en-IN')}
-                        </span>
+                      {/* Order Quick Actions */}
+                      <div className="px-6 py-3 bg-gray-50/50 border-t border-gray-100 flex flex-wrap gap-4 items-center justify-between font-sans text-xs">
+                        <div className="flex flex-wrap gap-4 text-gray-500 font-bold">
+                          <button
+                            type="button"
+                            onClick={() => alert('Invoice download is being prepared and will be available shortly.')}
+                            className="hover:text-royal-blue transition-colors uppercase tracking-wider text-[10px]"
+                          >
+                            View Invoice
+                          </button>
+                          
+                          <button
+                            type="button"
+                            onClick={() => handleBuyAgain(order)}
+                            className="hover:text-royal-blue transition-colors uppercase tracking-wider text-[10px]"
+                          >
+                            Buy Again
+                          </button>
+
+                          <a
+                            href={`mailto:support@rarecomforts.com?subject=Support Request for Order Ref #${order.id.slice(-8).toUpperCase()}`}
+                            className="hover:text-royal-blue transition-colors uppercase tracking-wider text-[10px]"
+                          >
+                            Contact Support
+                          </a>
+
+                          {(order.status === 'PENDING' || order.status === 'CONFIRMED') && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancelOrder(order.id)}
+                              className="text-red-600 hover:text-red-800 transition-colors font-bold uppercase tracking-wider text-[10px]"
+                            >
+                              Cancel Order
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          <span className="text-muted-gray uppercase tracking-wider font-semibold mr-2">Total Paid</span>
+                          <span className="font-sans text-sm font-bold text-navy-deep">
+                            ₹{Number(order.total).toLocaleString('en-IN')}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );
@@ -584,19 +681,12 @@ export const Account: React.FC = () => {
                 <div className="h-48 bg-gray-50 rounded-lg" />
               </div>
             ) : wishlistItems.length === 0 ? (
-              <div className="py-16 text-center border border-dashed border-[#BDE8F5]/30 rounded-xl space-y-4 bg-gray-50/30">
-                <Heart className="w-10 h-10 text-[#BDE8F5] mx-auto" />
-                <h3 className="font-serif text-lg font-semibold text-navy-deep">Your Sanctuary is Empty</h3>
-                <p className="text-xs text-muted-gray max-w-xs mx-auto">
-                  Click the heart icon on product pages to save bedroom inspirations.
-                </p>
-                <button
-                  onClick={() => navigate('/products')}
-                  className="px-5 py-2 bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-semibold rounded-full"
-                >
-                  SHOP BEDDING
-                </button>
-              </div>
+              <EmptyState
+                icon="🤍"
+                message="No saved products yet."
+                ctaText="Start exploring →"
+                onCtaClick={() => navigate('/products')}
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {wishlistItems.map((prod) => (
@@ -747,7 +837,12 @@ export const Account: React.FC = () => {
                 <div className="h-20 bg-gray-50 rounded" />
               </div>
             ) : addresses.length === 0 ? (
-              <p className="text-xs text-muted-gray font-sans">No saved shipping addresses yet.</p>
+              <EmptyState
+                icon="🏡"
+                message="Your address book is empty."
+                ctaText="Add an Address"
+                onCtaClick={() => setShowAddressForm(true)}
+              />
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {addresses.map((addr) => (

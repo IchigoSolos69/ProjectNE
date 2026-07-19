@@ -56,6 +56,7 @@ router.get('/', async (req: AuthenticatedRequest, res) => {
         priceAtPurchase: item.priceAtPurchase,
         size: item.variant.size,
         color: item.variant.color,
+        variantId: item.variantId,
         product: {
           id: item.variant.productId,
           name: item.variant.product.name,
@@ -244,6 +245,116 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
   } catch (error) {
     console.error('Checkout error:', error);
     return res.status(500).json({ error: 'Failed to process checkout transaction.' });
+  }
+});
+
+// PATCH /api/orders/:id/cancel - Cancel a pending or confirmed order
+router.patch('/:id/cancel', async (req: AuthenticatedRequest, res) => {
+  try {
+    const orderId = req.params.id;
+    const userId = req.user!.id;
+
+    // Find order
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found.' });
+    }
+
+    if (order.userId !== userId) {
+      return res.status(403).json({ error: 'You are not authorized to cancel this order.' });
+    }
+
+    if (order.status !== 'PENDING' && order.status !== 'CONFIRMED') {
+      return res.status(400).json({ error: 'Only pending or confirmed orders can be cancelled.' });
+    }
+
+    // Cancel order
+    const updated = await prisma.$transaction(async (tx) => {
+      // Restore variant stock
+      const orderItems = await tx.orderItem.findMany({
+        where: { orderId },
+      });
+
+      for (const item of orderItems) {
+        await tx.productVariant.update({
+          where: { id: item.variantId },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        });
+      }
+
+      // Update status
+      const updatedOrder = await tx.order.update({
+        where: { id: orderId },
+        data: {
+          status: 'CANCELLED',
+          statusHistory: {
+            create: {
+              status: 'CANCELLED',
+              note: 'Order cancelled by customer.',
+            },
+          },
+        },
+        include: {
+          shippingAddress: true,
+          statusHistory: {
+            orderBy: { createdAt: 'asc' },
+          },
+          items: {
+            include: {
+              variant: {
+                include: {
+                  product: {
+                    select: {
+                      id: true,
+                      name: true,
+                      slug: true,
+                      images: true,
+                      category: {
+                        select: { name: true }
+                      }
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+
+      return updatedOrder;
+    });
+
+    // Formatting items to keep nested product shapes on client
+    const formatted = {
+      ...updated,
+      items: updated.items.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+        priceAtPurchase: item.priceAtPurchase,
+        size: item.variant.size,
+        color: item.variant.color,
+        variantId: item.variantId,
+        product: {
+          id: item.variant.productId,
+          name: item.variant.product.name,
+          slug: item.variant.product.slug,
+          images: item.variant.images.length > 0 ? item.variant.images : item.variant.product.images,
+          category: item.variant.product.category ? { name: item.variant.product.category.name } : undefined,
+        },
+      })),
+    };
+
+    return res.status(200).json({ success: true, order: formatted });
+  } catch (error) {
+    console.error('Cancel order error:', error);
+    return res.status(500).json({ error: 'Failed to cancel order.' });
   }
 });
 
