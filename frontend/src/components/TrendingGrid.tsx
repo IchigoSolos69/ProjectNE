@@ -18,8 +18,8 @@ export const TrendingGrid: React.FC = () => {
       setError(null);
       try {
         const data = await apiRequest<{ products: Product[] }>('/api/products?landing=true');
-        if (data && data.products && data.products.length > 0) {
-          setProducts(data.products.slice(0, 4)); // Show top 4 trending products
+        if (data && data.products) {
+          setProducts(data.products);
         } else {
           setProducts([]);
         }
@@ -113,27 +113,16 @@ export const TrendingGrid: React.FC = () => {
         </div>
       )}
 
-      {/* Error or Empty state: 4 brand-themed "Coming Soon" placeholders */}
+      {/* Error or Empty state: elegant fallback message */}
       {!loading && (error || products.length === 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="border border-[#BDE8F5]/60 rounded-xl p-6 bg-[#0F2854] text-white flex flex-col justify-between aspect-[4/5] shadow-md hover:shadow-lg transition-shadow"
-            >
-              <div className="space-y-2">
-                <p className="text-[9px] font-sans font-bold tracking-widest text-[#BDE8F5] uppercase">RARECOMFORTS</p>
-                <h3 className="font-serif text-lg font-bold">Cotton Showcase</h3>
-                <p className="text-[11px] text-[#BDE8F5]/70 font-sans leading-relaxed">
-                  A signature textile creation currently being unrolled for the seasonal catalogs.
-                </p>
-              </div>
-              <div className="border-t border-[#BDE8F5]/10 pt-4 flex justify-between items-center">
-                <span className="font-serif italic text-xs text-[#BDE8F5]/85">Coming Soon</span>
-                <span className="text-[8px] font-sans text-[#BDE8F5]/50 tracking-wider">EST. 2026</span>
-              </div>
-            </div>
-          ))}
+        <div className="bg-[#F5FAFD]/40 border border-[#BDE8F5]/25 rounded-2xl p-12 text-center max-w-xl mx-auto space-y-3 font-sans">
+          <span className="text-3xl block">🪶</span>
+          <p className="font-serif text-lg italic text-navy-deep leading-relaxed">
+            "We are curating our newest textile collection to offer you the ultimate sleep sanctuary. Please check back shortly."
+          </p>
+          <p className="text-[10px] text-muted-gray uppercase tracking-widest font-semibold pt-1">
+            RareComforts Showcase Curation
+          </p>
         </div>
       )}
 

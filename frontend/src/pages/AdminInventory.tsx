@@ -4,6 +4,7 @@ import { apiRequest, getOptimizedImageUrl } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { Product } from '../components/ProductCard';
 import { Plus, Pencil, Trash2, X, Search, Upload, Check } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
 
 interface VariantInput {
   size: string;
@@ -22,10 +23,11 @@ interface InventoryRowProps {
   onEdit: (prod: Product) => void;
   onDelete: (id: string) => void;
   onToggleTrending: (prod: Product) => void;
+  onToggleLanding: (prod: Product) => void;
   onToggleActive: (prod: Product) => void;
 }
 
-const InventoryRow = React.memo<InventoryRowProps>(({ prod, onEdit, onDelete, onToggleTrending, onToggleActive }) => {
+const InventoryRow = React.memo<InventoryRowProps>(({ prod, onEdit, onDelete, onToggleTrending, onToggleLanding, onToggleActive }) => {
   const totalStock = prod.variants ? prod.variants.reduce((acc, v) => acc + v.stock, 0) : 0;
   let lowestPrice = 0;
   if (prod.variants && prod.variants.length > 0) {
@@ -72,34 +74,51 @@ const InventoryRow = React.memo<InventoryRowProps>(({ prod, onEdit, onDelete, on
         </span>
       </td>
       <td className="p-4">
-        <div className="flex gap-2">
-          <button
-            onClick={() => onToggleTrending(prod)}
-            className="hover:scale-105 transition-transform"
-            title="Click to toggle Trending status"
-          >
-            {prod.isTrending ? (
-              <span className="bg-sky-blue/15 text-sky-blue px-2 py-0.5 rounded text-[9px] font-bold">
-                TRENDING
-              </span>
-            ) : (
-              <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold">
-                PROMO
-              </span>
-            )}
-          </button>
+        <div className="flex flex-col gap-1.5 justify-center">
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => onToggleTrending(prod)}
+              className="hover:scale-105 transition-transform flex-1"
+              title="Click to toggle Trending status"
+            >
+              {prod.isTrending ? (
+                <span className="bg-sky-blue/15 text-sky-blue px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
+                  TRENDING
+                </span>
+              ) : (
+                <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
+                  PROMO
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => onToggleLanding(prod)}
+              className="hover:scale-105 transition-transform flex-1"
+              title="Click to toggle Landing Page status"
+            >
+              {prod.showOnLandingPage ? (
+                <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
+                  LANDING
+                </span>
+              ) : (
+                <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
+                  INNER
+                </span>
+              )}
+            </button>
+          </div>
           <button
             onClick={() => onToggleActive(prod)}
-            className="hover:scale-105 transition-transform"
+            className="hover:scale-105 transition-transform w-full"
             title="Click to toggle Showroom publish status"
           >
             {prod.isActive ? (
-              <span className="bg-[#3AA757]/15 text-[#3AA757] px-2 py-0.5 rounded text-[9px] font-bold">
-                ACTIVE
+              <span className="bg-[#3AA757]/15 text-[#3AA757] px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
+                ACTIVE DISPLAY
               </span>
             ) : (
-              <span className="bg-red-50 text-red-500 px-2 py-0.5 rounded text-[9px] font-bold">
-                DRAFT
+              <span className="bg-red-50 text-red-500 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
+                DRAFT / ARCHIVE
               </span>
             )}
           </button>
@@ -132,6 +151,12 @@ InventoryRow.displayName = 'InventoryRow';
 export const AdminInventory: React.FC = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
+  const [confirmToggleData, setConfirmToggleData] = useState<{
+    product: Product;
+    field: 'isTrending' | 'showOnLandingPage' | 'isActive';
+    newValue: boolean;
+  } | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
@@ -438,44 +463,58 @@ export const AdminInventory: React.FC = () => {
     }
   }, [products]);
 
-  // 3. Optimistic UI Updates: Immediate status toggles
-  const handleToggleTrending = useCallback(async (prod: Product) => {
-    const newVal = !prod.isTrending;
+  // 3. Status Toggles with Confirmation
+  const handleToggleTrending = useCallback((prod: Product) => {
+    setConfirmToggleData({
+      product: prod,
+      field: 'isTrending',
+      newValue: !prod.isTrending
+    });
+  }, []);
+
+  const handleToggleLanding = useCallback((prod: Product) => {
+    setConfirmToggleData({
+      product: prod,
+      field: 'showOnLandingPage',
+      newValue: !prod.showOnLandingPage
+    });
+  }, []);
+
+  const handleToggleActive = useCallback((prod: Product) => {
+    setConfirmToggleData({
+      product: prod,
+      field: 'isActive',
+      newValue: !prod.isActive
+    });
+  }, []);
+
+  const handleConfirmToggle = async () => {
+    if (!confirmToggleData) return;
+    const { product: prod, field, newValue } = confirmToggleData;
+    setConfirmToggleData(null);
+
     const previousProducts = [...products];
 
+    // Optimistically update local state
     setProducts((prev) =>
-      prev.map((p) => (p.id === prod.id ? { ...p, isTrending: newVal } : p))
+      prev.map((p) => (p.id === prod.id ? { ...p, [field]: newValue } : p))
     );
 
     try {
       await apiRequest(`/api/admin/products/${prod.id}`, {
         method: 'PATCH',
-        body: JSON.stringify({ isTrending: newVal }),
+        body: JSON.stringify({ [field]: newValue }),
       });
+      toast.success(
+        'Showcase Updated',
+        `Successfully updated the visibility flags for ${prod.name}.`
+      );
     } catch (err: any) {
-      alert(err.message || 'Failed to update trending status.');
+      console.error('Failed to update product status:', err);
+      toast.error('Update Failed', err.message || 'Failed to update status. Please try again.');
       setProducts(previousProducts);
     }
-  }, [products]);
-
-  const handleToggleActive = useCallback(async (prod: Product) => {
-    const newVal = !prod.isActive;
-    const previousProducts = [...products];
-
-    setProducts((prev) =>
-      prev.map((p) => (p.id === prod.id ? { ...p, isActive: newVal } : p))
-    );
-
-    try {
-      await apiRequest(`/api/admin/products/${prod.id}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ isActive: newVal }),
-      });
-    } catch (err: any) {
-      alert(err.message || 'Failed to update active status.');
-      setProducts(previousProducts);
-    }
-  }, [products]);
+  };
 
   // 4. In-Place State Patching on addition/edits
   const handleSubmit = async (e: React.FormEvent) => {
@@ -737,6 +776,7 @@ export const AdminInventory: React.FC = () => {
                   onEdit={handleOpenEdit}
                   onDelete={handleDelete}
                   onToggleTrending={handleToggleTrending}
+                  onToggleLanding={handleToggleLanding}
                   onToggleActive={handleToggleActive}
                 />
               ))}
@@ -1218,6 +1258,41 @@ export const AdminInventory: React.FC = () => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+      {/* Custom Badge Toggle Confirmation Modal */}
+      {confirmToggleData && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 animate-none">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-[#0F2854]/45 backdrop-blur-sm animate-none"
+            onClick={() => setConfirmToggleData(null)}
+          />
+          
+          {/* Modal Card */}
+          <div className="relative bg-white border border-[#BDE8F5]/45 rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl font-sans text-left space-y-4 animate-none">
+            <h3 className="font-serif text-lg font-bold text-navy-deep leading-snug">
+              Update Showcase Status?
+            </h3>
+            <p className="text-xs text-muted-gray leading-relaxed">
+              Are you sure you want to update the visibility of <strong>{confirmToggleData.product.name}</strong> on the live site? This change will take effect immediately.
+            </p>
+            
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={handleConfirmToggle}
+                className="flex-1 px-4 py-2.5 bg-[#0F2854] hover:bg-royal-blue text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-sm"
+              >
+                Confirm Update
+              </button>
+              <button
+                onClick={() => setConfirmToggleData(null)}
+                className="px-5 border border-gray-300 text-muted-gray text-xs font-bold uppercase tracking-widest rounded-full hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </main>
