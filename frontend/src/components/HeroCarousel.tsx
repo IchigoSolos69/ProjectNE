@@ -257,7 +257,7 @@ export const HeroCarousel: React.FC = () => {
               <h2 className="font-serif text-3xl sm:text-4xl text-navy-deep font-bold leading-tight">
                 {displaySlides[activeIndex].name}
               </h2>
-              <p className="font-sans text-sm text-muted-gray leading-relaxed pt-2">
+              <p className="font-sans text-sm text-muted-gray leading-relaxed pt-2 line-clamp-3">
                 {displaySlides[activeIndex].description}
               </p>
               <div className="pt-3">
