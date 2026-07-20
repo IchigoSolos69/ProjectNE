@@ -14,12 +14,6 @@ import { Footer } from './components/Footer';
 
 // Pages
 import { Landing } from './pages/Landing';
-import { ProductListing } from './pages/ProductListing';
-import { ProductDetail } from './pages/ProductDetail';
-import { Auth } from './pages/Auth';
-import { AuthForgotPassword } from './pages/AuthForgotPassword';
-import { AuthResetPassword } from './pages/AuthResetPassword';
-import { LegalPage } from './pages/LegalPage';
 
 // Catch dynamic import failures and reload the page automatically
 window.addEventListener('vite:preloadError', (event) => {
@@ -28,6 +22,12 @@ window.addEventListener('vite:preloadError', (event) => {
 });
 
 // Lazy loaded page components
+const ProductListing = React.lazy(() => import('./pages/ProductListing').then(m => ({ default: m.ProductListing })));
+const ProductDetail = React.lazy(() => import('./pages/ProductDetail').then(m => ({ default: m.ProductDetail })));
+const Auth = React.lazy(() => import('./pages/Auth').then(m => ({ default: m.Auth })));
+const AuthForgotPassword = React.lazy(() => import('./pages/AuthForgotPassword').then(m => ({ default: m.AuthForgotPassword })));
+const AuthResetPassword = React.lazy(() => import('./pages/AuthResetPassword').then(m => ({ default: m.AuthResetPassword })));
+const LegalPage = React.lazy(() => import('./pages/LegalPage').then(m => ({ default: m.LegalPage })));
 const Account = React.lazy(() => import('./pages/Account').then(m => ({ default: m.Account })));
 const AdminInventory = React.lazy(() => import('./pages/AdminInventory').then(m => ({ default: m.AdminInventory })));
 const AdminOrders = React.lazy(() => import('./pages/AdminOrders').then(m => ({ default: m.AdminOrders })));
@@ -35,10 +35,18 @@ const AdminReviews = React.lazy(() => import('./pages/AdminReviews').then(m => (
 const AdminCoupons = React.lazy(() => import('./pages/AdminCoupons').then(m => ({ default: m.AdminCoupons })));
 
 const LazyFallback: React.FC = () => (
-  <div className="max-w-7xl mx-auto px-6 py-24 mt-[80px] text-center">
-    <p className="font-sans text-xs font-bold tracking-widest text-muted-gray uppercase animate-pulse">
-      LOADING PAGE...
-    </p>
+  <div className="flex items-center justify-center min-h-[60vh] bg-white">
+    <div className="flex flex-col items-center space-y-4 animate-none">
+      {/* Brand logo styling */}
+      <h2 className="font-serif text-xl font-medium tracking-[0.2em] text-[#0F2854] animate-pulse">
+        RARECOMFORTS
+      </h2>
+      {/* Centered pulsing navy loading ring */}
+      <div className="relative w-8 h-8 animate-none">
+        <div className="absolute inset-0 rounded-full border-2 border-[#0F2854]/10 animate-none" />
+        <div className="absolute inset-0 rounded-full border-2 border-t-[#0F2854] animate-spin" />
+      </div>
+    </div>
   </div>
 );
 
@@ -106,7 +114,9 @@ const AppLayout: React.FC = () => {
 
       {/* 2. Page viewport contents */}
       <div className="flex-grow">
-        <Outlet />
+        <Suspense fallback={<LazyFallback />}>
+          <Outlet />
+        </Suspense>
       </div>
 
       {/* 3. Persistent Brand Footer */}
@@ -147,31 +157,11 @@ ReactDOM.createRoot(rootElement).render(
                 <Route path="auth" element={<Auth />} />
                 <Route path="auth/forgot-password" element={<AuthForgotPassword />} />
                 <Route path="auth/reset-password" element={<AuthResetPassword />} />
-                <Route path="account" element={
-                  <Suspense fallback={<LazyFallback />}>
-                    <Account />
-                  </Suspense>
-                } />
-                <Route path="admin/inventory" element={
-                  <Suspense fallback={<LazyFallback />}>
-                    <AdminInventory />
-                  </Suspense>
-                } />
-                <Route path="admin/orders" element={
-                  <Suspense fallback={<LazyFallback />}>
-                    <AdminOrders />
-                  </Suspense>
-                } />
-                <Route path="admin/reviews" element={
-                  <Suspense fallback={<LazyFallback />}>
-                    <AdminReviews />
-                  </Suspense>
-                } />
-                <Route path="admin/coupons" element={
-                  <Suspense fallback={<LazyFallback />}>
-                    <AdminCoupons />
-                  </Suspense>
-                } />
+                <Route path="account" element={<Account />} />
+                <Route path="admin/inventory" element={<AdminInventory />} />
+                <Route path="admin/orders" element={<AdminOrders />} />
+                <Route path="admin/reviews" element={<AdminReviews />} />
+                <Route path="admin/coupons" element={<AdminCoupons />} />
                 <Route path="legal/:policyName" element={<LegalPage />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
