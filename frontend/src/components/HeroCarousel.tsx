@@ -18,6 +18,7 @@ interface CarouselSlide {
 
 export const HeroCarousel: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeIndex, setActiveIndex] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
@@ -25,13 +26,16 @@ export const HeroCarousel: React.FC = () => {
 
   useEffect(() => {
     const fetchLandingProducts = async () => {
+      setIsLoading(true);
       try {
         const data = await apiRequest<{ products: Product[] }>('/api/products?landing=true');
-        if (data && data.products && data.products.length > 0) {
+        if (data && data.products) {
           setProducts(data.products);
         }
       } catch (err) {
         console.error('Failed to fetch landing products for hero carousel:', err);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchLandingProducts();
@@ -60,36 +64,7 @@ export const HeroCarousel: React.FC = () => {
       });
     }
 
-    // Default hardcoded fallback slides if DB has no landing items
-    return [
-      {
-        id: '1',
-        name: 'Royal Egyptian Cotton Sheet Set',
-        tagline: 'THE GOLD STANDARD OF SLEEP',
-        description: 'Woven from hand-harvested, 100% long-staple Egyptian cotton. Offering 1000 Thread Count weight and a sateen sheen that grows softer with every wash.',
-        price: '₹12,999',
-        image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200',
-        link: '/products/royal-egyptian-cotton-sheet-set',
-      },
-      {
-        id: '2',
-        name: 'Imperial Satin Cotton Collection',
-        tagline: 'SILK WITHOUT COMPROMISE',
-        description: 'Liquid-smooth organic satin silk engineered for friction-free nights. Keeps temperatures balanced while preserving hair and skin moisture.',
-        price: '₹18,500',
-        image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200',
-        link: '/products/imperial-satin-cotton-collection',
-      },
-      {
-        id: '3',
-        name: 'Mulberry Silk Comforter',
-        tagline: 'WEIGHTLESS ALL-SEASON INSULATION',
-        description: 'Stuffed with 100% organic long-strand mulberry silk. It gently breathes to dissipate humidity while creating a heavy-lofted shield of warmth.',
-        price: '₹22,000',
-        image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=1200',
-        link: '/products/all-season-mulberry-silk-comforter',
-      },
-    ];
+    return [];
   }, [products]);
 
   const resetAutoplay = () => {
@@ -142,6 +117,42 @@ export const HeroCarousel: React.FC = () => {
   const handleDotClick = (index: number) => {
     setActiveIndex(index);
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 animate-pulse">
+        {/* Left Side: Image skeleton */}
+        <div className="w-full md:w-[58%] h-[50vh] md:h-full bg-gray-200" />
+        {/* Right Side: Info skeleton */}
+        <div className="w-full md:w-[42%] h-auto md:h-full flex flex-col justify-center p-8 sm:p-12 md:p-16 space-y-6 bg-white">
+          <div className="h-4 bg-gray-200 rounded w-1/4" />
+          <div className="h-10 bg-gray-200 rounded w-3/4" />
+          <div className="h-6 bg-gray-200 rounded w-5/6" />
+          <div className="h-6 bg-gray-200 rounded w-2/3" />
+          <div className="h-12 bg-gray-200 rounded-full w-1/3 pt-6" />
+        </div>
+      </div>
+    );
+  }
+
+  if (displaySlides.length === 0) {
+    return (
+      <div className="w-full h-[60vh] flex flex-col items-center justify-center bg-[#F5FAFD]/40 text-center px-6">
+        <h2 className="font-serif text-2xl md:text-3xl text-navy-deep font-bold mb-4">
+          Experience Restorative Luxury
+        </h2>
+        <p className="font-sans text-xs text-muted-gray uppercase tracking-widest max-w-md leading-relaxed">
+          Our curated collection showcase is being updated. Explore our full range of cotton products by clicking below.
+        </p>
+        <Link
+          to="/products"
+          className="mt-8 inline-block bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-semibold px-8 py-3.5 rounded-full hover:bg-royal-blue transition-luxury shadow-md"
+        >
+          Explore All Products
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <section className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">

@@ -8,16 +8,16 @@ gsap.registerPlugin(ScrollTrigger);
 
 export const TrendingGrid: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchTrending = async () => {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
       try {
-        const data = await apiRequest<{ products: Product[] }>('/api/products?landing=true');
+        const data = await apiRequest<{ products: Product[] }>('/api/products?trending=true');
         if (data && data.products) {
           setProducts(data.products);
         } else {
@@ -27,7 +27,7 @@ export const TrendingGrid: React.FC = () => {
         console.error('Error fetching trending products:', err);
         setError('Failed to retrieve trending collections.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -35,7 +35,7 @@ export const TrendingGrid: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (loading || products.length === 0 || !gridRef.current) return;
+    if (isLoading || products.length === 0 || !gridRef.current) return;
 
     const cards = gridRef.current.querySelectorAll('.trending-card');
     
@@ -57,7 +57,7 @@ export const TrendingGrid: React.FC = () => {
         },
       }
     );
-  }, [loading, products]);
+  }, [isLoading, products]);
 
   const shimmerStyles = (
     <style>{`
@@ -100,7 +100,7 @@ export const TrendingGrid: React.FC = () => {
       </div>
 
       {/* Loading state skeleton shimmer grid */}
-      {loading && (
+      {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex flex-col space-y-4">
@@ -114,7 +114,7 @@ export const TrendingGrid: React.FC = () => {
       )}
 
       {/* Error or Empty state: elegant fallback message */}
-      {!loading && (error || products.length === 0) && (
+      {!isLoading && (error || products.length === 0) && (
         <div className="bg-[#F5FAFD]/40 border border-[#BDE8F5]/25 rounded-2xl p-12 text-center max-w-xl mx-auto space-y-3 font-sans">
           <span className="text-3xl block">🪶</span>
           <p className="font-serif text-lg italic text-navy-deep leading-relaxed">
@@ -127,7 +127,7 @@ export const TrendingGrid: React.FC = () => {
       )}
 
       {/* Actual products grid */}
-      {!loading && !error && products.length > 0 && (
+      {!isLoading && !error && products.length > 0 && (
         <div
           ref={gridRef}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"

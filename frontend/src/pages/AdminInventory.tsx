@@ -87,7 +87,7 @@ const InventoryRow = React.memo<InventoryRowProps>(({ prod, onEdit, onDelete, on
                 </span>
               ) : (
                 <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
-                  PROMO
+                  STANDARD
                 </span>
               )}
             </button>
@@ -98,11 +98,11 @@ const InventoryRow = React.memo<InventoryRowProps>(({ prod, onEdit, onDelete, on
             >
               {prod.showOnLandingPage ? (
                 <span className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
-                  LANDING
+                  LANDING PAGE
                 </span>
               ) : (
                 <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded text-[9px] font-bold uppercase block text-center">
-                  INNER
+                  INNER PAGE
                 </span>
               )}
             </button>
@@ -473,15 +473,26 @@ export const AdminInventory: React.FC = () => {
         method: 'PATCH',
         body: JSON.stringify({ [field]: newValue }),
       });
-      toast.success(
-        'Showcase Updated',
-        `Successfully updated the ${
-          field === 'isTrending' ? 'Trending' : field === 'showOnLandingPage' ? 'Landing Page' : 'Active Display'
-        } flag for ${prod.name}.`
-      );
+
+      let successMessage = '';
+      if (field === 'isTrending') {
+        successMessage = newValue
+          ? `"${prod.name}" added to Trending`
+          : `"${prod.name}" removed from Trending`;
+      } else if (field === 'showOnLandingPage') {
+        successMessage = newValue
+          ? `"${prod.name}" added to Landing Page`
+          : `"${prod.name}" removed from Landing Page`;
+      } else if (field === 'isActive') {
+        successMessage = newValue
+          ? `"${prod.name}" set to Active Display`
+          : `"${prod.name}" set to Draft / Archive`;
+      }
+
+      toast.success('Status Updated', successMessage);
     } catch (err: any) {
       console.error('Failed to toggle badge status:', err);
-      toast.error('Update Failed', err.message || 'Failed to update status. Please try again.');
+      toast.error('Update Failed', `Failed to update "${prod.name}": ${err.message || 'Network Error'}`);
       // Revert visual toggle on error
       setProducts(previousProducts);
     }
