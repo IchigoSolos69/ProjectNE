@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import gsap from 'gsap';
-import { getOptimizedImageUrl } from '../lib/api';
+import { getOptimizedImageUrl, apiRequest } from '../lib/api';
+import { Product } from './ProductCard';
 
 interface CarouselSlide {
   id: string;
@@ -15,41 +16,81 @@ interface CarouselSlide {
   link: string;
 }
 
-const slides: CarouselSlide[] = [
-  {
-    id: '1',
-    name: 'Royal Egyptian Cotton Sheet Set',
-    tagline: 'THE GOLD STANDARD OF SLEEP',
-    description: 'Woven from hand-harvested, 100% long-staple Egyptian cotton. Offering 1000 Thread Count weight and a sateen sheen that grows softer with every wash.',
-    price: '₹12,999',
-    image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200',
-    link: '/products/royal-egyptian-cotton-sheet-set',
-  },
-  {
-    id: '2',
-    name: 'Imperial Satin Cotton Collection',
-    tagline: 'SILK WITHOUT COMPROMISE',
-    description: 'Liquid-smooth organic satin silk engineered for friction-free nights. Keeps temperatures balanced while preserving hair and skin moisture.',
-    price: '₹18,500',
-    image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200',
-    link: '/products/imperial-satin-cotton-collection',
-  },
-  {
-    id: '3',
-    name: 'Mulberry Silk Comforter',
-    tagline: 'WEIGHTLESS ALL-SEASON INSULATION',
-    description: 'Stuffed with 100% organic long-strand mulberry silk. It gently breathes to dissipate humidity while creating a heavy-lofted shield of warmth.',
-    price: '₹22,000',
-    image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=1200',
-    link: '/products/all-season-mulberry-silk-comforter',
-  },
-];
-
 export const HeroCarousel: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
   const autoPlayRef = useRef<any>(null);
+
+  useEffect(() => {
+    const fetchLandingProducts = async () => {
+      try {
+        const data = await apiRequest<{ products: Product[] }>('/api/products?landing=true');
+        if (data && data.products && data.products.length > 0) {
+          setProducts(data.products);
+        }
+      } catch (err) {
+        console.error('Failed to fetch landing products for hero carousel:', err);
+      }
+    };
+    fetchLandingProducts();
+  }, []);
+
+  const displaySlides = useMemo<CarouselSlide[]>(() => {
+    if (products.length > 0) {
+      return products.map((prod) => {
+        // Find lowest variant price or default to base price if set
+        let lowestPrice = 0;
+        if (prod.variants && prod.variants.length > 0) {
+          lowestPrice = Math.min(
+            ...prod.variants.map((v) => (v.discountPrice ? Number(v.discountPrice) : Number(v.price)))
+          );
+        }
+
+        return {
+          id: prod.id,
+          name: prod.name,
+          tagline: prod.material?.toUpperCase() || 'PREMIUM TEXTILE CREATION',
+          description: prod.description,
+          price: lowestPrice > 0 ? `₹${lowestPrice.toLocaleString('en-IN')}` : 'Request Price',
+          image: prod.images[0] || (prod.variants?.[0]?.imageUrl) || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200',
+          link: `/products/${prod.slug}`,
+        };
+      });
+    }
+
+    // Default hardcoded fallback slides if DB has no landing items
+    return [
+      {
+        id: '1',
+        name: 'Royal Egyptian Cotton Sheet Set',
+        tagline: 'THE GOLD STANDARD OF SLEEP',
+        description: 'Woven from hand-harvested, 100% long-staple Egyptian cotton. Offering 1000 Thread Count weight and a sateen sheen that grows softer with every wash.',
+        price: '₹12,999',
+        image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200',
+        link: '/products/royal-egyptian-cotton-sheet-set',
+      },
+      {
+        id: '2',
+        name: 'Imperial Satin Cotton Collection',
+        tagline: 'SILK WITHOUT COMPROMISE',
+        description: 'Liquid-smooth organic satin silk engineered for friction-free nights. Keeps temperatures balanced while preserving hair and skin moisture.',
+        price: '₹18,500',
+        image: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200',
+        link: '/products/imperial-satin-cotton-collection',
+      },
+      {
+        id: '3',
+        name: 'Mulberry Silk Comforter',
+        tagline: 'WEIGHTLESS ALL-SEASON INSULATION',
+        description: 'Stuffed with 100% organic long-strand mulberry silk. It gently breathes to dissipate humidity while creating a heavy-lofted shield of warmth.',
+        price: '₹22,000',
+        image: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?q=80&w=1200',
+        link: '/products/all-season-mulberry-silk-comforter',
+      },
+    ];
+  }, [products]);
 
   const resetAutoplay = () => {
     if (autoPlayRef.current) {
@@ -65,10 +106,12 @@ export const HeroCarousel: React.FC = () => {
     return () => {
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [activeIndex]);
+  }, [activeIndex, displaySlides]);
 
   // Handle GSAP transitions when slide changes
   useEffect(() => {
+    if (displaySlides.length === 0) return;
+    
     // Left Image Animation
     if (imageContainerRef.current) {
       const activeImg = imageContainerRef.current.querySelector(`.slide-img-${activeIndex}`);
@@ -86,14 +129,14 @@ export const HeroCarousel: React.FC = () => {
         { opacity: 1, y: 0, duration: 0.6, stagger: 0.08, ease: 'power2.out' }
       );
     }
-  }, [activeIndex]);
+  }, [activeIndex, displaySlides]);
 
   const handlePrev = () => {
-    setActiveIndex((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+    setActiveIndex((prev) => (prev === 0 ? displaySlides.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setActiveIndex((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
+    setActiveIndex((prev) => (prev === displaySlides.length - 1 ? 0 : prev + 1));
   };
 
   const handleDotClick = (index: number) => {
@@ -102,22 +145,24 @@ export const HeroCarousel: React.FC = () => {
 
   return (
     <section className="relative w-full h-screen flex flex-col md:flex-row bg-[#F5FAFD]/40 overflow-hidden">
-      <Helmet>
-        <link
-          rel="preload"
-          as="image"
-          href={getOptimizedImageUrl(slides[0].image, 1200)}
-          imageSrcSet={`${getOptimizedImageUrl(slides[0].image, 600)} 600w, ${getOptimizedImageUrl(slides[0].image, 1200)} 1200w, ${getOptimizedImageUrl(slides[0].image, 1800)} 1800w`}
-          imageSizes="(max-width: 768px) 100vw, 58vw"
-        />
-      </Helmet>
+      {displaySlides.length > 0 && (
+        <Helmet>
+          <link
+            rel="preload"
+            as="image"
+            href={getOptimizedImageUrl(displaySlides[0].image, 1200)}
+            imageSrcSet={`${getOptimizedImageUrl(displaySlides[0].image, 600)} 600w, ${getOptimizedImageUrl(displaySlides[0].image, 1200)} 1200w, ${getOptimizedImageUrl(displaySlides[0].image, 1800)} 1800w`}
+            imageSizes="(max-width: 768px) 100vw, 58vw"
+          />
+        </Helmet>
+      )}
         
         {/* Left Carousel Image Section (~58%) */}
         <div
           ref={imageContainerRef}
           className="relative w-full md:w-[58%] h-[50vh] md:h-full overflow-hidden bg-navy-deep flex-shrink-0 p-0 m-0 border-0"
         >
-          {slides.map((slide, idx) => {
+          {displaySlides.map((slide, idx) => {
             const isFirst = idx === 0;
             return (
               <div
@@ -173,7 +218,7 @@ export const HeroCarousel: React.FC = () => {
           
           {/* Carousel Slide Indicators */}
           <div className="flex gap-1 mb-6 justify-start items-center">
-            {slides.map((_, idx) => {
+            {displaySlides.map((_, idx) => {
               const isActive = idx === activeIndex;
               return (
                 <button
@@ -193,31 +238,33 @@ export const HeroCarousel: React.FC = () => {
           </div>
 
           {/* Content Ref container */}
-          <div ref={textContainerRef} className="space-y-4 max-w-md my-auto">
-            <p className="font-sans text-xs font-bold tracking-widest text-royal-blue uppercase">
-              {slides[activeIndex].tagline}
-            </p>
-            <h2 className="font-serif text-3xl sm:text-4xl text-navy-deep font-bold leading-tight">
-              {slides[activeIndex].name}
-            </h2>
-            <p className="font-sans text-sm text-muted-gray leading-relaxed pt-2">
-              {slides[activeIndex].description}
-            </p>
-            <div className="pt-3">
-              <span className="font-sans text-xs text-muted-gray tracking-wider uppercase block">ESTIMATED PRICE</span>
-              <span className="font-sans text-xl font-bold text-navy-deep">
-                From {slides[activeIndex].price}
-              </span>
+          {displaySlides.length > activeIndex && (
+            <div ref={textContainerRef} className="space-y-4 max-w-md my-auto">
+              <p className="font-sans text-xs font-bold tracking-widest text-royal-blue uppercase">
+                {displaySlides[activeIndex].tagline}
+              </p>
+              <h2 className="font-serif text-3xl sm:text-4xl text-navy-deep font-bold leading-tight">
+                {displaySlides[activeIndex].name}
+              </h2>
+              <p className="font-sans text-sm text-muted-gray leading-relaxed pt-2">
+                {displaySlides[activeIndex].description}
+              </p>
+              <div className="pt-3">
+                <span className="font-sans text-xs text-muted-gray tracking-wider uppercase block">ESTIMATED PRICE</span>
+                <span className="font-sans text-xl font-bold text-navy-deep">
+                  From {displaySlides[activeIndex].price}
+                </span>
+              </div>
+              <div className="pt-6">
+                <Link
+                  to={displaySlides[activeIndex].link}
+                  className="inline-block bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-semibold px-8 py-3.5 rounded-full hover:bg-royal-blue hover:text-white transition-luxury shadow-md"
+                >
+                  SHOP THE COLLECTION →
+                </Link>
+              </div>
             </div>
-            <div className="pt-6">
-              <Link
-                to={slides[activeIndex].link}
-                className="inline-block bg-navy-deep text-white font-sans text-xs uppercase tracking-wide font-semibold px-8 py-3.5 rounded-full hover:bg-royal-blue hover:text-white transition-luxury shadow-md"
-              >
-                SHOP THE COLLECTION →
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </section>
     );

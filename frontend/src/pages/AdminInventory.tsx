@@ -152,11 +152,6 @@ export const AdminInventory: React.FC = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
-  const [confirmToggleData, setConfirmToggleData] = useState<{
-    product: Product;
-    field: 'isTrending' | 'showOnLandingPage' | 'isActive';
-    newValue: boolean;
-  } | null>(null);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
@@ -463,39 +458,12 @@ export const AdminInventory: React.FC = () => {
     }
   }, [products]);
 
-  // 3. Status Toggles with Confirmation
-  const handleToggleTrending = useCallback((prod: Product) => {
-    setConfirmToggleData({
-      product: prod,
-      field: 'isTrending',
-      newValue: !prod.isTrending
-    });
-  }, []);
-
-  const handleToggleLanding = useCallback((prod: Product) => {
-    setConfirmToggleData({
-      product: prod,
-      field: 'showOnLandingPage',
-      newValue: !prod.showOnLandingPage
-    });
-  }, []);
-
-  const handleToggleActive = useCallback((prod: Product) => {
-    setConfirmToggleData({
-      product: prod,
-      field: 'isActive',
-      newValue: !prod.isActive
-    });
-  }, []);
-
-  const handleConfirmToggle = async () => {
-    if (!confirmToggleData) return;
-    const { product: prod, field, newValue } = confirmToggleData;
-    setConfirmToggleData(null);
-
+  // 3. Direct status toggles (No Confirmation)
+  const toggleBadge = async (prod: Product, field: 'isTrending' | 'showOnLandingPage' | 'isActive') => {
+    const newValue = !prod[field];
     const previousProducts = [...products];
 
-    // Optimistically update local state
+    // Optimistically update local state immediately
     setProducts((prev) =>
       prev.map((p) => (p.id === prod.id ? { ...p, [field]: newValue } : p))
     );
@@ -507,14 +475,29 @@ export const AdminInventory: React.FC = () => {
       });
       toast.success(
         'Showcase Updated',
-        `Successfully updated the visibility flags for ${prod.name}.`
+        `Successfully updated the ${
+          field === 'isTrending' ? 'Trending' : field === 'showOnLandingPage' ? 'Landing Page' : 'Active Display'
+        } flag for ${prod.name}.`
       );
     } catch (err: any) {
-      console.error('Failed to update product status:', err);
+      console.error('Failed to toggle badge status:', err);
       toast.error('Update Failed', err.message || 'Failed to update status. Please try again.');
+      // Revert visual toggle on error
       setProducts(previousProducts);
     }
   };
+
+  const handleToggleTrending = useCallback((prod: Product) => {
+    toggleBadge(prod, 'isTrending');
+  }, [products]);
+
+  const handleToggleLanding = useCallback((prod: Product) => {
+    toggleBadge(prod, 'showOnLandingPage');
+  }, [products]);
+
+  const handleToggleActive = useCallback((prod: Product) => {
+    toggleBadge(prod, 'isActive');
+  }, [products]);
 
   // 4. In-Place State Patching on addition/edits
   const handleSubmit = async (e: React.FormEvent) => {
@@ -1258,41 +1241,6 @@ export const AdminInventory: React.FC = () => {
               </button>
             </div>
           </form>
-        </div>
-      )}
-      {/* Custom Badge Toggle Confirmation Modal */}
-      {confirmToggleData && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 animate-none">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-[#0F2854]/45 backdrop-blur-sm animate-none"
-            onClick={() => setConfirmToggleData(null)}
-          />
-          
-          {/* Modal Card */}
-          <div className="relative bg-white border border-[#BDE8F5]/45 rounded-2xl p-6 md:p-8 max-w-sm w-full shadow-2xl font-sans text-left space-y-4 animate-none">
-            <h3 className="font-serif text-lg font-bold text-navy-deep leading-snug">
-              Update Showcase Status?
-            </h3>
-            <p className="text-xs text-muted-gray leading-relaxed">
-              Are you sure you want to update the visibility of <strong>{confirmToggleData.product.name}</strong> on the live site? This change will take effect immediately.
-            </p>
-            
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={handleConfirmToggle}
-                className="flex-1 px-4 py-2.5 bg-[#0F2854] hover:bg-royal-blue text-white text-xs font-bold uppercase tracking-widest rounded-full transition-colors shadow-sm"
-              >
-                Confirm Update
-              </button>
-              <button
-                onClick={() => setConfirmToggleData(null)}
-                className="px-5 border border-gray-300 text-muted-gray text-xs font-bold uppercase tracking-widest rounded-full hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
         </div>
       )}
     </main>
