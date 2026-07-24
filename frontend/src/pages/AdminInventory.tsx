@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiRequest, getOptimizedImageUrl } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
 import { Product } from '../components/ProductCard';
-import { Plus, Pencil, Trash2, X, Search, Upload, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Search, Upload, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 
 interface VariantInput {
@@ -164,6 +164,14 @@ export const AdminInventory: React.FC = () => {
 
   // Modal States
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true);
+  const [isSpecsOpen, setIsSpecsOpen] = useState(false);
+  const [isVariantsOpen, setIsVariantsOpen] = useState(true);
+
+  // Auto-Generate Variants States
+  const [selectedGenColors, setSelectedGenColors] = useState<string[]>([]);
+  const [selectedGenSizes, setSelectedGenSizes] = useState<string[]>([]);
+
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [bulkFile, setBulkFile] = useState<File | null>(null);
@@ -268,6 +276,12 @@ export const AdminInventory: React.FC = () => {
     setShowOnLandingPage(false);
     setIsActive(true);
 
+    setIsBasicInfoOpen(true);
+    setIsSpecsOpen(false);
+    setIsVariantsOpen(true);
+    setSelectedGenColors([]);
+    setSelectedGenSizes([]);
+
     const defaultSku = generateClientSku('', defaultCatId, 'Queen', 'Ivory Cream');
     setVariants([
       { size: 'Queen', color: 'Ivory Cream', sku: defaultSku, price: '', discountPrice: '', stock: '30', images: [] },
@@ -289,6 +303,12 @@ export const AdminInventory: React.FC = () => {
     setIsTrending(prod.isTrending);
     setShowOnLandingPage(prod.showOnLandingPage || false);
     setIsActive(prod.isActive);
+
+    setIsBasicInfoOpen(true);
+    setIsSpecsOpen(false);
+    setIsVariantsOpen(true);
+    setSelectedGenColors([]);
+    setSelectedGenSizes([]);
 
     if (prod.variants && prod.variants.length > 0) {
       setVariants(
@@ -328,6 +348,62 @@ export const AdminInventory: React.FC = () => {
       ...prev,
       { size: defaultSize, color: '', sku: tempSku, price: '', discountPrice: '', stock: '10', images: [] },
     ]);
+  };
+
+  const handleAutoGenerateVariants = () => {
+    if (selectedGenColors.length === 0) {
+      alert('Please select at least one color.');
+      return;
+    }
+    if (!hideSizeField && selectedGenSizes.length === 0) {
+      alert('Please select at least one size.');
+      return;
+    }
+
+    const targetSizes = hideSizeField ? ['Standard'] : selectedGenSizes;
+    const newGenRows: VariantInput[] = [];
+
+    targetSizes.forEach((sz) => {
+      selectedGenColors.forEach((col) => {
+        const sku = generateClientSku(name, categoryId, sz, col);
+        // Check if combination already exists
+        const exists = variants.some(
+          (v) => v.size.toLowerCase() === sz.toLowerCase() && v.color.toLowerCase() === col.toLowerCase()
+        );
+        if (!exists) {
+          newGenRows.push({
+            size: sz,
+            color: col,
+            sku,
+            price: '',
+            discountPrice: '',
+            stock: '30',
+            imageUrl: '',
+            images: [],
+          });
+        }
+      });
+    });
+
+    if (newGenRows.length === 0) {
+      alert('No new unique variant combinations were found to generate.');
+      return;
+    }
+
+    setVariants((prev) => {
+      const isDefaultBlank =
+        prev.length === 1 &&
+        prev[0].price === '' &&
+        prev[0].color === 'Ivory Cream' &&
+        prev[0].size === 'Queen';
+      return isDefaultBlank ? newGenRows : [...prev, ...newGenRows];
+    });
+
+    // Reset selection checkboxes
+    setSelectedGenColors([]);
+    setSelectedGenSizes([]);
+
+    toast.success('Variants Generated', `Successfully auto-generated ${newGenRows.length} variant combinations.`);
   };
 
   const handleRemoveVariantRow = (index: number) => {
@@ -511,13 +587,15 @@ export const AdminInventory: React.FC = () => {
   }, [products]);
 
   // 4. In-Place State Patching on addition/edits
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent, overrideActiveStatus?: boolean) => {
+    if (e) e.preventDefault();
 
     if (!name || !description || !categoryId) {
       alert('Please fill in required fields.');
       return;
     }
+
+    const activeFlag = overrideActiveStatus !== undefined ? overrideActiveStatus : isActive;
 
     const packageIncludesArray = packageIncludes
       .split(',')
@@ -540,7 +618,7 @@ export const AdminInventory: React.FC = () => {
       images,
       isTrending,
       showOnLandingPage,
-      isActive,
+      isActive: activeFlag,
       categoryId,
       variants: variants.map((v) => {
         const basePrice = parseFloat(v.price) || 0;
@@ -798,367 +876,556 @@ export const AdminInventory: React.FC = () => {
             </div>
 
             {/* Modal Form Scrollable Area */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-6">
+            <form onSubmit={(e) => handleSubmit(e)} className="flex-1 overflow-y-auto p-5 space-y-4">
               
-              {/* Product Title */}
-              <div className="space-y-1">
-                <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                  Product Name *
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Royal Egyptian Cotton Sheet Set"
-                  value={name}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setName(val);
-                    setVariants(prev => prev.map(v => ({
-                      ...v,
-                      sku: generateClientSku(val, categoryId, v.size, v.color)
-                    })));
-                  }}
-                  className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
-                  required
-                />
-              </div>
+              {/* SECTION 1: BASIC INFORMATION */}
+              <div className="border border-[#BDE8F5]/30 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setIsBasicInfoOpen(!isBasicInfoOpen)}
+                  className="w-full p-4 bg-[#F5FAFD] flex justify-between items-center text-left border-b border-[#BDE8F5]/20 hover:bg-[#BDE8F5]/10 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans text-xs font-bold text-navy-deep uppercase tracking-wider">
+                      1. Basic Information
+                    </span>
+                    <span className="text-[10px] text-muted-gray">(Title, Description, Category, Showcase Badges)</span>
+                  </div>
+                  {isBasicInfoOpen ? <ChevronUp className="w-4 h-4 text-navy-deep" /> : <ChevronDown className="w-4 h-4 text-navy-deep" />}
+                </button>
+                {isBasicInfoOpen && (
+                  <div className="p-5 space-y-5">
+                    {/* Product Title */}
+                    <div className="space-y-1">
+                      <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                        Product Name *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Royal Egyptian Cotton Sheet Set"
+                        value={name}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setName(val);
+                          setVariants((prev) =>
+                            prev.map((v) => ({
+                              ...v,
+                              sku: generateClientSku(val, categoryId, v.size, v.color),
+                            }))
+                          );
+                        }}
+                        className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
+                        required
+                      />
+                    </div>
 
-              {/* Description */}
-              <div className="space-y-1">
-                <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                  Product Description *
-                </label>
-                <textarea
-                  placeholder="Write a descriptive, luxury, on-brand blurb..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none leading-relaxed"
-                  required
-                />
-              </div>
+                    {/* Description */}
+                    <div className="space-y-1">
+                      <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                        Product Description *
+                      </label>
+                      <textarea
+                        placeholder="Write a descriptive, luxury, on-brand blurb..."
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                        className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none leading-relaxed"
+                        required
+                      />
+                    </div>
 
-              {/* Category, Material Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                    Category *
-                  </label>
-                  <select
-                    value={categoryId}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setCategoryId(val);
-                      setVariants(prev => prev.map(v => ({
-                        ...v,
-                        sku: generateClientSku(name, val, v.size, v.color)
-                      })));
-                    }}
-                    className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none cursor-pointer"
-                    required
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                    {/* Category, Material Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                          Category *
+                        </label>
+                        <select
+                          value={categoryId}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setCategoryId(val);
+                            setVariants((prev) =>
+                              prev.map((v) => ({
+                                ...v,
+                                sku: generateClientSku(name, val, v.size, v.color),
+                              }))
+                            );
+                          }}
+                          className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none cursor-pointer"
+                          required
+                        >
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                    Material / Build
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 100% long-staple Egyptian cotton"
-                    value={material}
-                    onChange={(e) => setMaterial(e.target.value)}
-                    className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
-                  />
-                </div>
-              </div>
+                      <div className="space-y-1">
+                        <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                          Material / Build
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 100% long-staple Egyptian cotton"
+                          value={material}
+                          onChange={(e) => setMaterial(e.target.value)}
+                          className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
+                        />
+                      </div>
+                    </div>
 
-              {/* Care Instructions & Manufacturing Details Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                    Care Instructions
-                  </label>
-                  <textarea
-                    placeholder="e.g. Machine wash cold, tumble dry low..."
-                    value={careInstructions}
-                    onChange={(e) => setCareInstructions(e.target.value)}
-                    rows={2}
-                    className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
-                  />
-                </div>
+                    {/* Toggles row with concise, scannable labels */}
+                    <div className="flex flex-wrap gap-6 items-center bg-[#F5FAFD]/40 border border-[#BDE8F5]/20 p-4 rounded-lg">
+                      <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
+                        <input
+                          type="checkbox"
+                          checked={isTrending}
+                          onChange={(e) => setIsTrending(e.target.checked)}
+                          className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
+                        />
+                        Signature Collection
+                      </label>
 
-                <div className="space-y-1">
-                  <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                    Manufacturing Details
-                  </label>
-                  <textarea
-                    placeholder="e.g. Handcrafted in Rajasthan, India..."
-                    value={manufacturingDetails}
-                    onChange={(e) => setManufacturingDetails(e.target.value)}
-                    rows={2}
-                    className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
-                  />
-                </div>
-              </div>
+                      <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
+                        <input
+                          type="checkbox"
+                          checked={showOnLandingPage}
+                          onChange={(e) => setShowOnLandingPage(e.target.checked)}
+                          className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
+                        />
+                        Feature on Homepage
+                      </label>
 
-              {/* What's Included Input */}
-              <div className="space-y-1">
-                <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                  What's Included (Package Contents - Comma-Separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. 1 Queen Bedsheet, 2 Pillow Covers"
-                  value={packageIncludes}
-                  onChange={(e) => setPackageIncludes(e.target.value)}
-                  className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
-                />
-              </div>
+                      <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
+                        <input
+                          type="checkbox"
+                          checked={isActive}
+                          onChange={(e) => setIsActive(e.target.checked)}
+                          className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
+                        />
+                        Publish Product
+                      </label>
+                    </div>
 
-              {/* DYNAMIC VARIANTS rows */}
-              <div className="space-y-4 border-t border-gray-100 pt-6">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase">
-                    Product Variants *
-                  </h3>
-                  <button
-                    type="button"
-                    onClick={handleAddVariantRow}
-                    className="text-[10px] font-bold text-royal-blue hover:text-navy-deep flex items-center gap-1 uppercase tracking-wider"
-                  >
-                    + Add Variant Row
-                  </button>
-                </div>
+                    {/* Shared Gallery Image Uploads */}
+                    <div className="space-y-4 border-t border-gray-100 pt-4">
+                      <h3 className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                        Product Shared Gallery
+                      </h3>
 
-                <div className="space-y-4">
-                  {variants.map((v, idx) => (
-                    <div
-                      key={idx}
-                      className="grid grid-cols-2 sm:grid-cols-7 gap-3 bg-gray-50/50 p-3 border border-gray-100 rounded-md relative items-end"
-                    >
-                      <div className="flex flex-col items-center justify-center">
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Image</label>
-                        <div className="relative w-10 h-10 bg-white border border-gray-250 rounded overflow-hidden flex items-center justify-center group cursor-pointer hover:border-royal-blue transition-colors">
-                          {v.imageUrl ? (
-                            <img src={v.imageUrl} className="w-full h-full object-cover" alt="Variant preview" />
-                          ) : (
-                            <Upload className="w-3.5 h-3.5 text-muted-gray" />
-                          )}
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleVariantImageUpload(idx, e)}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                          />
+                      <div className="border-2 border-dashed border-[#BDE8F5] hover:border-royal-blue bg-[#BDE8F5]/5 rounded-xl p-6 text-center cursor-pointer relative transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                          disabled={uploading}
+                        />
+                        <div className="space-y-2">
+                          <Upload className="w-8 h-8 text-sky-blue mx-auto" />
+                          <p className="text-xs font-semibold text-navy-deep">
+                            {uploading ? 'UPLOADING TO CLOUDINARY...' : 'DRAG FILE HERE OR CLICK TO UPLOAD'}
+                          </p>
+                          <p className="text-[10px] text-muted-gray">Direct image streaming to your cloud asset storage</p>
                         </div>
                       </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Size</label>
-                        <input
-                          type="text"
-                          placeholder="Queen"
-                          value={hideSizeField ? 'Standard' : v.size}
-                          onChange={(e) => handleVariantChange(idx, 'size', e.target.value)}
-                          disabled={hideSizeField}
-                          className={`w-full border rounded p-1.5 text-xs outline-none focus:border-royal-blue ${
-                            hideSizeField
-                              ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed font-medium font-sans'
-                              : 'bg-white border-gray-200 text-navy-deep font-sans'
-                          }`}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Color</label>
-                        <input
-                          type="text"
-                          placeholder="Cream"
-                          value={v.color}
-                          onChange={(e) => handleVariantChange(idx, 'color', e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">SKU (Auto)</label>
-                        <input
-                          type="text"
-                          value={v.sku}
-                          readOnly
-                          className="w-full bg-gray-100 border border-gray-200 rounded p-1.5 text-xs font-mono uppercase outline-none text-gray-500 cursor-not-allowed"
-                          title="SKUs are automatically generated by the server based on product attributes"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Price *</label>
-                        <input
-                          type="number"
-                          placeholder="14999"
-                          value={v.price}
-                          onChange={(e) => handleVariantChange(idx, 'price', e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Discount (%)</label>
-                        <input
-                          type="number"
-                          placeholder="e.g. 28"
-                          value={v.discountPrice}
-                          onChange={(e) => handleVariantChange(idx, 'discountPrice', e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
-                          min="0"
-                          max="100"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Stock *</label>
-                        <input
-                          type="number"
-                          placeholder="30"
-                          value={v.stock}
-                          onChange={(e) => handleVariantChange(idx, 'stock', e.target.value)}
-                          className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
-                          required
-                        />
+
+                      <div className="space-y-2">
+                        <label className="font-sans text-[9px] font-bold text-muted-gray uppercase block">
+                          Upload Fallback URL (Optional, paste direct link)
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="e.g. https://images.unsplash.com/photo-..."
+                            value={fallbackImageUrl}
+                            onChange={(e) => setFallbackImageUrl(e.target.value)}
+                            className="flex-1 bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 rounded-md py-2 px-3 font-sans text-[11px] text-navy-deep outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddFallbackImage}
+                            className="px-4 py-2 border border-royal-blue text-royal-blue rounded-md text-[10px] font-bold uppercase tracking-wider hover:bg-royal-blue hover:text-white transition-colors"
+                          >
+                            ADD LINK
+                          </button>
+                        </div>
                       </div>
 
-                      {variants.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveVariantRow(idx)}
-                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-all"
-                          title="Remove Variant"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
+                      {images.length > 0 && (
+                        <div className="flex flex-wrap gap-4 pt-2">
+                          {images.map((img, idx) => (
+                            <div key={idx} className="relative w-20 h-24 bg-gray-50 border border-gray-200 rounded overflow-hidden group">
+                              <img src={img} alt="Preview" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}
+                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-colors"
+                                title="Remove image"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       )}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Toggles row */}
-              <div className="flex flex-wrap gap-6 items-center bg-[#F5FAFD]/20 border border-[#BDE8F5]/20 p-4 rounded-lg">
-                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
-                  <input
-                     type="checkbox"
-                     checked={isTrending}
-                     onChange={(e) => setIsTrending(e.target.checked)}
-                     className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
-                  />
-                  Mark as Trending / Signature Item
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
-                  <input
-                     type="checkbox"
-                     checked={showOnLandingPage}
-                     onChange={(e) => setShowOnLandingPage(e.target.checked)}
-                     className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
-                  />
-                  Display on Landing Page
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-semibold text-navy-deep">
-                  <input
-                     type="checkbox"
-                     checked={isActive}
-                     onChange={(e) => setIsActive(e.target.checked)}
-                     className="w-4 h-4 rounded accent-royal-blue cursor-pointer"
-                  />
-                  Publish / Active Showroom display
-                </label>
-              </div>
-
-              {/* Image uploads components */}
-              <div className="space-y-4">
-                <h3 className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
-                  Product Shared Gallery
-                </h3>
-
-                <div className="border-2 border-dashed border-[#BDE8F5] hover:border-royal-blue bg-[#BDE8F5]/5 rounded-xl p-6 text-center cursor-pointer relative transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    disabled={uploading}
-                  />
-                  <div className="space-y-2">
-                    <Upload className="w-8 h-8 text-sky-blue mx-auto" />
-                    <p className="text-xs font-semibold text-navy-deep">
-                      {uploading ? 'UPLOADING TO CLOUDINARY...' : 'DRAG FILE HERE OR CLICK TO UPLOAD'}
-                    </p>
-                    <p className="text-[10px] text-muted-gray">Direct image streaming to your cloud asset storage</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="font-sans text-[9px] font-bold text-muted-gray uppercase block">
-                    Upload Fallback URL (Optional, paste direct link)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. https://images.unsplash.com/photo-..."
-                      value={fallbackImageUrl}
-                      onChange={(e) => setFallbackImageUrl(e.target.value)}
-                      className="flex-1 bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 rounded-md py-2 px-3 font-sans text-[11px] text-navy-deep outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddFallbackImage}
-                      className="px-4 py-2 border border-royal-blue text-royal-blue rounded-md text-[10px] font-bold uppercase tracking-wider hover:bg-royal-blue hover:text-white transition-colors"
-                    >
-                      ADD LINK
-                    </button>
-                  </div>
-                </div>
-
-                {images.length > 0 && (
-                  <div className="flex flex-wrap gap-4 pt-2">
-                    {images.map((img, idx) => (
-                      <div key={idx} className="relative w-20 h-24 bg-gray-50 border border-gray-200 rounded overflow-hidden group">
-                        <img src={img} alt="Preview" className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setImages((prev) => prev.filter((_, i) => i !== idx))}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-colors"
-                          title="Remove image"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
                   </div>
                 )}
               </div>
 
-              {/* Submit actions */}
-              <div className="pt-6 border-t border-gray-100 flex justify-end gap-4">
+              {/* SECTION 2: SPECIFICATIONS */}
+              <div className="border border-[#BDE8F5]/30 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-6 py-2.5 border border-gray-200 text-muted-gray hover:text-navy-deep rounded-full text-xs font-semibold uppercase tracking-wider"
+                  onClick={() => setIsSpecsOpen(!isSpecsOpen)}
+                  className="w-full p-4 bg-[#F5FAFD] flex justify-between items-center text-left border-b border-[#BDE8F5]/20 hover:bg-[#BDE8F5]/10 transition-colors"
                 >
-                  CANCEL
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans text-xs font-bold text-navy-deep uppercase tracking-wider">
+                      2. Specifications
+                    </span>
+                    <span className="text-[10px] text-muted-gray">(Care Instructions, Manufacturing Details, Package Contents)</span>
+                  </div>
+                  {isSpecsOpen ? <ChevronUp className="w-4 h-4 text-navy-deep" /> : <ChevronDown className="w-4 h-4 text-navy-deep" />}
                 </button>
+                {isSpecsOpen && (
+                  <div className="p-5 space-y-5">
+                    {/* Care Instructions & Manufacturing Details Row */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1">
+                        <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                          Care Instructions
+                        </label>
+                        <textarea
+                          placeholder="e.g. Machine wash cold, tumble dry low..."
+                          value={careInstructions}
+                          onChange={(e) => setCareInstructions(e.target.value)}
+                          rows={2}
+                          className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                          Manufacturing Details
+                        </label>
+                        <textarea
+                          placeholder="e.g. Handcrafted in Rajasthan, India..."
+                          value={manufacturingDetails}
+                          onChange={(e) => setManufacturingDetails(e.target.value)}
+                          rows={2}
+                          className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2 px-3 font-sans text-xs text-navy-deep outline-none leading-relaxed"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Package Contents Input */}
+                    <div className="space-y-1">
+                      <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                        Package Contents (Comma-Separated)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 1 Queen Bedsheet, 2 Pillow Covers"
+                        value={packageIncludes}
+                        onChange={(e) => setPackageIncludes(e.target.value)}
+                        className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION 3: VARIANTS & PRICING */}
+              <div className="border border-[#BDE8F5]/30 rounded-xl overflow-hidden bg-white shadow-sm">
                 <button
-                  type="submit"
-                  className="px-6 py-2.5 bg-navy-deep text-white hover:bg-royal-blue rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-colors"
+                  type="button"
+                  onClick={() => setIsVariantsOpen(!isVariantsOpen)}
+                  className="w-full p-4 bg-[#F5FAFD] flex justify-between items-center text-left border-b border-[#BDE8F5]/20 hover:bg-[#BDE8F5]/10 transition-colors"
                 >
-                  <Check className="w-4 h-4" />
-                  {editingProduct ? 'SAVE CHANGES' : 'CREATE PRODUCT'}
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans text-xs font-bold text-navy-deep uppercase tracking-wider">
+                      3. Variants & Pricing
+                    </span>
+                    <span className="text-[10px] text-muted-gray">(Auto-Generate Tool, Size & Color Combinations, Pricing)</span>
+                  </div>
+                  {isVariantsOpen ? <ChevronUp className="w-4 h-4 text-navy-deep" /> : <ChevronDown className="w-4 h-4 text-navy-deep" />}
                 </button>
+                {isVariantsOpen && (
+                  <div className="p-5 space-y-6">
+                    {/* Auto-Generate Variants Tool UI Block */}
+                    <div className="bg-[#F5FAFD]/80 border border-[#BDE8F5]/40 rounded-xl p-4 space-y-4">
+                      <div className="flex justify-between items-center border-b border-[#BDE8F5]/20 pb-2">
+                        <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-navy-deep flex items-center gap-1.5">
+                          <span>⚡</span> Auto-Generate Variant Generator
+                        </h4>
+                        <span className="text-[10px] text-muted-gray">Select combinations & click Generate</span>
+                      </div>
+
+                      {/* Colors Multi-Select */}
+                      <div className="space-y-1.5">
+                        <label className="font-sans text-[10px] font-bold text-navy-deep uppercase block">
+                          Select Colors:
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {['Ivory Cream', 'Ocean Blue', 'Slate Grey', 'Classic White', 'Rose Quartz', 'Emerald Green', 'Maroon'].map((col) => {
+                            const checked = selectedGenColors.includes(col);
+                            return (
+                              <button
+                                key={col}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedGenColors((prev) =>
+                                    checked ? prev.filter((c) => c !== col) : [...prev, col]
+                                  );
+                                }}
+                                className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+                                  checked
+                                    ? 'bg-navy-deep text-white border-navy-deep'
+                                    : 'bg-white text-navy-deep border-gray-250 hover:border-royal-blue'
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  readOnly
+                                  className="w-3 h-3 accent-royal-blue pointer-events-none"
+                                />
+                                {col}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Sizes Multi-Select (if hideSizeField is false) */}
+                      {!hideSizeField && (
+                        <div className="space-y-1.5">
+                          <label className="font-sans text-[10px] font-bold text-navy-deep uppercase block">
+                            Select Sizes:
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {['Single', 'Double', 'Queen', 'King'].map((sz) => {
+                              const checked = selectedGenSizes.includes(sz);
+                              return (
+                                <button
+                                  key={sz}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedGenSizes((prev) =>
+                                      checked ? prev.filter((s) => s !== sz) : [...prev, sz]
+                                    );
+                                  }}
+                                  className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors flex items-center gap-1.5 ${
+                                    checked
+                                      ? 'bg-navy-deep text-white border-navy-deep'
+                                      : 'bg-white text-navy-deep border-gray-250 hover:border-royal-blue'
+                                  }`}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={checked}
+                                    readOnly
+                                    className="w-3 h-3 accent-royal-blue pointer-events-none"
+                                  />
+                                  {sz}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={handleAutoGenerateVariants}
+                        className="w-full py-2 bg-royal-blue hover:bg-navy-deep text-white text-xs font-bold uppercase tracking-wider rounded-md transition-colors shadow-sm"
+                      >
+                        Generate Variant Rows ({hideSizeField ? selectedGenColors.length : selectedGenColors.length * selectedGenSizes.length} Combinations)
+                      </button>
+                    </div>
+
+                    {/* DYNAMIC VARIANTS rows */}
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase">
+                          Variant Combinations Grid *
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={handleAddVariantRow}
+                          className="text-[10px] font-bold text-royal-blue hover:text-navy-deep flex items-center gap-1 uppercase tracking-wider"
+                        >
+                          + Add Single Variant Row
+                        </button>
+                      </div>
+
+                      <div className="space-y-4">
+                        {variants.map((v, idx) => (
+                          <div
+                            key={idx}
+                            className="grid grid-cols-2 sm:grid-cols-7 gap-3 bg-gray-50/50 p-3 border border-gray-100 rounded-md relative items-end"
+                          >
+                            <div className="flex flex-col items-center justify-center">
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Image</label>
+                              <div className="relative w-10 h-10 bg-white border border-gray-250 rounded overflow-hidden flex items-center justify-center group cursor-pointer hover:border-royal-blue transition-colors">
+                                {v.imageUrl ? (
+                                  <img src={v.imageUrl} className="w-full h-full object-cover" alt="Variant preview" />
+                                ) : (
+                                  <Upload className="w-3.5 h-3.5 text-muted-gray" />
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleVariantImageUpload(idx, e)}
+                                  className="absolute inset-0 opacity-0 cursor-pointer"
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Size</label>
+                              <input
+                                type="text"
+                                placeholder="Queen"
+                                value={hideSizeField ? 'Standard' : v.size}
+                                onChange={(e) => handleVariantChange(idx, 'size', e.target.value)}
+                                disabled={hideSizeField}
+                                className={`w-full border rounded p-1.5 text-xs outline-none focus:border-royal-blue ${
+                                  hideSizeField
+                                    ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed font-medium font-sans'
+                                    : 'bg-white border-gray-200 text-navy-deep font-sans'
+                                }`}
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Color</label>
+                              <input
+                                type="text"
+                                placeholder="Cream"
+                                value={v.color}
+                                onChange={(e) => handleVariantChange(idx, 'color', e.target.value)}
+                                className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">SKU (Auto)</label>
+                              <input
+                                type="text"
+                                value={v.sku}
+                                readOnly
+                                className="w-full bg-gray-100 border border-gray-200 rounded p-1.5 text-xs font-mono uppercase outline-none text-gray-500 cursor-not-allowed"
+                                title="SKUs are automatically generated by the server based on product attributes"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Price *</label>
+                              <input
+                                type="number"
+                                placeholder="14999"
+                                value={v.price}
+                                onChange={(e) => handleVariantChange(idx, 'price', e.target.value)}
+                                className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
+                                required
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Discount (%)</label>
+                              <input
+                                type="number"
+                                placeholder="e.g. 28"
+                                value={v.discountPrice}
+                                onChange={(e) => handleVariantChange(idx, 'discountPrice', e.target.value)}
+                                className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
+                                min="0"
+                                max="100"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-[9px] font-bold text-muted-gray uppercase block mb-1">Stock *</label>
+                              <input
+                                type="number"
+                                placeholder="30"
+                                value={v.stock}
+                                onChange={(e) => handleVariantChange(idx, 'stock', e.target.value)}
+                                className="w-full bg-white border border-gray-200 rounded p-1.5 text-xs outline-none focus:border-royal-blue"
+                                required
+                              />
+                            </div>
+
+                            {variants.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveVariantRow(idx)}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5 shadow hover:bg-red-600 transition-all"
+                                title="Remove Variant"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </form>
+
+            {/* STICKY ACTION FOOTER */}
+            <div className="sticky bottom-0 z-50 bg-white border-t border-[#BDE8F5]/30 p-4 flex justify-between items-center shadow-lg">
+              {/* Left align: Cancel, Save Draft */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2 border border-gray-300 text-muted-gray hover:text-navy-deep rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSubmit(undefined, false)}
+                  className="px-5 py-2 border border-navy-deep text-navy-deep hover:bg-navy-deep/5 rounded-full text-xs font-semibold uppercase tracking-wider transition-colors"
+                >
+                  Save Draft
+                </button>
+              </div>
+
+              {/* Right align: Preview, Publish Product */}
+              <div className="flex items-center gap-3">
+                {editingProduct ? (
+                  <a
+                    href={`/products/${editingProduct.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-2 border border-royal-blue text-royal-blue rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-royal-blue/10 transition-colors"
+                  >
+                    Preview
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => toast.info('Preview', 'Save product first to generate live preview.')}
+                    className="px-5 py-2 border border-gray-300 text-muted-gray rounded-full text-xs font-semibold uppercase tracking-wider hover:bg-gray-50 transition-colors"
+                  >
+                    Preview
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => handleSubmit(undefined, true)}
+                  className="px-6 py-2 bg-navy-deep hover:bg-royal-blue text-white rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2 shadow-md transition-colors"
+                >
+                  <Check className="w-4 h-4" />
+                  Publish Product
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
