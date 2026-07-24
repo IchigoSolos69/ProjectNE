@@ -202,7 +202,10 @@ router.post('/products', async (req, res) => {
   try {
     const {
       name,
+      slug: customSlug,
       description,
+      metaTitle,
+      metaDescription,
       images = [],
       isTrending = false,
       showOnLandingPage = false,
@@ -224,11 +227,12 @@ router.post('/products', async (req, res) => {
     }
 
     // Slug calculation
-    let slug = slugify(name);
+    const baseSlugSource = (customSlug && customSlug.trim()) ? customSlug.trim() : name;
+    let slug = slugify(baseSlugSource);
     let slugExists = await prisma.product.findUnique({ where: { slug } });
     let counter = 1;
     while (slugExists) {
-      slug = `${slugify(name)}-${counter}`;
+      slug = `${slugify(baseSlugSource)}-${counter}`;
       slugExists = await prisma.product.findUnique({ where: { slug } });
       counter++;
     }
@@ -245,6 +249,8 @@ router.post('/products', async (req, res) => {
           name,
           slug,
           description,
+          metaTitle: metaTitle || null,
+          metaDescription: metaDescription || null,
           images,
           isTrending: Boolean(isTrending),
           showOnLandingPage: Boolean(showOnLandingPage),
@@ -303,7 +309,10 @@ router.patch('/products/:id', async (req, res) => {
     const { id } = req.params;
     const {
       name,
+      slug: customSlug,
       description,
+      metaTitle,
+      metaDescription,
       images,
       isTrending,
       showOnLandingPage,
@@ -322,11 +331,15 @@ router.patch('/products/:id', async (req, res) => {
     }
 
     const updateData: any = {};
-    if (name !== undefined) {
-      updateData.name = name;
+    if (customSlug !== undefined && customSlug.trim() !== '') {
+      updateData.slug = slugify(customSlug.trim());
+    } else if (name !== undefined) {
       updateData.slug = slugify(name);
     }
+    if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
+    if (metaTitle !== undefined) updateData.metaTitle = metaTitle || null;
+    if (metaDescription !== undefined) updateData.metaDescription = metaDescription || null;
     if (images !== undefined) updateData.images = images;
     if (isTrending !== undefined) updateData.isTrending = Boolean(isTrending);
     if (showOnLandingPage !== undefined) updateData.showOnLandingPage = Boolean(showOnLandingPage);

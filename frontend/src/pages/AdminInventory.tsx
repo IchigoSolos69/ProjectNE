@@ -167,6 +167,7 @@ export const AdminInventory: React.FC = () => {
   const [isBasicInfoOpen, setIsBasicInfoOpen] = useState(true);
   const [isSpecsOpen, setIsSpecsOpen] = useState(false);
   const [isVariantsOpen, setIsVariantsOpen] = useState(true);
+  const [isSeoOpen, setIsSeoOpen] = useState(true);
 
   // Auto-Generate Variants States
   const [selectedGenColors, setSelectedGenColors] = useState<string[]>([]);
@@ -189,6 +190,24 @@ export const AdminInventory: React.FC = () => {
   const [isTrending, setIsTrending] = useState(false);
   const [showOnLandingPage, setShowOnLandingPage] = useState(false);
   const [isActive, setIsActive] = useState(true);
+
+  // SEO Form Fields & Slug auto-generation state
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [slug, setSlug] = useState('');
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
+
+  const slugifyText = useCallback((text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-')
+      .replace(/^-+/, '')
+      .replace(/-+$/, '');
+  }, []);
 
   // Variants Input List
   const [variants, setVariants] = useState<VariantInput[]>([
@@ -279,8 +298,14 @@ export const AdminInventory: React.FC = () => {
     setIsBasicInfoOpen(true);
     setIsSpecsOpen(false);
     setIsVariantsOpen(true);
+    setIsSeoOpen(false);
     setSelectedGenColors([]);
     setSelectedGenSizes([]);
+
+    setMetaTitle('');
+    setMetaDescription('');
+    setSlug('');
+    setIsSlugManuallyEdited(false);
 
     const defaultSku = generateClientSku('', defaultCatId, 'Queen', 'Ivory Cream');
     setVariants([
@@ -304,9 +329,15 @@ export const AdminInventory: React.FC = () => {
     setShowOnLandingPage(prod.showOnLandingPage || false);
     setIsActive(prod.isActive);
 
+    setMetaTitle(prod.metaTitle || '');
+    setMetaDescription(prod.metaDescription || '');
+    setSlug(prod.slug || slugifyText(prod.name));
+    setIsSlugManuallyEdited(true);
+
     setIsBasicInfoOpen(true);
     setIsSpecsOpen(false);
     setIsVariantsOpen(true);
+    setIsSeoOpen(false);
     setSelectedGenColors([]);
     setSelectedGenSizes([]);
 
@@ -610,6 +641,9 @@ export const AdminInventory: React.FC = () => {
 
     const payload = {
       name,
+      slug: slug || slugifyText(name),
+      metaTitle,
+      metaDescription,
       description,
       material,
       careInstructions,
@@ -907,6 +941,9 @@ export const AdminInventory: React.FC = () => {
                         onChange={(e) => {
                           const val = e.target.value;
                           setName(val);
+                          if (!isSlugManuallyEdited) {
+                            setSlug(slugifyText(val));
+                          }
                           setVariants((prev) =>
                             prev.map((v) => ({
                               ...v,
@@ -1368,6 +1405,111 @@ export const AdminInventory: React.FC = () => {
                             )}
                           </div>
                         ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION 4: SEARCH ENGINE OPTIMIZATION (SEO) */}
+              <div className="border border-[#BDE8F5]/30 rounded-xl overflow-hidden bg-white shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setIsSeoOpen(!isSeoOpen)}
+                  className="w-full p-4 bg-[#F5FAFD] flex justify-between items-center text-left border-b border-[#BDE8F5]/20 hover:bg-[#BDE8F5]/10 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans text-xs font-bold text-navy-deep uppercase tracking-wider">
+                      4. Search Engine Optimization (SEO)
+                    </span>
+                    <span className="text-[10px] text-muted-gray">(Meta Title, Meta Description, URL Slug, Search Preview)</span>
+                  </div>
+                  {isSeoOpen ? <ChevronUp className="w-4 h-4 text-navy-deep" /> : <ChevronDown className="w-4 h-4 text-navy-deep" />}
+                </button>
+                {isSeoOpen && (
+                  <div className="p-5 space-y-5">
+                    {/* Meta Title */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                          Meta Title
+                        </label>
+                        <span className={`text-[10px] font-mono ${metaTitle.length > 60 ? 'text-red-500 font-bold' : 'text-muted-gray'}`}>
+                          {metaTitle.length} / 60 chars (Recommended 50–60)
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder={name || "e.g. Royal Egyptian Cotton Sheet Set | RareComforts"}
+                        value={metaTitle}
+                        onChange={(e) => setMetaTitle(e.target.value)}
+                        className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none"
+                      />
+                      <p className="text-[10px] text-muted-gray">Fallback: Defaults to product name if left blank.</p>
+                    </div>
+
+                    {/* Meta Description */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                          Meta Description
+                        </label>
+                        <span className={`text-[10px] font-mono ${metaDescription.length > 160 ? 'text-red-500 font-bold' : 'text-muted-gray'}`}>
+                          {metaDescription.length} / 160 chars (Recommended 150–160)
+                        </span>
+                      </div>
+                      <textarea
+                        placeholder="Brief summary appearing in Google search snippet..."
+                        value={metaDescription}
+                        onChange={(e) => setMetaDescription(e.target.value)}
+                        rows={3}
+                        className="w-full bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs text-navy-deep outline-none leading-relaxed"
+                      />
+                    </div>
+
+                    {/* URL Slug */}
+                    <div className="space-y-1">
+                      <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block">
+                        URL Slug *
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-gray font-mono bg-gray-100 px-3 py-2.5 rounded-md border border-gray-200">
+                          rarecomforts.com/products/
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="royal-egyptian-cotton-sheet-set"
+                          value={slug}
+                          onChange={(e) => {
+                            setSlug(slugifyText(e.target.value));
+                            setIsSlugManuallyEdited(true);
+                          }}
+                          className="flex-1 bg-[#BDE8F5]/10 border border-[#BDE8F5]/30 focus:border-royal-blue focus:bg-white rounded-md py-2.5 px-4 font-sans text-xs font-mono text-navy-deep outline-none"
+                          required
+                        />
+                      </div>
+                      <p className="text-[10px] text-muted-gray">Auto-generated from Product Name. Can be manually edited above.</p>
+                    </div>
+
+                    {/* LIVE GOOGLE SEARCH PREVIEW CARD */}
+                    <div className="pt-3 border-t border-gray-100 space-y-2">
+                      <label className="font-sans text-[10px] font-bold tracking-widest text-navy-deep uppercase block flex items-center gap-1.5">
+                        <span>🔍</span> Live Google Search Preview
+                      </label>
+                      <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-1.5 shadow-sm font-sans max-w-xl">
+                        {/* Breadcrumb URL */}
+                        <div className="text-[12px] text-[#202124] flex items-center gap-1.5 font-sans leading-tight">
+                          <span className="text-[#3c4043] font-normal">https://rarecomforts.com</span>
+                          <span className="text-[#5f6368]">› products › {slug || slugifyText(name) || 'product-slug'}</span>
+                        </div>
+                        {/* Title */}
+                        <h3 className="text-[18px] text-[#1a0dab] font-normal hover:underline cursor-pointer leading-snug line-clamp-1">
+                          {metaTitle || name || 'Product Title | RareComforts'}
+                        </h3>
+                        {/* Description */}
+                        <p className="text-[13px] text-[#4d5156] leading-snug line-clamp-2">
+                          {metaDescription || description || 'Discover handcrafted luxury bedding and long-staple cotton sheets at RareComforts.'}
+                        </p>
                       </div>
                     </div>
                   </div>

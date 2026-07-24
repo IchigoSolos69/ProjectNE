@@ -38,6 +38,8 @@ export interface Product {
   reviewCount?: number;
   lowestPrice?: number;
   ratingInfo?: { average: number; count: number };
+  metaTitle?: string | null;
+  metaDescription?: string | null;
 }
 
 interface ProductCardProps {

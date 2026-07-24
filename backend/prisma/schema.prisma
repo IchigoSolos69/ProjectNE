@@ -42,6 +42,8 @@ model Product {
   name         String
   slug         String         @unique
   description  String
+  metaTitle    String?
+  metaDescription String?
   images       String[]       // shared gallery
   isTrending   Boolean        @default(false)
   showOnLandingPage Boolean   @default(false)
