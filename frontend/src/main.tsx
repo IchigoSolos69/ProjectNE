@@ -1,5 +1,6 @@
 import React, { useEffect, Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
+import './index.css';
 import { BrowserRouter, Routes, Route, Outlet, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Lenis from 'lenis';
@@ -59,8 +60,6 @@ import '@fontsource/playfair-display/400.css';
 import '@fontsource/playfair-display/400-italic.css';
 import '@fontsource/playfair-display/600.css';
 import '@fontsource/playfair-display/700.css';
-
-import './index.css';
 
 // Register GSAP ScrollTrigger
 gsap.registerPlugin(ScrollTrigger);
